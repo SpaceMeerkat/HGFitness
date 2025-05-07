@@ -1,75 +1,136 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { BackHandler, Text, View } from "react-native";
+import { useState, useEffect } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from 'react-native-toast-message';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { DefaultTabStyles} from "@/components/HGStyles"
+import { GymPrograms } from "@/components/shop/ShopGymPrograms";
+import { MealPrograms } from "@/components/shop/ShopMealPrograms";
+import { ShopLanding } from "@/components/shop/ShopLanding";
+import { BeginnerPrograms } from "@/components/shop/ShopBeginner";
+import { IntermediatePrograms } from "@/components/shop/ShopIntermediate";
+import { AdvancedPrograms } from "@/components/shop/ShopAdvanced";
+import { WhatsHot } from "@/components/shop/WhatsHot";
+import { HGHeader } from "@/components/HeaderBar"; 
 
-export default function HomeScreen() {
+type PageType = 'programs' | 'mealPrograms' | 'beginner' | 'intermediate' | 'advanced' | 'hot';
+
+
+export default function ShopScreen() {
+
+  const [shopOpen, setShopOpen] = useState(true);
+  const [programsOpen, setProgramsOpen] = useState(false);
+  const [mealProgramsOpen, setMealProgramsOpen] = useState(false);
+  const [hotOpen, setHotOpen] = useState(false);
+
+  const [beginnerOpen, setBeginnerOpen] = useState(false);
+  const [intermediateOpen, setIntermediateOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  const handleChildPage = (page: PageType) => {
+    setShopOpen(false);
+    setProgramsOpen(page === 'programs');
+    setMealProgramsOpen(page === 'mealPrograms');
+    setBeginnerOpen(page === 'beginner');
+    setIntermediateOpen(page === 'intermediate');
+    setAdvancedOpen(page === 'advanced');
+    setHotOpen(page === 'hot');
+  }
+
+  const handleBackButton = () => {
+    if (programsOpen) {
+      // Set shop open and close all other menus
+      setShopOpen(true);
+      setProgramsOpen(false);
+      setMealProgramsOpen(false);
+      setBeginnerOpen(false);
+      setIntermediateOpen(false);
+      setAdvancedOpen(false);
+      setHotOpen(false);
+      return true;
+    } else if (mealProgramsOpen) {
+      // Close meals and set shop open
+      setShopOpen(true);
+      setProgramsOpen(false);
+      setMealProgramsOpen(false);
+      setBeginnerOpen(false);
+      setIntermediateOpen(false);
+      setAdvancedOpen(false);
+      setHotOpen(false);
+      return true;
+    } else if (beginnerOpen || intermediateOpen || advancedOpen) {
+      // Close programs and set intermediate step
+      setShopOpen(false);
+      setProgramsOpen(true);
+      setMealProgramsOpen(false);
+      setBeginnerOpen(false);
+      setIntermediateOpen(false);
+      setAdvancedOpen(false);
+      setHotOpen(false);
+      return true;
+    } else if (hotOpen) {
+      // Close programs and set what's hot page to open
+      setShopOpen(true);
+      setProgramsOpen(false);
+      setMealProgramsOpen(false);
+      setBeginnerOpen(false);
+      setIntermediateOpen(false);
+      setAdvancedOpen(false);
+      setHotOpen(false);
+      return true;
+    } else {
+      // No menus open, default behavior (exit app)
+      return false;
+    }
+    // Prevent default behavior (exit app) for menu handling cases
+    return false;
+  };
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      handleBackButton
+    );
+
+    return () => backHandler.remove();
+  }, [shopOpen, programsOpen, mealProgramsOpen, beginnerOpen, intermediateOpen, advancedOpen, hotOpen]);
+
+  let content = null;
+
+  if (shopOpen) {
+    content = <ShopLanding handleChildPage={handleChildPage} />;
+  }
+
+  if (programsOpen) {
+    content = <GymPrograms handleChildPage={handleChildPage}/>;
+  }
+
+  if (beginnerOpen) {
+    content = <BeginnerPrograms />;
+  }
+
+  if (intermediateOpen) {
+    content = <IntermediatePrograms />;
+  }
+
+  if (advancedOpen) {
+    content = <AdvancedPrograms />;
+  }
+
+  if (mealProgramsOpen) {
+    content = <MealPrograms />;
+  }
+
+  if (hotOpen) {
+    content = <WhatsHot handleBackButton={handleBackButton} />
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={DefaultTabStyles.defaultContainer}>
+      <HGHeader />
+      <Toast />
+      {content}
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
