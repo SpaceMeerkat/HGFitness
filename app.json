@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "HGMobile2.0",
+    "name": "HG Fitness",
     "slug": "HGMobile2.0",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -33,7 +33,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#000000"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
