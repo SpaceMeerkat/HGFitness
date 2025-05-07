@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "HGMobile2.0",
+    "slug": "HGMobile2.0",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/playIcon.png",
+    "scheme": "hoolegainz",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/playIcon.png",
+        "backgroundColor": "#000000"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/playIcon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/HGsplash3.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "0d07fcf8-9560-4bbb-8595-b92936df2373"
+      }
+    }
+  }
+}

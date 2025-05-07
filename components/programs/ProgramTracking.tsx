@@ -1,0 +1,352 @@
+import React from 'react';
+import { View, Text, Pressable, Image, ImageBackground, ScrollView, TextInput } from "react-native";
+import { useState, useEffect } from "react";
+import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import * as SecureStore from 'expo-secure-store';
+import { DefaultTabStyles, ShopStyles, ProgramStyles } from "@/components/HGStyles"
+import TrackingNotes from "./TrackingNotes";
+import SaveSession from "./SaveSession";
+import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
+import { FindPrecedingNumber } from './FindPrecedingNumber';
+
+import { useAppContext } from "@/components/appContext";
+import { useStoreRootState } from 'expo-router/build/global-state/router-store';
+
+type PageType = 'programs' | 'programOverview' | 'programTracking';
+
+type ProgramTrackerProps = {
+  programID: any;
+  programData: any;
+  programDay: any;
+  completedKeys: any;
+  handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
+};
+
+interface TrackingData {
+  [key: string]: {
+    activeStatus: boolean;
+    subsetExercises: string[];
+    subsetReps: number[];
+    type: string;
+    uniqueSetKey: string;
+    userInputReps: string[];
+    userInputWeights: string[];
+    userNotes: string;
+  };
+}
+
+interface Placeholders {
+  day: string;
+  trackingData: TrackingData;
+  week: string;
+}
+
+export function ProgramTracker({programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
+
+  const { setTrackingData, trackingData } = useAppContext();
+  // Handle the memory keys/data for tracker placeholders
+  let memoryKeys = trackingData[programID]["memoryKeys"];
+  let memoryData = trackingData[programID]["memoryData"];
+  const completedDay = completedKeys.includes(`${programDay[0]}_${programDay[1]}`);
+  const [placeholders, setPlaceHolders] = useState<Placeholders | null>(null);
+  // Handle the dictionary of exercises and keys from reading in
+  const exercises = programData[programDay[0]][programDay[1]]["exercises"];
+  const exerciseKeys = Object.keys(exercises);
+  const [token, setToken] = useState<string | null>(null);
+  // Set the notes visibility to false to initialise
+  const [isNotesVisible, setIsNotesVisible] = useState(false);
+  const [exerciseDictionary, setExerciseDictionary] = useState(InitializeExerciseDictionary(exerciseKeys, exercises));
+  // console.log(JSON.stringify(exerciseDictionary, null, 2)); 
+  // state for the 'next' button being pressed for color changes etc.
+  const [isPressed, setIsPressed] = useState(false);
+  // state for the save session button being pressed for color changes etc.
+  const [saveIsPressed, setSaveIsPressed] = useState(false);
+  const [isSaveVisible, setIsSaveVisible] = useState(false);
+  // Handle any saving overlays
+  const [saving, setSaving] = useState(false);
+  // Styling
+  const image = require("@/assets/images/HGBackground.png");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const retrievedToken = await SecureStore.getItemAsync('jwtToken');
+      if (retrievedToken) {
+        setToken(retrievedToken); 
+      } else {
+        console.log('No ID found in SecureStore');
+        setToken(null); 
+      }
+    };
+    fetchProfile(); 
+  });
+ 
+  const handleExerciseClick = (index: number) => {
+    setExerciseDictionary(prevState => {
+      const newState = { ...prevState };
+      Object.keys(newState).forEach(key => {
+        newState[parseInt(key)].activeStatus = parseInt(key) === index;
+      });
+      return newState;
+    });
+  }; 
+
+  const handleInputChange = (index: number, type: 'weight' | 'reps' | 'notes', setIndex: number, value: string) => {
+    // The problem of notes must be here in that prevState is looking too far back when a note is made, not at the current 
+    // dictionary status
+    setExerciseDictionary(prevState => {
+      const newState = { ...prevState };
+      if (type === 'weight') {
+        newState[index].userInputWeights[setIndex] = value;
+      } else if (type === 'reps') {
+        newState[index].userInputReps[setIndex] = value;
+      } else if (type === 'notes') {
+        newState[index].userNotes = value;
+      }
+      // console.log(exerciseDictionary[index]);
+      return newState;
+    });
+  };
+
+  useEffect(() => {
+    const result = FindPrecedingNumber(memoryKeys, programDay[0]);
+    console.log("week: ", programDay[0]);
+    if (result !== 0 && !completedDay) {
+      setPlaceHolders(memoryData[`week-${result}-day-${programDay[1]}`]); // Set placeholders when the component mounts or dependencies change
+    } else if (completedDay) {
+      setPlaceHolders(memoryData[`week-${programDay[0]}-day-${programDay[1]}`]); // Set placeholders when the day is tracked already
+    } else {
+      setPlaceHolders(null);
+    }
+  }, [memoryKeys, programDay, memoryData]); // Run the effect when memoryKeys, programDay, or memoryData changes  
+
+  // console.log(JSON.stringify(placeholders["trackingData"], null, 2)); 
+
+  const renderExercises = () => {
+
+    return Object.keys(exerciseDictionary).map(key => {
+      const index = parseInt(key);
+      const exerciseSet = exerciseDictionary[index];
+
+      return (
+        <View key={exerciseSet.uniqueSetKey} style={{ paddingBottom: 5 }}>
+          {exerciseSet.activeStatus ? (
+            <View style={ProgramStyles.trackingActive}>
+              <Pressable style={ProgramStyles.trackingType} onPress={()=>handleExerciseClick(-1)}>
+                <Text style={[DefaultTabStyles.defaultTypeText, {textAlign: "center"}]}>
+                  {exerciseSet.type}
+                </Text>
+              </Pressable>
+              <View style={ProgramStyles.trackingChildContainer}>
+                <View style={ProgramStyles.trackingExerciseHeader}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText]}>
+                    Exercise
+                  </Text>
+                </View>
+                <View style={ProgramStyles.trackingWeight}>
+                  <Text style={DefaultTabStyles.defaultTrackingText}>
+                    Rep range
+                  </Text>
+                </View>
+                <View style={ProgramStyles.trackingInputHeader}>
+                  <View style={{flexDirection: "row", justifyContent: "center", alignContent: "center", alignItems: "flex-end"}}>
+                    <View>
+                      <Text style={DefaultTabStyles.defaultTrackingText}>
+                        Weight
+                      </Text>
+                    </View>
+                    <View style={{paddingLeft:3}}>
+                      <Text style={[DefaultTabStyles.defaultTrackingText, {fontSize:9}]}>
+                        (kg)
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View style={ProgramStyles.trackingInputHeader}>
+                  <Text style={DefaultTabStyles.defaultTrackingText}>
+                    Reps
+                  </Text>
+                </View>
+              </View>
+              {exerciseSet.subsetExercises.map((exercise, setIndex) => {
+                let weightPlaceholder: string;
+                let repsPlaceholder: string;
+
+                if (placeholders !== null) {
+                  // Use the placeholders if they exist
+                  try {
+                    weightPlaceholder = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userInputWeights[setIndex] || '';
+                    repsPlaceholder = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userInputReps[setIndex] || '';
+                  } catch {
+                    weightPlaceholder = ''; // Default to an empty string
+                    repsPlaceholder = '';   // Default to an empty string
+                  }
+                } else {
+                  // Define blank placeholders based on the length of subsetExercises
+                  weightPlaceholder = ''; // Default to an empty string
+                  repsPlaceholder = '';   // Default to an empty string
+                }
+
+                return (
+                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={ProgramStyles.trackingChildContainer}>
+                    <View style={ProgramStyles.trackingExercise}>
+                      <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
+                        {exercise}
+                      </Text>
+                    </View>
+                    <View style={ProgramStyles.trackingWeight}>
+                      <Text style={DefaultTabStyles.defaultBoldText}>
+                        {exerciseSet.subsetReps[setIndex]}
+                      </Text>
+                    </View>
+                    <View style={ProgramStyles.trackingContainer}>
+                      <View style={ProgramStyles.trackingExerciseInput}>
+                        <TextInput
+                          keyboardType="number-pad"
+                          cursorColor={'black'}
+                          textAlign={'center'}
+                          textAlignVertical="center"
+                          style={{ fontSize: 20, flex: 1, color: "white"}}
+                          placeholder={weightPlaceholder}
+                          value={exerciseSet.userInputWeights[setIndex] || ''}
+                          onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
+                          editable={!completedDay}
+                        />
+                      </View>
+                    </View>
+                    <View style={ProgramStyles.trackingContainer}>
+                      <View style={ProgramStyles.trackingWeightInput}>
+                        <TextInput
+                          keyboardType="number-pad"
+                          cursorColor={"black"}
+                          textAlign={'center'}
+                          textAlignVertical={'center'}
+                          style={{ fontSize: 20, flex: 1, width: '100%', color: "white" }}
+                          placeholder={repsPlaceholder}
+                          value={exerciseSet.userInputReps[setIndex] || ''}
+                          onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
+                          editable={!completedDay}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+              {/* user notes pressable icon */}
+              <View style={{backgroundColor: "black", flex: 1, flexDirection: "row", justifyContent : 'space-between', paddingRight: 24, paddingLeft:8, paddingTop: 12}}>
+                <View style={{flex:0.665, flexDirection: 'row', paddingTop: 15}}> 
+                  <Pressable style={{flex: 0.3, flexDirection: "row"}} onPress={() => setIsNotesVisible(true)}>
+                    {/* If the user presses on the notes, a text input field appears for the user to log thoughts */}
+
+                    {(() => {
+                      // Initialize values
+                      let memoryNotes = null;
+                      let notesIconColor = 'white';
+
+                      // Fetch existing notes if available
+                      if (placeholders !== null && exerciseSet) {
+                        try {
+                          memoryNotes = placeholders.trackingData[index].userNotes;
+                          if (memoryNotes !== null) {
+                            notesIconColor = 'red';
+                          } else {
+                            notesIconColor = 'white';
+                          }
+                          
+                        } catch (error) {
+                          memoryNotes = exerciseSet.userNotes;
+                          notesIconColor = 'white';
+                        } 
+                      } else {
+                          memoryNotes = exerciseSet.userNotes;
+                          notesIconColor = 'white';
+                        }
+
+                      // Render the notes icon and text
+                      return (
+                        <>
+                          <TabBarIcon name={'document-text-outline'} color={notesIconColor} size={20} />
+                          <Text 
+                            style={[
+                              DefaultTabStyles.defaultBodyText, 
+                              { paddingLeft: 2, paddingTop: 5, color: notesIconColor, fontWeight: "bold" }
+                            ]}
+                          >
+                            NOTES
+                          </Text>
+
+                          {/* TrackingNotes modal */}
+                          <TrackingNotes
+                            memoryNotes={memoryNotes}
+                            handleInputChange={handleInputChange}
+                            visible={isNotesVisible}
+                            onClose={() => setIsNotesVisible(false)}
+                            index={index}
+                          />
+                        </>
+                      );
+                    })()}
+                  </Pressable>
+                </View>
+                {/* user pressable next set button */}
+                <Pressable style={{flex:0.335, 
+                flexDirection: 'row', 
+                justifyContent:"center", 
+                alignItems: "center", 
+                borderRadius:4, 
+                backgroundColor: isPressed? 'black' : 'black',
+                borderColor: isPressed ? 'lime' : 'grey',
+                borderWidth: 1,
+                paddingBottom:4}} 
+                onPressIn={() => setIsPressed(true)}
+                onPressOut={() => setIsPressed(false)}
+                onPress={() => {handleExerciseClick(index + 1); setIsPressed(false)}}>
+                  <Text style={[DefaultTabStyles.defaultBodyText, {paddingRight: 4, paddingBottom:6, color: 'lime', fontWeight: "bold", fontSize:12}]}>NEXT</Text>
+                  <TabBarIcon name={'arrow-forward-circle-outline'} color="lime" size={20} />
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            <Pressable onPress={() => handleExerciseClick(index)}>
+              <View style={ProgramStyles.trackingInactive}>
+                <Text style={[DefaultTabStyles.defaultMediumText, {color: 'black'}]}>{exerciseSet.type}</Text>
+              </View>
+            </Pressable>
+          )}
+        </View>
+      );
+    }); 
+  };
+
+  const saveOpacity = completedDay ? 0.5 : 1;
+
+  return (
+    <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
+      <ScrollView style={ShopStyles.shopScrollContainer}>
+        <View>
+          {renderExercises()}
+        <Pressable 
+        style={[ProgramStyles.trackingSaveButton, {opacity: saveOpacity, backgroundColor: saveIsPressed? 'grey': 'black'}]}
+        onPressIn={completedDay ? undefined : () => { setSaveIsPressed(true) }}
+        onPressOut={completedDay ? undefined : () => { setSaveIsPressed(false) }}
+        onPress={completedDay ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
+        >
+            <Text style={{color: "white"}}>Save session</Text>
+        </Pressable>
+        {/* SaveSession modal */}
+        <SaveSession
+          visible={isSaveVisible}
+          onClose={() => setIsSaveVisible(false)}
+          programID={programID}
+          programDay={programDay}
+          token={token}
+          exerciseDictionary={exerciseDictionary}
+          trackingData = {trackingData}
+          setTrackingData = {setTrackingData}
+          setSaving = {setSaving}
+          handleChildPage={handleChildPage}
+        />
+        </View>
+      </ScrollView>
+    </ImageBackground>
+  );
+}
