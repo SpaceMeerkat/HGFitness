@@ -1,6 +1,25 @@
 import { StyleSheet } from "react-native";
 
 export const MealTrackingStyles = StyleSheet.create({
+    HeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'stretch',
+    paddingTop: 10,
+    },
+    HeaderStackedColumn: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    HeaderBox: {
+        flex: 1,
+    },
+    HeaderSeparator: {
+        width: 2,
+        backgroundColor: 'white',
+        marginHorizontal: 0,
+        borderRadius: 0,
+    },
     TrackingOverlay: {
         position: "absolute",
         top: 0,
@@ -44,6 +63,34 @@ export const MealTrackingStyles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "white",
         backgroundColor: "black"
+    },
+    MealInfoButton: {
+        position: 'absolute',
+        right: -15, // Half of the child width (if width = 100)
+        top: '60%',
+        transform: [{ translateY: -25 }], // Half of child height (if height = 50)
+        width: 40,
+        height: 40,
+        backgroundColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 50,
+        borderColor: 'grey',
+        borderWidth: 1
+    },
+    MealSizeButton: {
+        position: 'absolute',
+        right: -15, // Half of the child width (if width = 100)
+        top: '60%',
+        transform: [{ translateY: -25 }], // Half of child height (if height = 50)
+        width: 40,
+        height: 40,
+        backgroundColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 50,
+        borderColor: 'grey',
+        borderWidth: 1
     },
     AddMealButton: {
         flex: 0.5,
