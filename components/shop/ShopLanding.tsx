@@ -1,5 +1,5 @@
-import { View, Text, Pressable, ScrollView, Image, ImageBackground} from "react-native";
-import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles"
+import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
+import { Image, ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
 
 // Define the type for the props
 type ShopLandingProps = {
@@ -54,14 +54,16 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
           </ImageBackground>
           </View>
         </Pressable>
-        <View style={[ShopStyles.shopBlockContainer, {height: 300}]}>
-          <ImageBackground source={require("@/assets/images/apparel.jpg")} resizeMode="contain" imageStyle={{left:55}} style={{flex: 1, width: '100%', height: '100%'}}>
-            <View style={{flex:1, justifyContent:"flex-start", alignItems:"flex-start", paddingTop:70, paddingLeft:15}}>
-              <Text style={[DefaultTabStyles.defaultBoldText, {fontSize: 16}]}>HOOLIGAINS apparel</Text>
-              <Text style={DefaultTabStyles.defaultBodyText}>Coming soon...</Text>
-            </View>
-          </ImageBackground>
-        </View>
+        <Pressable onPress={() => console.log('pressed')} style={{paddingBottom: 16}}>
+          <View style={[ShopStyles.shopBlockContainer, {height: 300}]}>
+            <ImageBackground source={require("@/assets/images/apparel.jpg")} resizeMode="contain" imageStyle={{left:55}} style={{flex: 1, width: '100%', height: '100%'}}>
+              <View style={{flex:1, justifyContent:"flex-start", alignItems:"flex-start", paddingTop:70, paddingLeft:15}}>
+                <Text style={[DefaultTabStyles.defaultBoldText, {fontSize: 16}]}>HOOLIGAINS apparel</Text>
+                <Text style={DefaultTabStyles.defaultBodyText}>Coming soon...</Text>
+              </View>
+            </ImageBackground>
+          </View>
+        </Pressable>
       </ScrollView> 
       </ImageBackground>
     )

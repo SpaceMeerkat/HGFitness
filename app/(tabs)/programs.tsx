@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
-import { BackHandler, ImageBackground, ScrollView, View} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { DefaultTabStyles } from "@/components/HGStyles";
+import React, { useEffect, useRef, useState } from "react";
+import { BackHandler, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { HGHeader } from "@/components/HeaderBar"; 
+import { useAppContext } from "@/components/appContext";
+import { HGHeader } from "@/components/HeaderBar";
 import { MyProgramsLanding } from "@/components/programs/MyPrograms";
 import { ProgramOverview } from "@/components/programs/ProgramOverview";
 import { ProgramTracker } from "@/components/programs/ProgramTracking";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
-import { useAppContext } from "@/components/appContext";
 
 type PageType = 'programs' | 'programOverview' | 'programTracking';
 
@@ -140,7 +140,7 @@ export default function MyPrograms() {
   };
 
   return (
-    <SafeAreaView style={DefaultTabStyles.defaultContainer}>
+    <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
       {/* <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}> */}
         <ScrollView 

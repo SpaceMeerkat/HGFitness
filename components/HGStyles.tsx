@@ -156,7 +156,8 @@ export const ShopStyles = StyleSheet.create({
     },
     shopScrollContainer: {
       paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingTop: 8,
+      paddingBottom: 16,
       marginBottom: 0,
       marginTop: 0,
     },
@@ -607,7 +608,7 @@ export const ShopStyles = StyleSheet.create({
     },
   })
 
-  export const DefaultTabStyles = StyleSheet.create({
+  export const DefaultTabStyles = StyleSheet.create({ 
     hgHeaderContainer: {
         flexDirection: "row",
         backgroundColor: "black",

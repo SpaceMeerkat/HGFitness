@@ -1,20 +1,20 @@
-import { View, Text, Pressable, ScrollView, ImageBackground } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
-import React from 'react';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DefaultTabStyles } from "@/components/HGStyles"
-import { HGHeader } from "@/components/HeaderBar"; 
+import { MealTrackingStyles } from "@/components/HGMealStyles";
+import { DefaultTabStyles } from "@/components/HGStyles";
+import { HGHeader } from "@/components/HeaderBar";
+import { useAppContext } from "@/components/appContext";
+import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
+import { MealInstructions } from "@/components/meals/instructions";
+import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, removeMealItem, TrackingData } from "@/components/meals/mealUtils";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
-import { useAppContext } from "@/components/appContext";
-import { MealTrackingStyles } from "@/components/HGMealStyles";
-import { Water250, Water500, Water1000, WaterCustom } from "@/components/meals/WaterButtons";
-import { MealInstructions } from "@/components/meals/instructions";
-import { getWaterNames,getMealNames,iconColors,TrackingData,MealProgramsState,addMealItem,removeMealItem,handleMealPress,updateActiveVersion } from "@/components/meals/mealUtils";
+import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MealScreen() {
 
@@ -145,7 +145,10 @@ export default function MealScreen() {
               Object.values(mealProgramsState[activeMeal] || {}).map((item: any, index: number) => {
                 return (
                   <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
-                    <View style={MealTrackingStyles.MealOptionLayoutContainer}>
+                    <Pressable style={MealTrackingStyles.MealOptionLayoutContainer} onPress={() => [
+                          setInstructionsVisible(true), 
+                          setCurrentInstructions(item.how[item.activeVersion].split('/')),
+                          setCurrentIngredients(item.ingredients[item.activeVersion])]}>
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
                         <Text style={{ color: "white", fontSize: 22, fontWeight: 'bold' }}>{item.name}</Text>
                       </View>
@@ -183,6 +186,21 @@ export default function MealScreen() {
                         </Pressable>
                       </View>
 
+                      {/* Include a meal sizing button here somewhere too:
+                        updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})}}
+                      */}
+
+                      <Pressable style={MealTrackingStyles.MealInfoButton}
+                        onPress={() => [
+                          setInstructionsVisible(true), 
+                          setCurrentInstructions(item.how[item.activeVersion].split('/')),
+                          setCurrentIngredients(item.ingredients[item.activeVersion])]}>
+                          <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>
+                            {/* <Ionicons name="information-circle-outline" size={22} color="lime" /> */}
+                            <Entypo name="arrow-with-circle-up" size={22} color="lime" />
+                          </Text>
+                      </Pressable>
+
                       {/* <View style={{ flex: 1, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
                       <Pressable
                           onPress={() => {
@@ -218,7 +236,6 @@ export default function MealScreen() {
 
                       <View style={{ flex: 0.5, flexDirection: 'row' }}>
 
-
                         {/* <Pressable style={{flex: 0.2, 
                           flexDirection: 
                           'column', 
@@ -236,7 +253,7 @@ export default function MealScreen() {
 
                         
                       </View>
-                    </View>
+                    </Pressable>
                   </View>
                 );
               })
@@ -250,45 +267,67 @@ export default function MealScreen() {
 
   const renderMeals = () => {
     return (
-      <ScrollView style={{flex: 1, backgroundColor: "black"}}>
-        <ImageBackground source={image} resizeMode="cover" style={{flex: 1, overflow: "hidden"}}>
+      <ScrollView style={{flex: 1, backgroundColor: "plum"}}>
+        <ImageBackground source={image} resizeMode="cover" style={{flex: 1}}>
 
         {/* Meals header component */}
 
-        <View style={{flex: 0.15, paddingBottom: 10}}>
-          <View style={{flex: 1, flexDirection: 'row', width: '100%', paddingTop: 20}}>
-            <View style={{flex: 1, width: '25%',  justifyContent: 'center', borderWidth: 1, borderRightColor: 'white'}}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Meals</Text>
-            </View>
-            <View style={{flex: 1, width: '25%', justifyContent: 'center', borderWidth: 1, borderRightColor: 'white', borderLeftColor: 'white'}}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Calories</Text>
-            </View>
-            <View style={{flex: 1, width: '25%', justifyContent: 'center', borderWidth: 1, borderRightColor: 'white', borderLeftColor: 'white'}}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Protein</Text>
-            </View>
-            <View style={{flex: 1, width: '25%', justifyContent: 'center', borderWidth: 1, borderLeftColor: 'white'}}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Water</Text>
-            </View>
-          </View>
+        <View style={{flex: 0.15, paddingBottom:10}}>
 
-          <View style={{flex: 1, flexDirection: 'row', width: '100%', backgroundColor: 'black', paddingBottom: 8}}>
-            <View style={{flex: 1, width: '25%', justifyContent: 'center', borderWidth: 1, borderRightColor: 'white'}}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningMealCount}</Text>
+          <View style={MealTrackingStyles.HeaderContainer}>
+            {/* Column 1 */}
+            <View style={MealTrackingStyles.HeaderStackedColumn}>
+              <View style={MealTrackingStyles.HeaderBox}>
+                <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Meals</Text>
+              </View>
+              <View style={MealTrackingStyles.HeaderBox}>
+                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningMealCount}</Text>
+              </View>
             </View>
-            <View style={{flex: 1, width: '25%', justifyContent: 'center', borderWidth: 1, borderRightColor: 'white', borderLeftColor: 'white'}}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningCalories.toFixed(0)}</Text>
+
+            {/* Separator 1 */}
+            <View style={MealTrackingStyles.HeaderSeparator} />
+
+            {/* Column 2 */}
+            <View style={MealTrackingStyles.HeaderStackedColumn}>
+              <View style={MealTrackingStyles.HeaderBox}>
+                <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Calories</Text>
+              </View>
+              <View style={MealTrackingStyles.HeaderBox}>
+                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningCalories.toFixed(0)}</Text>
+              </View>
             </View>
-            <View style={{flex: 1, width: '25%', justifyContent: 'center', borderWidth: 1, borderRightColor: 'white', borderLeftColor: 'white'}}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningProtein.toFixed(0)}</Text>
+
+            {/* Separator 2 */}
+            <View style={MealTrackingStyles.HeaderSeparator} />
+
+            {/* Column 3 */}
+            <View style={MealTrackingStyles.HeaderStackedColumn}>
+              <View style={MealTrackingStyles.HeaderBox}>
+                <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Protein</Text>
+              </View>
+              <View style={MealTrackingStyles.HeaderBox}>
+                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningProtein.toFixed(0)}</Text>
+              </View>
             </View>
-            <View style={{flex: 1, width: '25%', justifyContent: 'center', borderWidth: 1, borderLeftColor: 'white'}}>
-              <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningWater}L</Text>
-            </View>            
+
+            {/* Separator 3 */}
+            <View style={MealTrackingStyles.HeaderSeparator} />
+
+            {/* Column 4 */}
+            <View style={MealTrackingStyles.HeaderStackedColumn}>
+              <View style={MealTrackingStyles.HeaderBox}>
+                <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Water</Text>
+              </View>
+              <View style={MealTrackingStyles.HeaderBox}>
+                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningWater}L</Text>
+              </View>
+            </View>
           </View>
 
           {/* Divider */}
 
-          <View style={{paddingHorizontal: 10}}>
+          <View style={{paddingVertical: 10}}>
             <View style={{height: 1, backgroundColor: 'white'}} />
           </View>
 
@@ -399,7 +438,7 @@ export default function MealScreen() {
   };
 
   return (
-    <SafeAreaView style={DefaultTabStyles.defaultContainer}>
+    <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
       <ScrollView 
         contentContainerStyle={{ flexGrow: 1 }} 

@@ -1,17 +1,17 @@
-import { BackHandler, Text, View } from "react-native";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { BackHandler } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 
-import { DefaultTabStyles} from "@/components/HGStyles"
-import { GymPrograms } from "@/components/shop/ShopGymPrograms";
-import { MealPrograms } from "@/components/shop/ShopMealPrograms";
-import { ShopLanding } from "@/components/shop/ShopLanding";
-import { BeginnerPrograms } from "@/components/shop/ShopBeginner";
-import { IntermediatePrograms } from "@/components/shop/ShopIntermediate";
+import { HGHeader } from "@/components/HeaderBar";
+import { DefaultTabStyles } from "@/components/HGStyles";
 import { AdvancedPrograms } from "@/components/shop/ShopAdvanced";
+import { BeginnerPrograms } from "@/components/shop/ShopBeginner";
+import { GymPrograms } from "@/components/shop/ShopGymPrograms";
+import { IntermediatePrograms } from "@/components/shop/ShopIntermediate";
+import { ShopLanding } from "@/components/shop/ShopLanding";
+import { MealPrograms } from "@/components/shop/ShopMealPrograms";
 import { WhatsHot } from "@/components/shop/WhatsHot";
-import { HGHeader } from "@/components/HeaderBar"; 
 
 type PageType = 'programs' | 'mealPrograms' | 'beginner' | 'intermediate' | 'advanced' | 'hot';
 
@@ -82,8 +82,6 @@ export default function ShopScreen() {
       // No menus open, default behavior (exit app)
       return false;
     }
-    // Prevent default behavior (exit app) for menu handling cases
-    return false;
   };
 
   useEffect(() => {
@@ -126,7 +124,7 @@ export default function ShopScreen() {
   }
 
   return (
-    <SafeAreaView style={DefaultTabStyles.defaultContainer}>
+    <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
       <Toast />
       {content}
