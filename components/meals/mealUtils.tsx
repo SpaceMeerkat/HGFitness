@@ -166,12 +166,12 @@ type addMealItemProps = {
     newVersion: number;
   }; 
 
-  export const updateActiveVersion = ({
+  export function updateActiveVersion ({
     activeMeal,
     mealIndex,
     newVersion,
     setMealProgramsState,
-  }: updateActiveVersionProps) => {
+  }: updateActiveVersionProps) {
     setMealProgramsState((prevState) => {
       const updatedMeals = { ...prevState };
       const updatedMeal = { ...updatedMeals[activeMeal][mealIndex] };
@@ -179,4 +179,8 @@ type addMealItemProps = {
       updatedMeals[activeMeal][mealIndex] = updatedMeal;
       return updatedMeals;
     });
+  };
+
+  export function randomFunction (test: string) {
+    console.log(test);
   };

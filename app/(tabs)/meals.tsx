@@ -186,6 +186,10 @@ export default function MealScreen() {
                         </Pressable>
                       </View>
 
+                      {/* Include a meal sizing button here somewhere too:
+                        updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})}}
+                      */}
+
                       <Pressable style={MealTrackingStyles.MealInfoButton}
                         onPress={() => [
                           setInstructionsVisible(true), 
