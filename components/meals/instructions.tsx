@@ -1,6 +1,8 @@
-import { View, Text, Pressable, ImageBackground } from "react-native";
 import { MealTrackingStyles } from "@/components/HGMealStyles";
+// import { updateActiveVersion } from "@/components/meals/mealUtils";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { ImageBackground, Pressable, Text, View } from "react-native";
+
 
 type HandleInstructionsClickProps = {
     setInstructionsVisible: (visible: boolean) => void;
@@ -10,7 +12,8 @@ type HandleInstructionsClickProps = {
     ingredients: any;
   };
 
-export function MealInstructions({ setInstructionsVisible, setCurrentInstructions, setCurrentIngredients, instructions, ingredients }: HandleInstructionsClickProps) {
+export function MealInstructions({ setInstructionsVisible, setCurrentInstructions, setCurrentIngredients, 
+    instructions, ingredients }: HandleInstructionsClickProps) {
 
     const handleInstructionsClick = (openWindow: boolean) => {
         setInstructionsVisible(openWindow);
@@ -42,9 +45,15 @@ export function MealInstructions({ setInstructionsVisible, setCurrentInstruction
                             <View style={{flex: 0.4, justifyContent: 'center'}}>
                                 <Text style={{color: 'white', textAlign: 'center'}}>Meal size</Text>
                             </View>
-                            <View style={{flex: 0.2,backgroundColor: 'black', borderColor: 'grey', borderWidth: 1, borderRadius: 8, justifyContent: 'center'}}>
-                                <Ionicons name="chevron-forward" size={24} color="lime" style={{textAlign: 'center'}} />
-                            </View>
+                            <Pressable 
+                                // onPress={() => {
+                                //     const mealIndex = index + 1;
+                                //     const newVersion = (item.activeVersion + 1) % item.version.length;  
+                                //     updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
+                                // }}
+                                style={{flex: 0.15,backgroundColor: 'black', borderColor: 'grey', borderWidth: 1, borderRadius: 8, justifyContent: 'center'}}>
+                                <Ionicons name="chevron-up" size={24} color="lime" style={{textAlign: 'center'}} />
+                            </Pressable>
                         </View>
                     </View>
 
@@ -52,7 +61,7 @@ export function MealInstructions({ setInstructionsVisible, setCurrentInstruction
                     <View style={{flex: 0.2, justifyContent: 'center'}}>
                         <View style={{flex: 1, flexDirection: 'column'}}>
                             {ingredients.split('/').map((item?: any, index?: any) => (
-                                <View style={{flexDirection: 'row'}}>
+                                <View key={index} style={{flexDirection: 'row'}}>
                                     <View style={{flex: 0.05, flexDirection: 'row'}}>
                                         <Text style={{ color: 'white', fontSize: 12, textAlign: 'left', paddingVertical: 0 }} >&#8226;</Text>
                                     </View>
