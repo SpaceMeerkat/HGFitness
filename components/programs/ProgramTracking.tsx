@@ -1,16 +1,14 @@
-import React from 'react';
-import { View, Text, Pressable, Image, ImageBackground, ScrollView, TextInput } from "react-native";
-import { useState, useEffect } from "react";
+import { DefaultTabStyles, ProgramStyles, ShopStyles } from "@/components/HGStyles";
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import * as SecureStore from 'expo-secure-store';
-import { DefaultTabStyles, ShopStyles, ProgramStyles } from "@/components/HGStyles"
-import TrackingNotes from "./TrackingNotes";
-import SaveSession from "./SaveSession";
-import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
+import React, { useEffect, useState } from 'react';
+import { ImageBackground, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { FindPrecedingNumber } from './FindPrecedingNumber';
+import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
+import SaveSession from "./SaveSession";
+import TrackingNotes from "./TrackingNotes";
 
 import { useAppContext } from "@/components/appContext";
-import { useStoreRootState } from 'expo-router/build/global-state/router-store';
 
 type PageType = 'programs' | 'programOverview' | 'programTracking';
 

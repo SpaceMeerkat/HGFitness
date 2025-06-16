@@ -1,26 +1,32 @@
 import { MealTrackingStyles } from "@/components/HGMealStyles";
-// import { updateActiveVersion } from "@/components/meals/mealUtils";
+import { updateActiveVersion } from "@/components/meals/mealUtils";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { ImageBackground, Pressable, Text, View } from "react-native";
 
 
 type HandleInstructionsClickProps = {
     setInstructionsVisible: (visible: boolean) => void;
+    setMealProgramsState: (data: any) => void;
     setCurrentInstructions: (data: any) => void;
     setCurrentIngredients: (data: any) => void;
+    mealProgramState: any;
+    activeMeal: any;
+    currentMealIndex: number;
+    versionLength: number;
     instructions: any;
     ingredients: any;
   };
 
-export function MealInstructions({ setInstructionsVisible, setCurrentInstructions, setCurrentIngredients, 
-    instructions, ingredients }: HandleInstructionsClickProps) {
+export function MealInstructions({ setInstructionsVisible, setMealProgramsState, setCurrentInstructions, setCurrentIngredients, 
+    mealProgramState, activeMeal, currentMealIndex, versionLength, instructions, ingredients }: HandleInstructionsClickProps) {
 
     const handleInstructionsClick = (openWindow: boolean) => {
         setInstructionsVisible(openWindow);
         setCurrentInstructions(null);
-        setCurrentIngredients(null);
+        setCurrentIngredients(null); 
       }
 
+    const mealVersions = versionLength;
     const image = require("@/assets/images/HGBackground.png");
       
     return(
@@ -46,11 +52,13 @@ export function MealInstructions({ setInstructionsVisible, setCurrentInstruction
                                 <Text style={{color: 'white', textAlign: 'center'}}>Meal size</Text>
                             </View>
                             <Pressable 
-                                // onPress={() => {
-                                //     const mealIndex = index + 1;
-                                //     const newVersion = (item.activeVersion + 1) % item.version.length;  
-                                //     updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
-                                // }}
+                                onPress={() => {
+                                    const mealIndex = currentMealIndex + 1;
+                                    const newVersion = (mealProgramState[activeMeal][mealIndex].activeVersion + 1) % mealVersions; 
+                                    updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
+                                    setCurrentInstructions(mealProgramState[activeMeal][mealIndex].how[newVersion].split('/')),
+                                    setCurrentIngredients(mealProgramState[activeMeal][mealIndex].ingredients[newVersion])
+                                }}
                                 style={{flex: 0.15,backgroundColor: 'black', borderColor: 'grey', borderWidth: 1, borderRadius: 8, justifyContent: 'center'}}>
                                 <Ionicons name="chevron-up" size={24} color="lime" style={{textAlign: 'center'}} />
                             </Pressable>
