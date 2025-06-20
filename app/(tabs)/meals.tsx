@@ -4,7 +4,7 @@ import { HGHeader } from "@/components/HeaderBar";
 import { useAppContext } from "@/components/appContext";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
-import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, removeMealItem, TrackingData } from "@/components/meals/mealUtils";
+import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
 import Entypo from '@expo/vector-icons/Entypo';
@@ -25,7 +25,10 @@ export default function MealScreen() {
   const [loginActive, setLoginActive] = useState(true);
   const [signupActive, setSignupActive] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
+  // const [mealItem, setMealItem] = useState<any | null>(null);
   const [activeMeal, setActiveMeal] = useState<any | null>(null);
+  const [mealIndex, setMealIndex] = useState<any>(0); 
+  const [versionLength, setVersionLength] = useState<any>(0); 
   const [removableIcons, setRemovableIcons] = useState(false);
 
   const [instructionsVisible, setInstructionsVisible] = useState(false);
@@ -106,14 +109,19 @@ export default function MealScreen() {
   }, [mealProgramsState]); 
 
   const renderOverlay = () => {
-    if (instructionsVisible && currentIngredients && currentInstructions) {
+    if (instructionsVisible && currentIngredients && currentInstructions && activeMeal) {
  
       // Show MealInstructions if instructionsVisible is true
       return (
         <MealInstructions
           setInstructionsVisible={setInstructionsVisible}
+          setMealProgramsState = {setMealProgramsState}
           setCurrentInstructions={setCurrentInstructions}
           setCurrentIngredients={setCurrentIngredients}
+          mealProgramState = {mealProgramsState}
+          activeMeal = {activeMeal}
+          currentMealIndex = {mealIndex}
+          versionLength = {versionLength}
           instructions={currentInstructions}
           ingredients={currentIngredients}
         />
@@ -123,14 +131,14 @@ export default function MealScreen() {
       // Show the default overlay if overlayVisible and activeMeal are true
       return (
       <View style={MealTrackingStyles.TrackingOverlay}>
-        <View style={MealTrackingStyles.TrackingOptionsContainer}>
-          <ImageBackground source={image} resizeMode="cover" style={{flex: 1, overflow: "hidden"}}>
-          <Pressable
+        <Pressable
             onPress={() => setOverlayVisible(false)}
             style={MealTrackingStyles.TrackingBackButton}
           >
-            <Text style={{ color: "white", fontSize: 16 }}>Back</Text>
-          </Pressable>
+            <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingLeft: 15}}>Back</Text>
+        </Pressable>
+        <View style={MealTrackingStyles.TrackingOptionsContainer}>
+          <ImageBackground source={image} resizeMode="cover" style={{flex: 1, overflow: "hidden"}}>
 
           {/* Map over activeMeal to create Pressable components */}
           <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
@@ -147,6 +155,9 @@ export default function MealScreen() {
                   <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
                     <Pressable style={MealTrackingStyles.MealOptionLayoutContainer} onPress={() => [
                           setInstructionsVisible(true), 
+                          // setMealItem(item),
+                          setMealIndex(index),
+                          setVersionLength(item.version.length),
                           setCurrentInstructions(item.how[item.activeVersion].split('/')),
                           setCurrentIngredients(item.ingredients[item.activeVersion])]}>
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
@@ -186,71 +197,20 @@ export default function MealScreen() {
                         </Pressable>
                       </View>
 
-                      {/* Include a meal sizing button here somewhere too:
-                        updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})}}
-                      */}
-
+                      {/* Meal size button */}
                       <Pressable style={MealTrackingStyles.MealInfoButton}
-                        onPress={() => [
-                          setInstructionsVisible(true), 
-                          setCurrentInstructions(item.how[item.activeVersion].split('/')),
-                          setCurrentIngredients(item.ingredients[item.activeVersion])]}>
+                        onPress={() => {
+                          const mealIndex = index + 1;
+                          const newVersion = (item.activeVersion + 1) % item.version.length;                          
+                          updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})}
+                        }>
                           <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>
                             {/* <Ionicons name="information-circle-outline" size={22} color="lime" /> */}
                             <Entypo name="arrow-with-circle-up" size={22} color="lime" />
                           </Text>
                       </Pressable>
 
-                      {/* <View style={{ flex: 1, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
-                      <Pressable
-                          onPress={() => {
-                            const mealIndex = index + 1;
-                            const newVersion = (item.activeVersion + 1) % item.version.length;
-                            updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})}}
-                          style={{
-                            flex: 0.6,
-                            flexDirection: 'column',
-                            backgroundColor: 'black',
-                            justifyContent: 'center',
-                            paddingHorizontal: 0,
-                            paddingTop: 10,
-                            paddingBottom: 2
-                          }}
-                        >
-                          <View
-                            style={{
-                              flex: 1,
-                              borderRadius: 4,
-                              borderWidth: 1,
-                              borderColor: 'grey',
-                              backgroundColor: 'grey',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>
-                              Meal size {item.activeVersion + 1 || 1}
-                            </Text>
-                          </View>
-                        </Pressable>
-                      </View> */}
-
                       <View style={{ flex: 0.5, flexDirection: 'row' }}>
-
-                        {/* <Pressable style={{flex: 0.2, 
-                          flexDirection: 
-                          'column', 
-                          justifyContent: 
-                          'center', 
-                          backgroundColor: 'black'}} 
-                          onPress={() => [
-                            setInstructionsVisible(true), 
-                            setCurrentInstructions(item.how[item.activeVersion].split('/')),
-                            setCurrentIngredients(item.ingredients[item.activeVersion])]}>
-                            <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>
-                              <Ionicons name="information-circle-outline" size={22} color="white" />
-                            </Text>
-                        </Pressable> */}
-
                         
                       </View>
                     </Pressable>
