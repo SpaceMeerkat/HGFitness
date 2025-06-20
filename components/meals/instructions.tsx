@@ -1,8 +1,9 @@
 import { MealTrackingStyles } from "@/components/HGMealStyles";
 import { updateActiveVersion } from "@/components/meals/mealUtils";
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { ImageBackground, Pressable, Text, View } from "react-native";
-
+import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
 
 type HandleInstructionsClickProps = {
     setInstructionsVisible: (visible: boolean) => void;
@@ -28,49 +29,92 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
 
     const mealVersions = versionLength;
     const image = require("@/assets/images/HGBackground.png");
+    const activeVersion = mealProgramState[activeMeal][currentMealIndex + 1].activeVersion
+    const headerProtein = mealProgramState[activeMeal][currentMealIndex + 1].protein[activeVersion];
+    const headerCalories = mealProgramState[activeMeal][currentMealIndex + 1].calories[activeVersion];
       
     return(
         <View style={MealTrackingStyles.InstructionsOverlay}>
+            <Pressable
+                onPress={() => handleInstructionsClick(false)}
+                style={MealTrackingStyles.TrackingBackButton}>
+                <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingLeft: 15}}>Back</Text>
+            </Pressable>
             <View style={MealTrackingStyles.TrackingOptionsContainer}>
-                <ImageBackground source={image} resizeMode="cover" style={{flex: 1, overflow: "hidden"}}>
-                    <View style={{flex: 1, padding: 12}}>
-                    <Pressable
-                        onPress={() => handleInstructionsClick(false)}
-                        style={MealTrackingStyles.TrackingBackButton}
-                    >
-                        <Text style={{ color: "white", fontSize: 16 }}>Back</Text>
+                <ScrollView contentContainerStyle={{ flexGrow: 1}}>
+                <ImageBackground source={image} resizeMode="cover" style={{ flex: 1 }}>
+                    <View style={{paddingTop: 12, paddingHorizontal: 12, paddingBottom: 15 }}>
+
+                    {/* Prtein and calries bar */}
+                    <Pressable 
+                        onPress={() => {
+                            const mealIndex = currentMealIndex + 1;
+                            const newVersion = (mealProgramState[activeMeal][mealIndex].activeVersion + 1) % mealVersions; 
+                            updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
+                            setCurrentInstructions(mealProgramState[activeMeal][mealIndex].how[newVersion].split('/')),
+                            setCurrentIngredients(mealProgramState[activeMeal][mealIndex].ingredients[newVersion])
+                        }}
+                        style={({ pressed }) => ({
+                        flex: 0.25,
+                        flexDirection: 'column',
+                        paddingTop: 10,
+                        paddingBottom: 10,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderColor: pressed ? 'limegreen' : 'grey',
+                        backgroundColor: pressed ? 'green' : 'black',
+                        overflow: 'hidden'
+                        })}>
+                        <View style={{flex: 1, flexDirection: 'row'}}>
+                            <View style={{flex: 1}}/>
+                            <View style={{flex: 2}}>
+                                <View style={{flex: 1, flexDirection: 'column'}}>
+                                    <View style={{flex: 0.7, justifyContent: 'flex-end'}}>
+                                        <Text style={{color:'white', textAlign: 'center', fontSize: 20}}>Protein</Text>
+                                    </View>
+                                    <View style={{flex: 0.5}}>
+                                        <Text style={{color:'white', textAlign: 'center'}}>
+                                            {headerProtein} <MaterialCommunityIcons name="food-drumstick" size={14} color="brown" />
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{flex: 1.5}}>
+                                <View style={{flex: 1, flexDirection: 'column'}}>
+                                    <View style={{flex: 1, paddingHorizontal: 15, justifyContent: 'center'}}>
+                                        <Entypo name="arrow-with-circle-up" size={30} color="lime" style={{textAlign: 'center'}} />
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{flex: 2}}>
+                                <View style={{flex: 1, flexDirection: 'column'}}>
+                                    <View style={{flex: 1, justifyContent: 'flex-end'}}>
+                                        <Text style={{color:'white', textAlign: 'center', fontSize: 20}}>Calories</Text>
+                                    </View>
+                                    <View style={{flex: 0.5}}>
+                                        <Text style={{color:'white', textAlign: 'center'}}>{headerCalories} <FontAwesome6 name="fire" size={14} color="orange" /></Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{flex: 1}}/>
+                        </View>
                     </Pressable>
 
                     {/* Ingredients title row */}
-                    <View style={{flex: 0.1, flexDirection: 'column', paddingTop: 10, paddingBottom: 10}}>
+                    <View style={{flex: 0.1, flexDirection: 'column', paddingTop: 10, paddingBottom: 5}}>
                         <View style={{flex: 1, flexDirection: 'row'}}>
-                            <View style={{flex: 0.6}}>
-                                <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', fontStyle: 'italic'}}>Ingredients:</Text>
+                            <View style={{flex: 1}}>
+                                <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', fontStyle: 'italic', textAlign: 'center'}}>Ingredients</Text>
                             </View>
-                            <View style={{flex: 0.1}}/>
-                            <View style={{flex: 0.4, justifyContent: 'center'}}>
-                                <Text style={{color: 'white', textAlign: 'center'}}>Meal size</Text>
-                            </View>
-                            <Pressable 
-                                onPress={() => {
-                                    const mealIndex = currentMealIndex + 1;
-                                    const newVersion = (mealProgramState[activeMeal][mealIndex].activeVersion + 1) % mealVersions; 
-                                    updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
-                                    setCurrentInstructions(mealProgramState[activeMeal][mealIndex].how[newVersion].split('/')),
-                                    setCurrentIngredients(mealProgramState[activeMeal][mealIndex].ingredients[newVersion])
-                                }}
-                                style={{flex: 0.15,backgroundColor: 'black', borderColor: 'grey', borderWidth: 1, borderRadius: 8, justifyContent: 'center'}}>
-                                <Ionicons name="chevron-up" size={24} color="lime" style={{textAlign: 'center'}} />
-                            </Pressable>
                         </View>
                     </View>
 
                     {/* Ingredients bullet list */}
-                    <View style={{flex: 0.2, justifyContent: 'center'}}>
-                        <View style={{flex: 1, flexDirection: 'column'}}>
+                    <View style={{flex: 0.15, justifyContent: 'center'}}>
+                        <View style={{flexDirection: 'column'}}>
                             {ingredients.split('/').map((item?: any, index?: any) => (
                                 <View key={index} style={{flexDirection: 'row'}}>
-                                    <View style={{flex: 0.05, flexDirection: 'row'}}>
+                                    <View style={{paddingHorizontal: 10}}>
                                         <Text style={{ color: 'white', fontSize: 12, textAlign: 'left', paddingVertical: 0 }} >&#8226;</Text>
                                     </View>
 
@@ -83,28 +127,36 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                             ))}
                         </View>
                     </View>
-                    <View style={{flex: 0.1, flexDirection: 'row', paddingVertical: 20}}>
-                        <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', fontStyle: 'italic'}}>How to prepare:</Text>
+
+                    <View style={{ flex: 0.1, paddingTop: 16, paddingBottom: 5 }}>
+                        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', fontStyle: 'italic', textAlign: 'center' }}>
+                            How to prepare
+                        </Text>
                     </View>
-                    <View style={{flex: 0.5, justifyContent: 'center'}}>
-                        {instructions.map((item?: any, index?: any) => (
-                            <View style={{flex: 1, flexDirection: 'row'}}>
-                                <View style={{ flex: 0.17, flexDirection: 'row', justifyContent: 'flex-start' }}>
-                                    <Text key='step_${index}' style={{ color: 'lime', fontSize: 12, textAlignVertical: 'top', marginHorizontal: 5 }}>
-                                        Step {index + 1}:
+
+                    <View style={{ flex: 0.4 }}>
+                        {instructions.map((item: string, index: number) => (
+                            <View key={index} style={{ paddingBottom: 2 }}>
+                                {/* Step Label Row */}
+                                <View style={{ alignItems: 'center', paddingTop: 5 }}>
+                                    <Text style={{ color: 'lime', fontSize: 14, fontWeight: 'bold' }}>
+                                        <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={20} color="lime" />
                                     </Text>
                                 </View>
-                                <View style={{ flex: 0.83, flexDirection: 'row', justifyContent: 'flex-start' }}>
-                                    <Text key={index} style={{ color: 'white', fontSize: 12, textAlignVertical: 'top', marginHorizontal: 5 }}>
-                                        {item}
+
+                                {/* Instruction Text Row */}
+                                <View style={{ paddingHorizontal: 10, paddingTop: 4 }}>
+                                    <Text style={{ color: 'white', fontSize: 12 }}>
+                                    {item}
                                     </Text>
                                 </View>
                             </View>
-                            ))}
+                        ))}
                     </View>
-                    </View>
-                    </ImageBackground>
-                    </View>
+                </View>
+            </ImageBackground>
+            </ScrollView>
+        </View>
         </View>
     );
 }
