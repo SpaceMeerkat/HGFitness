@@ -138,8 +138,8 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                         {instructions.map((item: string, index: number) => (
                             <View key={index} style={{ paddingBottom: 2 }}>
                                 {/* Step Label Row */}
-                                <View style={{ alignItems: 'center', paddingTop: 5 }}>
-                                    <Text style={{ color: 'lime', fontSize: 14, fontWeight: 'bold' }}>
+                                <View style={{ alignItems: 'center', paddingTop: 10, paddingBottom: 5 }}>
+                                    <Text style={{ color: 'lime', fontSize: 14, fontWeight: 'bold', alignContent: 'center' }}>
                                         <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={20} color="lime" />
                                     </Text>
                                 </View>

@@ -1,3 +1,5 @@
+import { Text, View } from "react-native";
+
 export type TrackingData = {
   datestamp: Date;
   runningMeals: any;
@@ -184,3 +186,13 @@ type addMealItemProps = {
   export function randomFunction (test: string) {
     console.log(test);
   };
+
+  export function PremiumRibbon() {
+    return ( 
+    <View style={{paddingVertical: 10, paddingHorizontal: 10}}>
+    <View style = {{backgroundColor: "gold", height: 2}}/>
+    <Text style={{color: 'gold', paddingVertical: 5, textAlign: 'center', fontWeight: 'bold'}}>UPGRADE TO PREMIUM</Text>
+    <View style = {{backgroundColor: "gold", height: 2}}/>
+    </View>
+    )
+  }

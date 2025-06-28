@@ -13,12 +13,15 @@ import { useAppContext } from "@/components/appContext";
 type PageType = 'programs' | 'programOverview' | 'programTracking';
 
 type ProgramTrackerProps = {
+  programLevel: string,
   programID: any;
   programData: any;
   programDay: any;
   completedKeys: any;
-  handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
+  handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: string, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
 };
+
+type ProgramLevel = 'advanced' | 'intermediate' | 'beginner';
 
 interface TrackingData {
   [key: string]: {
@@ -39,7 +42,7 @@ interface Placeholders {
   week: string;
 }
 
-export function ProgramTracker({programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
+export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
 
   const { setTrackingData, trackingData } = useAppContext();
   // Handle the memory keys/data for tracker placeholders
@@ -107,7 +110,6 @@ export function ProgramTracker({programID, programData, programDay, completedKey
 
   useEffect(() => {
     const result = FindPrecedingNumber(memoryKeys, programDay[0]);
-    console.log("week: ", programDay[0]);
     if (result !== 0 && !completedDay) {
       setPlaceHolders(memoryData[`week-${result}-day-${programDay[1]}`]); // Set placeholders when the component mounts or dependencies change
     } else if (completedDay) {
@@ -136,31 +138,31 @@ export function ProgramTracker({programID, programData, programDay, completedKey
               </Pressable>
               <View style={ProgramStyles.trackingChildContainer}>
                 <View style={ProgramStyles.trackingExerciseHeader}>
-                  <Text style={[DefaultTabStyles.defaultTrackingText]}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
                     Exercise
                   </Text>
                 </View>
                 <View style={ProgramStyles.trackingWeight}>
-                  <Text style={DefaultTabStyles.defaultTrackingText}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
                     Rep range
                   </Text>
                 </View>
                 <View style={ProgramStyles.trackingInputHeader}>
                   <View style={{flexDirection: "row", justifyContent: "center", alignContent: "center", alignItems: "flex-end"}}>
                     <View>
-                      <Text style={DefaultTabStyles.defaultTrackingText}>
+                      <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
                         Weight
                       </Text>
                     </View>
                     <View style={{paddingLeft:3}}>
-                      <Text style={[DefaultTabStyles.defaultTrackingText, {fontSize:9}]}>
+                      <Text style={[DefaultTabStyles.defaultTrackingText, {fontSize:9}, ShopStyles[(programLevel) as ProgramLevel]]}>
                         (kg)
                       </Text>
                     </View>
                   </View>
                 </View>
                 <View style={ProgramStyles.trackingInputHeader}>
-                  <Text style={DefaultTabStyles.defaultTrackingText}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
                     Reps
                   </Text>
                 </View>
@@ -168,6 +170,14 @@ export function ProgramTracker({programID, programData, programDay, completedKey
               {exerciseSet.subsetExercises.map((exercise, setIndex) => {
                 let weightPlaceholder: string;
                 let repsPlaceholder: string;
+                let rowColour = 'black';
+                const uniqueCount = new Set(exerciseSet.subsetExercises).size;
+                
+                if (setIndex % 2 === 0 && uniqueCount > 1)  {
+                  rowColour = '#232423'
+                } else {
+                  rowColour = 'black'
+                }
 
                 if (placeholders !== null) {
                   // Use the placeholders if they exist
@@ -185,18 +195,18 @@ export function ProgramTracker({programID, programData, programDay, completedKey
                 }
 
                 return (
-                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={ProgramStyles.trackingChildContainer}>
-                    <View style={ProgramStyles.trackingExercise}>
+                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
+                    <View style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
                       <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
                         {exercise}
                       </Text>
                     </View>
-                    <View style={ProgramStyles.trackingWeight}>
+                    <View style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
                       <Text style={DefaultTabStyles.defaultBoldText}>
                         {exerciseSet.subsetReps[setIndex]}
                       </Text>
                     </View>
-                    <View style={ProgramStyles.trackingContainer}>
+                    <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingExerciseInput}>
                         <TextInput
                           keyboardType="number-pad"
@@ -211,7 +221,7 @@ export function ProgramTracker({programID, programData, programDay, completedKey
                         />
                       </View>
                     </View>
-                    <View style={ProgramStyles.trackingContainer}>
+                    <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingWeightInput}>
                         <TextInput
                           keyboardType="number-pad"

@@ -4,7 +4,7 @@ import { HGHeader } from "@/components/HeaderBar";
 import { useAppContext } from "@/components/appContext";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
-import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
+import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
 import Entypo from '@expo/vector-icons/Entypo';
@@ -150,28 +150,36 @@ export default function MealScreen() {
                 <WaterCustom handleWaterClick={handleWaterClick} />
               </>
             ) : (
-              Object.values(mealProgramsState[activeMeal] || {}).map((item: any, index: number) => {
-                return (
-                  <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
-                    <Pressable style={MealTrackingStyles.MealOptionLayoutContainer} onPress={() => [
-                          setInstructionsVisible(true), 
-                          // setMealItem(item),
-                          setMealIndex(index),
-                          setVersionLength(item.version.length),
-                          setCurrentInstructions(item.how[item.activeVersion].split('/')),
-                          setCurrentIngredients(item.ingredients[item.activeVersion])]}>
+            Object.values(mealProgramsState[activeMeal] || {}).map((item: any, index: number) => {
+              return (
+                <View key={index}>
+                  {/* Add the premium ribbon here */}
+                  {index === 3 && <PremiumRibbon />}
+                  <View style={MealTrackingStyles.MealOptionOuterContainer}>
+                    <Pressable
+                      style={MealTrackingStyles.MealOptionLayoutContainer}
+                      onPress={() => {
+                        setInstructionsVisible(true);
+                        setMealIndex(index);
+                        setVersionLength(item.version.length);
+                        setCurrentInstructions(item.how[item.activeVersion].split('/'));
+                        setCurrentIngredients(item.ingredients[item.activeVersion]);
+                      }}
+                    >
+                      {/* Meal name */}
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
                         <Text style={{ color: "white", fontSize: 22, fontWeight: 'bold' }}>{item.name}</Text>
                       </View>
+
+                      {/* Protein + Calories */}
                       <View style={{ flex: 1, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center', paddingBottom: 10 }}>
-                        <View style={{ flex: 0.5, flexDirection: 'column', paddingTop: 5, paddingRight: 5, justifyContent: 'flex-start' }}>
+                        <View style={{ flex: 0.5, paddingTop: 5, paddingRight: 5 }}>
                           <Text style={{ color: "white", fontSize: 14, textAlign: 'right' }}>
                             Protein {item.protein[item.activeVersion]}
                             <MaterialCommunityIcons name="food-drumstick" size={14} color="brown" />
                           </Text>
                         </View>
-
-                        <View style={{ flex: 0.5, flexDirection: 'column', paddingTop: 5, paddingLeft: 5, justifyContent: 'flex-start' }}>
+                        <View style={{ flex: 0.5, paddingTop: 5, paddingLeft: 5 }}>
                           <Text style={{ color: "white", fontSize: 14, textAlign: 'left' }}>
                             Calories {item.calories[item.activeVersion]}
                             <FontAwesome6 name="fire" size={14} color="orange" />
@@ -179,8 +187,9 @@ export default function MealScreen() {
                         </View>
                       </View>
 
+                      {/* Add button */}
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
-                      <Pressable
+                        <Pressable
                           onPress={() => {
                             const currentVersion = item.activeVersion;
                             const key = activeMeal.toLowerCase();
@@ -189,34 +198,45 @@ export default function MealScreen() {
                             const calorieValue = item.calories[currentVersion];
                             const proteinValue = item.protein[currentVersion];
                             const waterValue = 0;
-                            addMealItem({key, dictionary, itemarg, trackingData, mealValue, calorieValue, proteinValue, waterValue, setDictionary, storeTrackingAsync, setTrackingData, setOverlayVisible});
+                            addMealItem({
+                              key,
+                              dictionary,
+                              itemarg,
+                              trackingData,
+                              mealValue,
+                              calorieValue,
+                              proteinValue,
+                              waterValue,
+                              setDictionary,
+                              storeTrackingAsync,
+                              setTrackingData,
+                              setOverlayVisible
+                            });
                           }}
                           style={MealTrackingStyles.AddMealButton}
                         >
-                          <Text style={{ color: "white", fontSize: 16, justifyContent: 'center', textAlign: 'center' }}>Add</Text>
+                          <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>Add</Text>
                         </Pressable>
                       </View>
 
-                      {/* Meal size button */}
-                      <Pressable style={MealTrackingStyles.MealInfoButton}
+                      {/* Change version button */}
+                      <Pressable
+                        style={MealTrackingStyles.MealInfoButton}
                         onPress={() => {
                           const mealIndex = index + 1;
-                          const newVersion = (item.activeVersion + 1) % item.version.length;                          
-                          updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})}
-                        }>
-                          <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>
-                            {/* <Ionicons name="information-circle-outline" size={22} color="lime" /> */}
-                            <Entypo name="arrow-with-circle-up" size={22} color="lime" />
-                          </Text>
+                          const newVersion = (item.activeVersion + 1) % item.version.length;
+                          updateActiveVersion({ activeMeal, mealIndex, newVersion, setMealProgramsState });
+                        }}
+                      >
+                        <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>
+                          <Entypo name="arrow-with-circle-up" size={22} color="lime" />
+                        </Text>
                       </Pressable>
-
-                      <View style={{ flex: 0.5, flexDirection: 'row' }}>
-                        
-                      </View>
                     </Pressable>
                   </View>
-                );
-              })
+                </View>
+              );
+            })
             )}
           </ScrollView>
         </ImageBackground>
@@ -227,7 +247,7 @@ export default function MealScreen() {
 
   const renderMeals = () => {
     return (
-      <ScrollView style={{flex: 1, backgroundColor: "plum"}}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1}}>
         <ImageBackground source={image} resizeMode="cover" style={{flex: 1}}>
 
         {/* Meals header component */}
