@@ -13,12 +13,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
+import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MealScreen() {
 
   const image = require("@/assets/images/HGBackground.png");
+  const premiumImage = require("@/assets/images/OfficialLogo.jpg");
 
   const { profile, mealPrograms, trackingData, setTrackingData } = useAppContext(); 
   const [loggedIn, setLoggedIn] = useState(false);
@@ -151,10 +152,56 @@ export default function MealScreen() {
               </>
             ) : (
             Object.values(mealProgramsState[activeMeal] || {}).map((item: any, index: number) => {
+              if (index > 3) {
+                return (
+                  <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
+                    <View style={MealTrackingStyles.MealOptionLayoutContainer}>
+                      <View style={{ flex: 1, flexDirection: 'column' }}>
+                          {/* Background image layer */}
+                          <View style={{ flex: 0.95, flexDirection: 'row' }}>
+                            <ImageBackground source={premiumImage} resizeMode="contain" style={{...StyleSheet.absoluteFillObject, opacity: 0.15}}/>
+                          </View>
+                          {/* Foreground content layer */}
+                          <View style={{ flex: 0.05, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', opacity: 0.75 }}>
+                            <View style={{flex: 1,flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                              <Text style={{ color: 'white', fontSize: 14, marginRight: 4 }}>{item.name}</Text>
+                              <Ionicons name="lock-closed" size={16} color="white" />
+                            </View>
+                          </View>
+                        </View>
+                    </View>
+                  </View>
+                );
+              }
+
+              // index === 3: render PremiumRibbon + simplified view
+              if (index === 3) {
+                return (
+                  <React.Fragment key={index}>
+                    <PremiumRibbon />
+                    <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
+                      <View style={MealTrackingStyles.MealOptionLayoutContainer}>
+                        <View style={{ flex: 1, flexDirection: 'column' }}>
+                          {/* Background image layer */}
+                          <View style={{ flex: 0.95, flexDirection: 'row' }}>
+                            <ImageBackground source={premiumImage} resizeMode="contain" style={{...StyleSheet.absoluteFillObject, opacity: 0.15}} />
+                          </View>
+                          {/* Foreground content layer */}
+                          <View style={{ flex: 0.05, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', opacity: 0.75 }}>
+                            <View style={{flex: 1,flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                              <Text style={{ color: 'white', fontSize: 14, marginRight: 4 }}>{item.name}</Text>
+                              <Ionicons name="lock-closed" size={16} color="white" />
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </React.Fragment>
+                );
+              }
               return (
                 <View key={index}>
                   {/* Add the premium ribbon here */}
-                  {index === 3 && <PremiumRibbon />}
                   <View style={MealTrackingStyles.MealOptionOuterContainer}>
                     <Pressable
                       style={MealTrackingStyles.MealOptionLayoutContainer}

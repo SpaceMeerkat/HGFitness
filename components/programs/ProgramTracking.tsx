@@ -57,7 +57,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   // Set the notes visibility to false to initialise
   const [isNotesVisible, setIsNotesVisible] = useState(false);
   const [exerciseDictionary, setExerciseDictionary] = useState(InitializeExerciseDictionary(exerciseKeys, exercises));
-  // console.log(JSON.stringify(exerciseDictionary, null, 2)); 
   // state for the 'next' button being pressed for color changes etc.
   const [isPressed, setIsPressed] = useState(false);
   // state for the save session button being pressed for color changes etc.
@@ -67,6 +66,9 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [saving, setSaving] = useState(false);
   // Styling
   const image = require("@/assets/images/HGBackground.png");
+
+  // State to hold the index of the exercise for which notes are being edited
+  const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -80,7 +82,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     };
     fetchProfile(); 
   });
- 
+  
   const handleExerciseClick = (index: number) => {
     setExerciseDictionary(prevState => {
       const newState = { ...prevState };
@@ -92,8 +94,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   }; 
 
   const handleInputChange = (index: number, type: 'weight' | 'reps' | 'notes', setIndex: number, value: string) => {
-    // The problem of notes must be here in that prevState is looking too far back when a note is made, not at the current 
-    // dictionary status
     setExerciseDictionary(prevState => {
       const newState = { ...prevState };
       if (type === 'weight') {
@@ -103,7 +103,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       } else if (type === 'notes') {
         newState[index].userNotes = value;
       }
-      // console.log(exerciseDictionary[index]);
       return newState;
     });
   };
@@ -117,9 +116,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     } else {
       setPlaceHolders(null);
     }
-  }, [memoryKeys, programDay, memoryData]); // Run the effect when memoryKeys, programDay, or memoryData changes  
-
-  // console.log(JSON.stringify(placeholders["trackingData"], null, 2)); 
+  }, [memoryKeys, programDay, memoryData]); // Run the effect when memoryKeys, programDay, or memoryData changes   
 
   const renderExercises = () => {
 
@@ -242,34 +239,35 @@ export function ProgramTracker({programLevel, programID, programData, programDay
               {/* user notes pressable icon */}
               <View style={{backgroundColor: "black", flex: 1, flexDirection: "row", justifyContent : 'space-between', paddingRight: 24, paddingLeft:8, paddingTop: 12}}>
                 <View style={{flex:0.665, flexDirection: 'row', paddingTop: 15}}> 
-                  <Pressable style={{flex: 0.3, flexDirection: "row"}} onPress={() => setIsNotesVisible(true)}>
-                    {/* If the user presses on the notes, a text input field appears for the user to log thoughts */}
-
+                  <Pressable 
+                    style={{flex: 0.3, flexDirection: "row"}} 
+                    onPress={() => {
+                      setCurrentExerciseIndexForNotes(index); // Set the index of the exercise whose notes are being edited
+                      setIsNotesVisible(true);
+                    }}
+                  >
                     {(() => {
-                      // Initialize values
-                      let memoryNotes = null;
+                      let memoryNotes: string | null = null;
                       let notesIconColor = 'white';
 
-                      // Fetch existing notes if available
                       if (placeholders !== null && exerciseSet) {
                         try {
-                          memoryNotes = placeholders.trackingData[index].userNotes;
-                          if (memoryNotes !== null) {
+                          memoryNotes = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userNotes;
+                          if (memoryNotes !== null && memoryNotes !== '') { // Check for empty string too
                             notesIconColor = 'red';
-                          } else {
-                            notesIconColor = 'white';
                           }
-                          
                         } catch (error) {
                           memoryNotes = exerciseSet.userNotes;
-                          notesIconColor = 'white';
-                        } 
-                      } else {
-                          memoryNotes = exerciseSet.userNotes;
-                          notesIconColor = 'white';
                         }
+                      } else {
+                        memoryNotes = exerciseSet.userNotes;
+                      }
 
-                      // Render the notes icon and text
+                      // Update icon color based on exerciseSet.userNotes as well for current session notes
+                      if (exerciseSet.userNotes && exerciseSet.userNotes !== '') {
+                        notesIconColor = 'red';
+                      }
+
                       return (
                         <>
                           <TabBarIcon name={'document-text-outline'} color={notesIconColor} size={20} />
@@ -281,15 +279,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           >
                             NOTES
                           </Text>
-
-                          {/* TrackingNotes modal */}
-                          <TrackingNotes
-                            memoryNotes={memoryNotes}
-                            handleInputChange={handleInputChange}
-                            visible={isNotesVisible}
-                            onClose={() => setIsNotesVisible(false)}
-                            index={index}
-                          />
                         </>
                       );
                     })()}
@@ -332,29 +321,41 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       <ScrollView style={ShopStyles.shopScrollContainer}>
         <View>
           {renderExercises()}
-        <Pressable 
-        style={[ProgramStyles.trackingSaveButton, {opacity: saveOpacity, backgroundColor: saveIsPressed? 'grey': 'black'}]}
-        onPressIn={completedDay ? undefined : () => { setSaveIsPressed(true) }}
-        onPressOut={completedDay ? undefined : () => { setSaveIsPressed(false) }}
-        onPress={completedDay ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
-        >
+          <Pressable 
+          style={[ProgramStyles.trackingSaveButton, {opacity: saveOpacity, backgroundColor: saveIsPressed? 'grey': 'black'}]}
+          onPressIn={completedDay ? undefined : () => { setSaveIsPressed(true) }}
+          onPressOut={completedDay ? undefined : () => { setSaveIsPressed(false) }}
+          onPress={completedDay ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
+          >
             <Text style={{color: "white"}}>Save session</Text>
-        </Pressable>
-        {/* SaveSession modal */}
-        <SaveSession
-          visible={isSaveVisible}
-          onClose={() => setIsSaveVisible(false)}
-          programID={programID}
-          programDay={programDay}
-          token={token}
-          exerciseDictionary={exerciseDictionary}
-          trackingData = {trackingData}
-          setTrackingData = {setTrackingData}
-          setSaving = {setSaving}
-          handleChildPage={handleChildPage}
-        />
+          </Pressable>
         </View>
       </ScrollView>
+
+      {/* TrackingNotes modal moved outside ScrollView and ImageBackground */}
+      {currentExerciseIndexForNotes !== null && (
+        <TrackingNotes
+          memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || (placeholders?.trackingData[exerciseDictionary[currentExerciseIndexForNotes]?.uniqueSetKey]?.userNotes || '')}
+          handleInputChange={handleInputChange}
+          visible={isNotesVisible}
+          onClose={() => setIsNotesVisible(false)}
+          index={currentExerciseIndexForNotes}
+        />
+      )}
+
+      {/* SaveSession modal */}
+      <SaveSession
+        visible={isSaveVisible}
+        onClose={() => setIsSaveVisible(false)}
+        programID={programID}
+        programDay={programDay}
+        token={token}
+        exerciseDictionary={exerciseDictionary}
+        trackingData = {trackingData}
+        setTrackingData = {setTrackingData}
+        setSaving = {setSaving}
+        handleChildPage={handleChildPage}
+      />
     </ImageBackground>
   );
 }
