@@ -548,10 +548,15 @@ export const ShopStyles = StyleSheet.create({
 
   export const TrackingNotesStyles = StyleSheet.create({
     overlay: {
-        flex: 1,
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.75)',
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 999,
     },
     container: {
         width: '80%',

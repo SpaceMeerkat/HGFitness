@@ -28,7 +28,7 @@ export default function MyPrograms() {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const { profile, myPrograms, trackingData } = useAppContext(); 
+  const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms } = useAppContext(); 
   const scrollViewRef = useRef<ScrollView>(null); // Add reference
 
   useEffect(() => {
@@ -81,6 +81,18 @@ export default function MyPrograms() {
     return () => backHandler.remove();
   }, [programOverviewOpen, programTrackingOpen]);
 
+  const getProgramLevel = (selectedProgramID: string): 'advanced' | 'intermediate' | 'beginner' | null => {
+    if (advancedPrograms.hasOwnProperty(selectedProgramID)) {
+      return 'advanced';
+    } else if (intermediatePrograms.hasOwnProperty(selectedProgramID)) {
+      return 'intermediate';
+    } else if (beginnerPrograms.hasOwnProperty(selectedProgramID)) {
+      return 'beginner';
+    } else {
+      return 'beginner';
+    }
+  };
+
   const handleChildPage = (page: PageType, 
     programID: any = null, 
     programData: any = null, 
@@ -127,11 +139,13 @@ export default function MyPrograms() {
         }).filter(Boolean);
   
         if (programOverviewOpen && selectedProgram) {
-          return <ProgramOverview programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
+          const selectedLevel = getProgramLevel(selectedProgramID);
+          return <ProgramOverview programLevel={selectedLevel} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
         }
   
         if (programTrackingOpen) {
-          return <ProgramTracker programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
+          const selectedLevel = getProgramLevel(selectedProgramID);
+          return <ProgramTracker programLevel={selectedLevel || 'beginner'} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
         }
       }
     }

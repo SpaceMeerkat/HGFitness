@@ -1,19 +1,16 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ResizeMode, Video } from 'expo-av';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState, useRef } from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useRef, useState } from 'react';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
-import { View, StyleSheet, Dimensions  } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
-import { StatusBar } from 'react-native';
 
-import { useRouter } from 'expo-router';
-import * as Linking from 'expo-linking';
 
+import { AppContextProvider, useAppContext } from "@/components/appContext";
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AppContextProvider} from "@/components/appContext";
-import { useAppContext } from "@/components/appContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -76,6 +73,7 @@ function AppContent() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <StatusBar style="light" />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />

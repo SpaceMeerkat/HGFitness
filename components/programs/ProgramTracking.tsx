@@ -13,12 +13,15 @@ import { useAppContext } from "@/components/appContext";
 type PageType = 'programs' | 'programOverview' | 'programTracking';
 
 type ProgramTrackerProps = {
+  programLevel: string,
   programID: any;
   programData: any;
   programDay: any;
   completedKeys: any;
-  handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
+  handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: string, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
 };
+
+type ProgramLevel = 'advanced' | 'intermediate' | 'beginner';
 
 interface TrackingData {
   [key: string]: {
@@ -39,7 +42,7 @@ interface Placeholders {
   week: string;
 }
 
-export function ProgramTracker({programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
+export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
 
   const { setTrackingData, trackingData } = useAppContext();
   // Handle the memory keys/data for tracker placeholders
@@ -54,7 +57,6 @@ export function ProgramTracker({programID, programData, programDay, completedKey
   // Set the notes visibility to false to initialise
   const [isNotesVisible, setIsNotesVisible] = useState(false);
   const [exerciseDictionary, setExerciseDictionary] = useState(InitializeExerciseDictionary(exerciseKeys, exercises));
-  // console.log(JSON.stringify(exerciseDictionary, null, 2)); 
   // state for the 'next' button being pressed for color changes etc.
   const [isPressed, setIsPressed] = useState(false);
   // state for the save session button being pressed for color changes etc.
@@ -64,6 +66,9 @@ export function ProgramTracker({programID, programData, programDay, completedKey
   const [saving, setSaving] = useState(false);
   // Styling
   const image = require("@/assets/images/HGBackground.png");
+
+  // State to hold the index of the exercise for which notes are being edited
+  const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -77,7 +82,7 @@ export function ProgramTracker({programID, programData, programDay, completedKey
     };
     fetchProfile(); 
   });
- 
+  
   const handleExerciseClick = (index: number) => {
     setExerciseDictionary(prevState => {
       const newState = { ...prevState };
@@ -89,8 +94,6 @@ export function ProgramTracker({programID, programData, programDay, completedKey
   }; 
 
   const handleInputChange = (index: number, type: 'weight' | 'reps' | 'notes', setIndex: number, value: string) => {
-    // The problem of notes must be here in that prevState is looking too far back when a note is made, not at the current 
-    // dictionary status
     setExerciseDictionary(prevState => {
       const newState = { ...prevState };
       if (type === 'weight') {
@@ -100,14 +103,12 @@ export function ProgramTracker({programID, programData, programDay, completedKey
       } else if (type === 'notes') {
         newState[index].userNotes = value;
       }
-      // console.log(exerciseDictionary[index]);
       return newState;
     });
   };
 
   useEffect(() => {
     const result = FindPrecedingNumber(memoryKeys, programDay[0]);
-    console.log("week: ", programDay[0]);
     if (result !== 0 && !completedDay) {
       setPlaceHolders(memoryData[`week-${result}-day-${programDay[1]}`]); // Set placeholders when the component mounts or dependencies change
     } else if (completedDay) {
@@ -115,9 +116,7 @@ export function ProgramTracker({programID, programData, programDay, completedKey
     } else {
       setPlaceHolders(null);
     }
-  }, [memoryKeys, programDay, memoryData]); // Run the effect when memoryKeys, programDay, or memoryData changes  
-
-  // console.log(JSON.stringify(placeholders["trackingData"], null, 2)); 
+  }, [memoryKeys, programDay, memoryData]); // Run the effect when memoryKeys, programDay, or memoryData changes   
 
   const renderExercises = () => {
 
@@ -136,31 +135,31 @@ export function ProgramTracker({programID, programData, programDay, completedKey
               </Pressable>
               <View style={ProgramStyles.trackingChildContainer}>
                 <View style={ProgramStyles.trackingExerciseHeader}>
-                  <Text style={[DefaultTabStyles.defaultTrackingText]}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
                     Exercise
                   </Text>
                 </View>
                 <View style={ProgramStyles.trackingWeight}>
-                  <Text style={DefaultTabStyles.defaultTrackingText}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
                     Rep range
                   </Text>
                 </View>
                 <View style={ProgramStyles.trackingInputHeader}>
                   <View style={{flexDirection: "row", justifyContent: "center", alignContent: "center", alignItems: "flex-end"}}>
                     <View>
-                      <Text style={DefaultTabStyles.defaultTrackingText}>
+                      <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
                         Weight
                       </Text>
                     </View>
                     <View style={{paddingLeft:3}}>
-                      <Text style={[DefaultTabStyles.defaultTrackingText, {fontSize:9}]}>
+                      <Text style={[DefaultTabStyles.defaultTrackingText, {fontSize:9}, ShopStyles[(programLevel) as ProgramLevel]]}>
                         (kg)
                       </Text>
                     </View>
                   </View>
                 </View>
                 <View style={ProgramStyles.trackingInputHeader}>
-                  <Text style={DefaultTabStyles.defaultTrackingText}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
                     Reps
                   </Text>
                 </View>
@@ -168,6 +167,14 @@ export function ProgramTracker({programID, programData, programDay, completedKey
               {exerciseSet.subsetExercises.map((exercise, setIndex) => {
                 let weightPlaceholder: string;
                 let repsPlaceholder: string;
+                let rowColour = 'black';
+                const uniqueCount = new Set(exerciseSet.subsetExercises).size;
+                
+                if (setIndex % 2 === 0 && uniqueCount > 1)  {
+                  rowColour = '#232423'
+                } else {
+                  rowColour = 'black'
+                }
 
                 if (placeholders !== null) {
                   // Use the placeholders if they exist
@@ -185,18 +192,18 @@ export function ProgramTracker({programID, programData, programDay, completedKey
                 }
 
                 return (
-                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={ProgramStyles.trackingChildContainer}>
-                    <View style={ProgramStyles.trackingExercise}>
+                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
+                    <View style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
                       <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
                         {exercise}
                       </Text>
                     </View>
-                    <View style={ProgramStyles.trackingWeight}>
+                    <View style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
                       <Text style={DefaultTabStyles.defaultBoldText}>
                         {exerciseSet.subsetReps[setIndex]}
                       </Text>
                     </View>
-                    <View style={ProgramStyles.trackingContainer}>
+                    <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingExerciseInput}>
                         <TextInput
                           keyboardType="number-pad"
@@ -211,7 +218,7 @@ export function ProgramTracker({programID, programData, programDay, completedKey
                         />
                       </View>
                     </View>
-                    <View style={ProgramStyles.trackingContainer}>
+                    <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingWeightInput}>
                         <TextInput
                           keyboardType="number-pad"
@@ -232,34 +239,35 @@ export function ProgramTracker({programID, programData, programDay, completedKey
               {/* user notes pressable icon */}
               <View style={{backgroundColor: "black", flex: 1, flexDirection: "row", justifyContent : 'space-between', paddingRight: 24, paddingLeft:8, paddingTop: 12}}>
                 <View style={{flex:0.665, flexDirection: 'row', paddingTop: 15}}> 
-                  <Pressable style={{flex: 0.3, flexDirection: "row"}} onPress={() => setIsNotesVisible(true)}>
-                    {/* If the user presses on the notes, a text input field appears for the user to log thoughts */}
-
+                  <Pressable 
+                    style={{flex: 0.3, flexDirection: "row"}} 
+                    onPress={() => {
+                      setCurrentExerciseIndexForNotes(index); // Set the index of the exercise whose notes are being edited
+                      setIsNotesVisible(true);
+                    }}
+                  >
                     {(() => {
-                      // Initialize values
-                      let memoryNotes = null;
+                      let memoryNotes: string | null = null;
                       let notesIconColor = 'white';
 
-                      // Fetch existing notes if available
                       if (placeholders !== null && exerciseSet) {
                         try {
-                          memoryNotes = placeholders.trackingData[index].userNotes;
-                          if (memoryNotes !== null) {
+                          memoryNotes = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userNotes;
+                          if (memoryNotes !== null && memoryNotes !== '') { // Check for empty string too
                             notesIconColor = 'red';
-                          } else {
-                            notesIconColor = 'white';
                           }
-                          
                         } catch (error) {
                           memoryNotes = exerciseSet.userNotes;
-                          notesIconColor = 'white';
-                        } 
-                      } else {
-                          memoryNotes = exerciseSet.userNotes;
-                          notesIconColor = 'white';
                         }
+                      } else {
+                        memoryNotes = exerciseSet.userNotes;
+                      }
 
-                      // Render the notes icon and text
+                      // Update icon color based on exerciseSet.userNotes as well for current session notes
+                      if (exerciseSet.userNotes && exerciseSet.userNotes !== '') {
+                        notesIconColor = 'red';
+                      }
+
                       return (
                         <>
                           <TabBarIcon name={'document-text-outline'} color={notesIconColor} size={20} />
@@ -271,15 +279,6 @@ export function ProgramTracker({programID, programData, programDay, completedKey
                           >
                             NOTES
                           </Text>
-
-                          {/* TrackingNotes modal */}
-                          <TrackingNotes
-                            memoryNotes={memoryNotes}
-                            handleInputChange={handleInputChange}
-                            visible={isNotesVisible}
-                            onClose={() => setIsNotesVisible(false)}
-                            index={index}
-                          />
                         </>
                       );
                     })()}
@@ -322,29 +321,41 @@ export function ProgramTracker({programID, programData, programDay, completedKey
       <ScrollView style={ShopStyles.shopScrollContainer}>
         <View>
           {renderExercises()}
-        <Pressable 
-        style={[ProgramStyles.trackingSaveButton, {opacity: saveOpacity, backgroundColor: saveIsPressed? 'grey': 'black'}]}
-        onPressIn={completedDay ? undefined : () => { setSaveIsPressed(true) }}
-        onPressOut={completedDay ? undefined : () => { setSaveIsPressed(false) }}
-        onPress={completedDay ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
-        >
+          <Pressable 
+          style={[ProgramStyles.trackingSaveButton, {opacity: saveOpacity, backgroundColor: saveIsPressed? 'grey': 'black'}]}
+          onPressIn={completedDay ? undefined : () => { setSaveIsPressed(true) }}
+          onPressOut={completedDay ? undefined : () => { setSaveIsPressed(false) }}
+          onPress={completedDay ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
+          >
             <Text style={{color: "white"}}>Save session</Text>
-        </Pressable>
-        {/* SaveSession modal */}
-        <SaveSession
-          visible={isSaveVisible}
-          onClose={() => setIsSaveVisible(false)}
-          programID={programID}
-          programDay={programDay}
-          token={token}
-          exerciseDictionary={exerciseDictionary}
-          trackingData = {trackingData}
-          setTrackingData = {setTrackingData}
-          setSaving = {setSaving}
-          handleChildPage={handleChildPage}
-        />
+          </Pressable>
         </View>
       </ScrollView>
+
+      {/* TrackingNotes modal moved outside ScrollView and ImageBackground */}
+      {currentExerciseIndexForNotes !== null && (
+        <TrackingNotes
+          memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || (placeholders?.trackingData[exerciseDictionary[currentExerciseIndexForNotes]?.uniqueSetKey]?.userNotes || '')}
+          handleInputChange={handleInputChange}
+          visible={isNotesVisible}
+          onClose={() => setIsNotesVisible(false)}
+          index={currentExerciseIndexForNotes}
+        />
+      )}
+
+      {/* SaveSession modal */}
+      <SaveSession
+        visible={isSaveVisible}
+        onClose={() => setIsSaveVisible(false)}
+        programID={programID}
+        programDay={programDay}
+        token={token}
+        exerciseDictionary={exerciseDictionary}
+        trackingData = {trackingData}
+        setTrackingData = {setTrackingData}
+        setSaving = {setSaving}
+        handleChildPage={handleChildPage}
+      />
     </ImageBackground>
   );
 }

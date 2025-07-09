@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, TextInput, StyleSheet, Modal } from 'react-native';
-import { TrackingNotesStyles } from "@/components/HGStyles"
+import { TrackingNotesStyles } from "@/components/HGStyles";
+import React, { useEffect, useState } from 'react';
+import { Modal, Pressable, Text, TextInput, View } from 'react-native';
 
 interface NotesProps {
     memoryNotes: string | null;
@@ -13,11 +13,13 @@ interface NotesProps {
   export default function TrackingNotes({ memoryNotes, handleInputChange, visible, onClose, index }: NotesProps) {
     
     const [note, setNote] = useState(memoryNotes || '');
+    const [placeholder, setPlaceholder] = useState(memoryNotes || "Enter your notes")
 
     // Synchronize note state with memoryNotes prop
     useEffect(() => {
         setNote(memoryNotes || '');
-    }, [memoryNotes]); // This will run whenever memoryNotes changes
+        setPlaceholder(memoryNotes || "Enter your notes");
+    }, [memoryNotes]); // This will run whenever memoryNotes changes, but preserves the placeholder
 
     const handleSaveNote = () => {
         // Use handleInputChange to update the notes in the dictionary
@@ -40,9 +42,8 @@ interface NotesProps {
             <Text style={TrackingNotesStyles.title}>Notes</Text>
             <TextInput
               style={TrackingNotesStyles.textInput}
-              value={note}
               onChangeText={setNote}
-              placeholder="Enter your notes"
+              placeholder={placeholder}
               placeholderTextColor="#999"
               multiline={true}
             />

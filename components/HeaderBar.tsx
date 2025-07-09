@@ -1,7 +1,6 @@
-import { View, Text, Image } from 'react-native';
-import { DefaultTabStyles} from "@/components/HGStyles"
+import { DefaultTabStyles } from "@/components/HGStyles";
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Ionicons } from '@expo/vector-icons';
+import { Text, View } from 'react-native';
 
 export function HGHeader() {
     const title = "HOOLIGAINS";

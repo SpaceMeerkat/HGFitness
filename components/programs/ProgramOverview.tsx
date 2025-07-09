@@ -1,6 +1,6 @@
-import { View, Text, Pressable, Image, ImageBackground, ScrollView} from "react-native";
-import { DefaultTabStyles, ShopStyles, ProgramStyles } from "@/components/HGStyles"
+import { DefaultTabStyles, ProgramStyles, ShopStyles } from "@/components/HGStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
 
 type Exercise = any; // Define the type of exercises if you have more details
 
@@ -17,17 +17,20 @@ type ProgramData = {
 [week: string]: Week;
 };
 
+type ProgramLevel = 'advanced' | 'intermediate' | 'beginner';
+
 type PageType = 'programs' | 'programOverview' | 'programTracking';
 
 type ProgramOverviewProps = {
+  programLevel: any;
   programID: any;
   programData: any;
   programDay: any;
   completedKeys: any;
-  handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
+  handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: any, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
 };
 
-export function ProgramOverview({ programData, programDay, programID, completedKeys, handleChildPage }: ProgramOverviewProps) {
+export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage }: ProgramOverviewProps) {
   
   const image = require("@/assets/images/HGBackground.png");
 
@@ -67,7 +70,7 @@ export function ProgramOverview({ programData, programDay, programID, completedK
     return Object.keys(programData).map(week => (
       <View key={`week-${week}`}>
         <View style={ProgramStyles.programOverviewWeek}>
-          <Text style={[{fontFamily: 'Edo', fontSize: 28}, ShopStyles.advanced]}>
+          <Text style={[{fontFamily: 'Edo', fontSize: 28}, ShopStyles[(programLevel || 'beginner') as ProgramLevel]]}>
             Week {week}
           </Text>
         </View>

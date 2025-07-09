@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "HG Fitness",
-    "slug": "HGMobile2.0",
+    "slug": "HGMobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/playIcon.png",
@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/playIcon.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.spacemeerkat.HGMobile"
     },
     "web": {
       "bundler": "metro",
