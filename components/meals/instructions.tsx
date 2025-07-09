@@ -32,6 +32,7 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
     const activeVersion = mealProgramState[activeMeal][currentMealIndex + 1].activeVersion
     const headerProtein = mealProgramState[activeMeal][currentMealIndex + 1].protein[activeVersion];
     const headerCalories = mealProgramState[activeMeal][currentMealIndex + 1].calories[activeVersion];
+    const mealTitle = mealProgramState[activeMeal][currentMealIndex + 1].name;
       
     return(
         <View style={MealTrackingStyles.InstructionsOverlay}>
@@ -45,6 +46,7 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                 <ImageBackground source={image} resizeMode="cover" style={{ flex: 1 }}>
                     <View style={{paddingTop: 12, paddingHorizontal: 12, paddingBottom: 15 }}>
 
+                    <View style={{flex: 0.25, flexDirection: 'column'}}>
                     {/* Prtein and calries bar */}
                     <Pressable 
                         onPress={() => {
@@ -55,7 +57,7 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                             setCurrentIngredients(mealProgramState[activeMeal][mealIndex].ingredients[newVersion])
                         }}
                         style={({ pressed }) => ({
-                        flex: 0.25,
+                        flex: 1,
                         flexDirection: 'column',
                         paddingTop: 10,
                         paddingBottom: 10,
@@ -99,12 +101,19 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                             <View style={{flex: 1}}/>
                         </View>
                     </Pressable>
+                    </View>
+
+                    <View style={{flex: 0.1, flexDirection: 'column', paddingVertical: 10}}>
+                        <Text style={{textAlign: 'center', textAlignVertical: 'center', fontSize: 18, color: 'grey'}}>{mealTitle}</Text>
+                    </View>
+
+                    <View style={{flex: 0.3, flexDirection: 'column', backgroundColor: 'rgba(68, 68, 68, 0.5)', borderRadius: 8, borderWidth: 1, paddingVertical: 10}}>
 
                     {/* Ingredients title row */}
-                    <View style={{flex: 0.1, flexDirection: 'column', paddingTop: 10, paddingBottom: 5}}>
+                    <View style={{flex: 0.1, flexDirection: 'column', paddingTop: 0, paddingBottom: 5}}>
                         <View style={{flex: 1, flexDirection: 'row'}}>
                             <View style={{flex: 1}}>
-                                <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', fontStyle: 'italic', textAlign: 'center'}}>Ingredients</Text>
+                                <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', textAlign: 'center', textDecorationLine: 'underline'}}>What You Will Need</Text>
                             </View>
                         </View>
                     </View>
@@ -114,12 +123,12 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                         <View style={{flexDirection: 'column'}}>
                             {ingredients.split('/').map((item?: any, index?: any) => (
                                 <View key={index} style={{flexDirection: 'row'}}>
-                                    <View style={{paddingHorizontal: 10}}>
-                                        <Text style={{ color: 'white', fontSize: 12, textAlign: 'left', paddingVertical: 0 }} >&#8226;</Text>
-                                    </View>
+                                    {/* <View style={{paddingHorizontal: 10}}>
+                                        <Text style={{ color: 'white', fontSize: 14, textAlign: 'center', paddingVertical: 0 }} >&#8226;</Text>
+                                    </View> */}
 
-                                    <View style={{flex: 0.95, flexDirection: 'row'}}>
-                                        <Text key={index} style={{ color: 'white', fontSize: 12, textAlign: 'left', paddingVertical: 0 }}>
+                                    <View style={{flex: 0.95, flexDirection: 'row', justifyContent: 'center'}}>
+                                        <Text key={index} style={{ color: 'white', fontSize: 18, textAlign: 'center', paddingVertical: 4 }}>
                                             {item.trim()}
                                         </Text>
                                     </View>
@@ -128,8 +137,10 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                         </View>
                     </View>
 
+                    </View>
+
                     <View style={{ flex: 0.1, paddingTop: 16, paddingBottom: 5 }}>
-                        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', fontStyle: 'italic', textAlign: 'center' }}>
+                        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>
                             How to prepare
                         </Text>
                     </View>
@@ -145,8 +156,8 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                                 </View>
 
                                 {/* Instruction Text Row */}
-                                <View style={{ paddingHorizontal: 10, paddingTop: 4 }}>
-                                    <Text style={{ color: 'white', fontSize: 12 }}>
+                                <View style={{ paddingHorizontal: 60, paddingTop: 4 }}>
+                                    <Text style={{ color: 'white', fontSize: 14, textAlign: 'center' }}>
                                     {item}
                                     </Text>
                                 </View>

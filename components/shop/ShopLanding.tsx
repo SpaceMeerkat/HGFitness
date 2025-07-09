@@ -3,7 +3,7 @@ import { Image, ImageBackground, Pressable, ScrollView, Text, View } from "react
 
 // Define the type for the props
 type ShopLandingProps = {
-    handleChildPage: (page: 'programs' | 'mealPrograms' | 'hot') => void;
+    handleChildPage: (page: 'programs' | 'mealPrograms' | 'hot' | 'subscription') => void;
   };
 
 export function ShopLanding({ handleChildPage }: ShopLandingProps) {
@@ -23,7 +23,7 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
             </ImageBackground>
           </View>
         </Pressable>
-        <Pressable onPress={() => console.log("no subscription page yet")}>
+        <Pressable onPress={() => handleChildPage('subscription')}>
           <View style={[ShopStyles.shopBlockContainer, {height: 200}]}>
               <View style={{flex:0.5, paddingLeft: 20}}>
                   <Image source={require("@/assets/images/OfficialLogo.jpg")} style={{ flex: 1, width: "80%", resizeMode: "contain"}} />
@@ -54,7 +54,7 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
           </ImageBackground>
           </View>
         </Pressable>
-        <Pressable onPress={() => console.log('pressed')} style={{paddingBottom: 16}}>
+        <Pressable onPress={() => console.log("no apparel page yet")} style={{paddingBottom: 16}}>
           <View style={[ShopStyles.shopBlockContainer, {height: 300}]}>
             <ImageBackground source={require("@/assets/images/apparel.jpg")} resizeMode="contain" imageStyle={{left:55}} style={{flex: 1, width: '100%', height: '100%'}}>
               <View style={{flex:1, justifyContent:"flex-start", alignItems:"flex-start", paddingTop:70, paddingLeft:15}}>

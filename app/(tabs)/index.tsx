@@ -11,9 +11,10 @@ import { GymPrograms } from "@/components/shop/ShopGymPrograms";
 import { IntermediatePrograms } from "@/components/shop/ShopIntermediate";
 import { ShopLanding } from "@/components/shop/ShopLanding";
 import { MealPrograms } from "@/components/shop/ShopMealPrograms";
+import { SubscriptionPage } from "@/components/shop/Subscription";
 import { WhatsHot } from "@/components/shop/WhatsHot";
 
-type PageType = 'programs' | 'mealPrograms' | 'beginner' | 'intermediate' | 'advanced' | 'hot';
+type PageType = 'programs' | 'mealPrograms' | 'beginner' | 'intermediate' | 'advanced' | 'hot' | 'subscription';
 
 
 export default function ShopScreen() {
@@ -22,6 +23,7 @@ export default function ShopScreen() {
   const [programsOpen, setProgramsOpen] = useState(false);
   const [mealProgramsOpen, setMealProgramsOpen] = useState(false);
   const [hotOpen, setHotOpen] = useState(false);
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
 
   const [beginnerOpen, setBeginnerOpen] = useState(false);
   const [intermediateOpen, setIntermediateOpen] = useState(false);
@@ -35,6 +37,7 @@ export default function ShopScreen() {
     setIntermediateOpen(page === 'intermediate');
     setAdvancedOpen(page === 'advanced');
     setHotOpen(page === 'hot');
+    setSubscriptionOpen(page === 'subscription');
   }
 
   const handleBackButton = () => {
@@ -47,6 +50,7 @@ export default function ShopScreen() {
       setIntermediateOpen(false);
       setAdvancedOpen(false);
       setHotOpen(false);
+      setSubscriptionOpen(false);
       return true;
     } else if (mealProgramsOpen) {
       // Close meals and set shop open
@@ -57,6 +61,7 @@ export default function ShopScreen() {
       setIntermediateOpen(false);
       setAdvancedOpen(false);
       setHotOpen(false);
+      setSubscriptionOpen(false);
       return true;
     } else if (beginnerOpen || intermediateOpen || advancedOpen) {
       // Close programs and set intermediate step
@@ -67,6 +72,7 @@ export default function ShopScreen() {
       setIntermediateOpen(false);
       setAdvancedOpen(false);
       setHotOpen(false);
+      setSubscriptionOpen(false);
       return true;
     } else if (hotOpen) {
       // Close programs and set what's hot page to open
@@ -77,6 +83,18 @@ export default function ShopScreen() {
       setIntermediateOpen(false);
       setAdvancedOpen(false);
       setHotOpen(false);
+      setSubscriptionOpen(false);
+      return true;
+    } else if (subscriptionOpen) {
+      // Close programs and set what's hot page to open
+      setShopOpen(true);
+      setProgramsOpen(false);
+      setMealProgramsOpen(false);
+      setBeginnerOpen(false);
+      setIntermediateOpen(false);
+      setAdvancedOpen(false);
+      setHotOpen(false);
+      setSubscriptionOpen(false);
       return true;
     } else {
       // No menus open, default behavior (exit app)
@@ -91,7 +109,7 @@ export default function ShopScreen() {
     );
 
     return () => backHandler.remove();
-  }, [shopOpen, programsOpen, mealProgramsOpen, beginnerOpen, intermediateOpen, advancedOpen, hotOpen]);
+  }, [shopOpen, programsOpen, mealProgramsOpen, beginnerOpen, intermediateOpen, advancedOpen, hotOpen, subscriptionOpen]);
 
   let content = null;
 
@@ -120,7 +138,11 @@ export default function ShopScreen() {
   }
 
   if (hotOpen) {
-    content = <WhatsHot handleBackButton={handleBackButton} />
+    content = <WhatsHot handleBackButton={handleBackButton} />;
+  }
+
+  if (subscriptionOpen) {
+    content = <SubscriptionPage handleBackButton={handleBackButton} />;
   }
 
   return (
