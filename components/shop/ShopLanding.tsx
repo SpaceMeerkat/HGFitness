@@ -15,7 +15,7 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
         <ScrollView style={ShopStyles.shopScrollContainer}>
         <Pressable onPress={() => handleChildPage('hot')}>
           <View style={[ShopStyles.shopBlockContainer, {height: 300}]}>
-            <ImageBackground source={require("@/assets/images/WhatsHot.jpg")} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
+            <ImageBackground source={require("@/assets/images/WhatsHot3.jpg")} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
               <View style={{flex:1, justifyContent:"flex-start", alignItems:"flex-start", paddingTop:50, paddingLeft:22}}>
                 <Text style={{fontFamily: 'Edo', fontSize: 28, color: 'white'}}>What's Hot...</Text>
                 <Text style={DefaultTabStyles.defaultBodyText}>Checkout the latest news and updates!</Text>
