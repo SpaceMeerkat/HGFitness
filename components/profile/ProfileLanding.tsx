@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, Alert, Pressable, Image } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
-import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
-import LogoutButton from "@/components/profile/Logout";
 import { useAppContext } from "@/components/appContext";
+import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
+import { BASE_API_URL } from "@/components/network/apiConfig";
+import LogoutButton from "@/components/profile/Logout";
+import { MealChart, NoMealsChart } from "@/components/profile/MealChart";
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { BASE_API_URL } from "@/components/network/apiConfig";
-import { MealChart, NoMealsChart } from "@/components/profile/MealChart";
+import React, { useEffect, useState } from "react";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { PremiumButton } from "./PremiumButton";
 
 export function ProfileOverview() {
 
@@ -17,6 +18,15 @@ export function ProfileOverview() {
   const [profileAvatar, setProfileAvatar] = useState(profileImagePaths["avatarDefault"]);
   const [dictionary, setDictionary] = useState(trackingData?.profileStats || undefined); 
   const [selected, setSelected] = useState<number | 0>(0);
+  const [premiumButton, setPremiumButton] = useState(true);
+
+  useEffect(() => {
+    if (profile.premium) {
+      setPremiumButton(false);
+    } else {
+      setPremiumButton(true);
+    }
+  }, [trackingData]);
 
   useEffect(() => {
     if (trackingData) {
@@ -112,7 +122,17 @@ export function ProfileOverview() {
   return (
     <View style={{ flex: 1, width: '100%', zIndex: 9}}>
       <ScrollView style={[{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 20 }]}>
-        <View style={{borderWidth: 2, borderRadius: 4, borderColor: 'grey'}}>
+
+        {/* <Pressable style={{flex: 0.1, paddingVertical: 10}}
+        onPress={() => console.log("pressed")}>
+        <View style={{flex:1, backgroundColor: 'black', paddingVertical: 10, borderWidth: 1, borderColor: 'gold', borderRadius: 8, justifyContent: 'center'}}>
+          <Text style={{color: 'gold', textAlign: 'center', fontWeight: 'bold'}}>Upgrade to premium</Text>
+        </View>
+        </Pressable> */}
+
+        <PremiumButton />
+
+        <View style={{flex: 0.25, borderWidth: 2, borderRadius: 4, borderColor: 'grey'}}>
         {/* Main header component */}
         <View style={{
           borderWidth: 1,
@@ -121,7 +141,6 @@ export function ProfileOverview() {
           paddingVertical: 8,
           paddingHorizontal: 12,
           backgroundColor: "black",
-          height: 120
         }}>
           {/* Profile image - pressable */}
           <Pressable onPress={handleProfileImageClick} style={{flex: 0.5}}>

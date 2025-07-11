@@ -152,7 +152,7 @@ export default function MealScreen() {
               </>
             ) : (
             Object.values(mealProgramsState[activeMeal] || {}).map((item: any, index: number) => {
-              if (index > 3) {
+              if (index > 3 && profile.premium === false) {
                 return (
                   <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
                     <View style={MealTrackingStyles.MealOptionLayoutContainer}>
@@ -175,7 +175,7 @@ export default function MealScreen() {
               }
 
               // index === 3: render PremiumRibbon + simplified view
-              if (index === 3) {
+              if (index === 3 && profile.premium === false) {
                 return (
                   <React.Fragment key={index}>
                     <PremiumRibbon />

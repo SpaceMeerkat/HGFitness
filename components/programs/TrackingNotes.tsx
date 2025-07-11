@@ -41,7 +41,7 @@ interface NotesProps {
             </Pressable>
             <Text style={TrackingNotesStyles.title}>Notes</Text>
             <TextInput
-              style={TrackingNotesStyles.textInput}
+              style={[TrackingNotesStyles.textInput, {color: "black"}]}
               onChangeText={setNote}
               placeholder={placeholder}
               placeholderTextColor="#999"

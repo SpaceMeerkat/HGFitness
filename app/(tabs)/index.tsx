@@ -16,7 +16,6 @@ import { WhatsHot } from "@/components/shop/WhatsHot";
 
 type PageType = 'programs' | 'mealPrograms' | 'beginner' | 'intermediate' | 'advanced' | 'hot' | 'subscription';
 
-
 export default function ShopScreen() {
 
   const [shopOpen, setShopOpen] = useState(true);

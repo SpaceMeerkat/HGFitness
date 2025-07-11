@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const ProfileStyles = StyleSheet.create({
     MealStatsParentContanier: {
         backgroundColor: 'black', 
-        flex: 1, 
+        flex: 0.25, 
         paddingTop: 10,
         borderColor: 'grey',
         borderWidth: 2,

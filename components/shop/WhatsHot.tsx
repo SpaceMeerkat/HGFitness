@@ -1,12 +1,12 @@
-import { View, Text, ScrollView, ImageBackground, TouchableOpacity, StyleSheet, Pressable } from "react-native";
-import { DefaultTabStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
-import { useState, useEffect } from "react";
 import { useAppContext } from "@/components/appContext";
+import { ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import { S3_API_URL } from "@/components/network/apiConfig";
 import { GymCard } from "@/components/shop/ShopCard";
 import { CardInfo } from "@/components/shop/ShopCardInfo";
-import { SubscriptionCard } from "./SubscriptionCard";
+import { useEffect, useState } from "react";
+import { ImageBackground, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { FreeProgramCard } from "./FreeProgramCard";
+import { SubscriptionCard } from "./SubscriptionCard";
 
 type WhatsHotProps = {
     handleBackButton: () => void;
@@ -20,7 +20,6 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
     const [womenCardInfo, setWomenCardInfo] = useState<any | null>(null);
 
     const image = require("@/assets/images/HGBackground.png");
-    const imageLines = require("@/assets/images/HGBackgroundHotLines.png");
 
     const [isWindowVisible, setisWindowVisible] = useState(false);
     const [content, setContent] = useState<any | null>(null);
