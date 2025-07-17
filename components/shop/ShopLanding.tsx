@@ -34,6 +34,16 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
               </View>
           </View>
         </Pressable>
+        <Pressable onPress={() => console.log('pressed')}>
+        <View style={ShopStyles.shopMealsContainer}>
+          <ImageBackground source={require("@/assets/images/onlineCoaching.jpg")} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%', borderRadius: 8, borderWidth: 0}}>
+            <View style={{flex:1, justifyContent:"flex-start", alignItems:"flex-start", paddingTop:50, paddingLeft:12}}>
+              <Text style={{fontFamily: 'Edo', fontSize: 20, color: 'white'}}>Online Coaching</Text>
+              <Text style={DefaultTabStyles.defaultBodyText}>gains gains gains</Text>
+            </View>
+          </ImageBackground>
+          </View>
+        </Pressable>
         <Pressable onPress={() => handleChildPage('programs')}>
         <View style={ShopStyles.shopProgramsContainer}>
           <ImageBackground source={require("@/assets/images/shopprograms2.jpg")} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>

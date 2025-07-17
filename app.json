@@ -30,8 +30,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/HGsplash.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
+          "resizeMode": "cover",
           "backgroundColor": "#000000"
         }
       ],

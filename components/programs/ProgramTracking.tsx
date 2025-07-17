@@ -335,7 +335,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       {/* TrackingNotes modal moved outside ScrollView and ImageBackground */}
       {currentExerciseIndexForNotes !== null && (
         <TrackingNotes
-          memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || (placeholders?.trackingData[exerciseDictionary[currentExerciseIndexForNotes]?.uniqueSetKey]?.userNotes || '')}
+          memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || ''}
+          currentNotes = {exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || null}
           handleInputChange={handleInputChange}
           visible={isNotesVisible}
           onClose={() => setIsNotesVisible(false)}

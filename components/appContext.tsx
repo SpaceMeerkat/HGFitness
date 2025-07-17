@@ -1,7 +1,7 @@
-import { BASE_API_URL } from "@/components/network/apiConfig";// AppContextProvider.tsx
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { BASE_API_URL } from "@/components/network/apiConfig"; // AppContextProvider.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
 // Define the structure of the context
@@ -114,13 +114,18 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       // If data is not from today, check for JWT token in SecureStore
       const retrievedToken = await SecureStore.getItemAsync('jwtToken');
       // If there is mealTracking data, it needs to go with the daily POST request
-      const retrievedTrackingData = await SecureStore.getItemAsync('trackingData');
+      let storedMealData = null;
+
+      if (storedTrackingData !== null) {
+        const parsedData = JSON.parse(storedTrackingData);
+        storedMealData = parsedData.meals;
+      }
       // console.log(retrievedTrackingData);  
 
       if (retrievedToken) {
         console.log("running full get request");
         // If token is present, make a POST request
-        const loginData = { token: retrievedToken, mealTrackingData: retrievedTrackingData };
+        const loginData = { token: retrievedToken, mealTrackingData: storedMealData };
 
         const response = await fetch(`${BASE_API_URL}/getContext`, {
           method: 'POST',

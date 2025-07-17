@@ -16,7 +16,7 @@ export function ProfileOverview() {
 
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const [profileAvatar, setProfileAvatar] = useState(profileImagePaths["avatarDefault"]);
-  const [dictionary, setDictionary] = useState(trackingData?.profileStats || undefined); 
+  const [dictionary, setDictionary] = useState(trackingData.meals?.profileStats || undefined); 
   const [selected, setSelected] = useState<number | 0>(0);
   const [premiumButton, setPremiumButton] = useState(true);
 

@@ -4,20 +4,21 @@ import { Modal, Pressable, Text, TextInput, View } from 'react-native';
 
 interface NotesProps {
     memoryNotes: string | null;
+    currentNotes: string | null;
     handleInputChange: (index: number, type: 'weight' | 'reps' | 'notes', setIndex: number, value: string) => void;
     visible: boolean;
     onClose: () => void;
     index: number;  // Pass index for exercise
   }
 
-  export default function TrackingNotes({ memoryNotes, handleInputChange, visible, onClose, index }: NotesProps) {
+  export default function TrackingNotes({ memoryNotes, currentNotes, handleInputChange, visible, onClose, index }: NotesProps) {
     
-    const [note, setNote] = useState(memoryNotes || '');
+    const [note, setNote] = useState(currentNotes || '');
     const [placeholder, setPlaceholder] = useState(memoryNotes || "Enter your notes")
 
-    // Synchronize note state with memoryNotes prop
+    // Synchronize note state with memoryNotes and currentNotes prop
     useEffect(() => {
-        setNote(memoryNotes || '');
+        setNote(currentNotes || '');
         setPlaceholder(memoryNotes || "Enter your notes");
     }, [memoryNotes]); // This will run whenever memoryNotes changes, but preserves the placeholder
 
@@ -42,6 +43,7 @@ interface NotesProps {
             <Text style={TrackingNotesStyles.title}>Notes</Text>
             <TextInput
               style={[TrackingNotesStyles.textInput, {color: "black"}]}
+              value={note}
               onChangeText={setNote}
               placeholder={placeholder}
               placeholderTextColor="#999"

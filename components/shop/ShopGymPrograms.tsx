@@ -1,5 +1,5 @@
-import { View, Text, Pressable, ScrollView, BackHandler, Image, ImageBackground} from "react-native";
-import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles"
+import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
+import { Image, ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
 
 type GymProgramProps = {
     handleChildPage: (page: 'beginner' | 'intermediate' | 'advanced') => void;
@@ -45,14 +45,14 @@ export function GymPrograms({ handleChildPage }: GymProgramProps) {
               </View>
           </View>
           </Pressable>
-          <Pressable onPress={() => console.log("no subscription page yet")}>
-          <View style={[ShopStyles.shopLevelContainer, {paddingLeft: 0}]}>
-              <View style={{flex:0.6}}>
-                  <Image source={require("@/assets/images/cards/card4.jpg")} style={{ flex: 1, width: "90%", resizeMode: "contain"}} />
+          <Pressable onPress={() => console.log("pressed")}>
+          <View style={[ShopStyles.shopBlockContainer]}>
+              <View style={{flex:0.5}}>
+                  <Image source={require("@/assets/images/cards/FreeCard.jpg")} style={{ flex: 1, height: 155, width: 155}} />
               </View>
-              <View style={{flex:0.4}}>
-                <Text style={[DefaultTabStyles.defaultBoldText, {color:'white'}]}>Online Coaching</Text>
-                <Text style={DefaultTabStyles.defaultBodyText}>Fully individualised programs</Text>
+              <View style={{flex:0.5, paddingLeft: 30}}>
+                <Text style={[DefaultTabStyles.defaultBoldText, {color:'white'}]}>Free programs</Text>
+                <Text style={DefaultTabStyles.defaultBodyText}>Cheap skate...</Text>
               </View>
             </View>
           </Pressable>
