@@ -1,12 +1,16 @@
 import { DefaultTabStyles, ProgramStyles, ShopStyles } from "@/components/HGStyles";
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { S3_API_URL } from "@/components/network/apiConfig";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ImageBackground, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { WebView } from 'react-native-webview';
 import { FindPrecedingNumber } from './FindPrecedingNumber';
 import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
 import SaveSession from "./SaveSession";
 import TrackingNotes from "./TrackingNotes";
+import { ExerciseDescriptions } from "./TrackingStyles";
 
 import { useAppContext } from "@/components/appContext";
 
@@ -42,9 +46,21 @@ interface Placeholders {
   week: string;
 }
 
+type GymProgramEntry = [string, string, string, string];
+
+export const getDescriptionByExerciseName = (
+  exerciseName: string,
+  masterGymProgramsDictionary: GymProgramEntry[]
+): string | null => {
+  const match = masterGymProgramsDictionary.find(
+    ([, name]) => name.trim().toLowerCase() === exerciseName.trim().toLowerCase()
+  );
+  return match ? match[3] : null;
+};
+
 export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
 
-  const { setTrackingData, trackingData } = useAppContext();
+  const { setTrackingData, trackingData, masterGymProgramsDictionary } = useAppContext();
   // Handle the memory keys/data for tracker placeholders
   let memoryKeys = trackingData[programID]["memoryKeys"];
   let memoryData = trackingData[programID]["memoryData"];
@@ -66,9 +82,25 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [saving, setSaving] = useState(false);
   // Styling
   const image = require("@/assets/images/HGBackground.png");
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalExercise, setModalExercise] = useState<string | null>(null);
+  const [modalDescription, setModalDescription] = useState<string[]>([]);
+
 
   // State to hold the index of the exercise for which notes are being edited
   const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(null);
+
+  const showExerciseModal = (exercise: string) => {
+    // For showing the exercise descriptions step by step guides
+    const description = getDescriptionByExerciseName(exercise, masterGymProgramsDictionary);
+    if (description) {
+      const splitDescription = description.split('\\');
+      setModalExercise(exercise);
+      setModalDescription(splitDescription);
+      setModalVisible(true);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -192,7 +224,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                 }
 
                 return (
-                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
+                  <Pressable onPress={() => showExerciseModal(exercise)} key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
                     <View style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
                       <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
                         {exercise}
@@ -233,9 +265,52 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         />
                       </View>
                     </View>
-                  </View>
+                  </Pressable>
                 );
               })}
+              <Modal visible={modalVisible} animationType="slide" transparent={true} onRequestClose={() => setModalVisible(false)}>
+                <View style={ExerciseDescriptions.ModalBackground}>
+                  <Pressable onPress={() => setModalVisible(false)} style={{paddingVertical: 20 }}>
+                    <Text style={ExerciseDescriptions.ModalCloseText}>Back</Text>
+                  </Pressable>
+                  <ScrollView style={ExerciseDescriptions.ModalScrollBox}>
+                    <View style={ExerciseDescriptions.ModalDescriptionBox}>
+                      <View style={ExerciseDescriptions.ModalTitleBox}>
+                        <Text style={ExerciseDescriptions.ModalTitle}>
+                          {modalExercise}
+                        </Text>
+                      </View>
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignContent: 'center'}}>
+                      <View style={{ height: 200, width: 200, paddingVertical: 10 }}>
+                        <WebView
+                          source={{ uri: `${S3_API_URL}/testgif.gif` }}
+                          style={{ flex: 1, backgroundColor: 'transparent' }}
+                          scrollEnabled={false}
+                          scalesPageToFit={true}
+                        />
+                      </View>
+                    </View>
+                      <View style={ExerciseDescriptions.ModalSubtitleBox}>
+                        <Text style={ExerciseDescriptions.ModalSubtitleText}>
+                          How to perform this exercise...
+                        </Text>
+                      </View>
+                      {modalDescription.map((line, index) => (
+                        <>
+                          <View style={ExerciseDescriptions.ModalMappingBox}>
+                            <Text style={ExerciseDescriptions.ModalStepNumber}>
+                                <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={20} color="lime" />
+                            </Text>
+                          </View>
+                          <Text key={index} style={ExerciseDescriptions.ModalText}>
+                            {line.trim()}
+                          </Text>
+                        </>
+                      ))}
+                    </View>
+                  </ScrollView>
+                </View>
+              </Modal>
               {/* user notes pressable icon */}
               <View style={{backgroundColor: "black", flex: 1, flexDirection: "row", justifyContent : 'space-between', paddingRight: 24, paddingLeft:8, paddingTop: 12}}>
                 <View style={{flex:0.665, flexDirection: 'row', paddingTop: 15}}> 

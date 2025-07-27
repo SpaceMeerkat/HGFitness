@@ -20,10 +20,13 @@ export function SubscriptionPage({handleBackButton}: WhatsHotProps) {
             </Text>
         </View>
         <View style={{flex: 0.3, width: '100%', paddingHorizontal: 10, justifyContent: 'center'}}>
-            <SubscriptionCard cardTitle="Subscription plan" cardDays="~ 2 days/week" />
+            <SubscriptionCard cardTitle="Upgrade to premium" cardDays="Monthly rewards" />
         </View>
         <View style={{flex: 0.3, width: '100%', paddingHorizontal: 10, justifyContent: 'center'}}>
-            <SubscriptionCard cardTitle="Subscription plan" cardDays="4 days/week" />
+            <SubscriptionCard cardTitle="Gym plan subscription" cardDays="~ 2 days/week" />
+        </View>
+        <View style={{flex: 0.3, width: '100%', paddingHorizontal: 10, justifyContent: 'center'}}>
+            <SubscriptionCard cardTitle="Gym plan subscription" cardDays="4 days/week" />
         </View>
         <View style={{flex: 0.15}} />
         </>

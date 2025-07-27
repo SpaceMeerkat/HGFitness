@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, ImageBackground } from "react-native";
-import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
-import * as SecureStore from 'expo-secure-store';
-import { BASE_API_URL } from "../network/apiConfig";
 import { useAppContext } from "@/components/appContext";
+import { ShopStyles } from "@/components/HGStyles";
+import * as SecureStore from 'expo-secure-store';
+import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
+import { BASE_API_URL } from "../network/apiConfig";
 // import { Linking } from 'react-native';
 import * as Linking from 'expo-linking';
 
@@ -62,8 +62,9 @@ export function CardInfo({ cardInfo }: CardInfoProps) {
                 const query = jsonResponse.PayFastQuery;
                 console.log('Received PayFast query: ', query)
                 const urlParams = new URLSearchParams(query).toString();
-                const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
-                console.log(url);
+                // const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
+                const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
+                console.log("url: ", url);
                 const supported = await Linking.canOpenURL(url);
                 if (supported) {
                     await Linking.openURL(url);

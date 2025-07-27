@@ -17,9 +17,12 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
     const { bestSellers, beginnerPrograms, intermediatePrograms, advancedPrograms } = useAppContext();
 
     const [menCardInfo, setMenCardInfo] = useState<any | null>(null);
+    const [menCardInfoBeginners, setMenCardInfoBeginners] = useState<any | null>(null);
+    const [menCardInfoIntermediate, setMenCardInfoIntermediate] = useState<any | null>(null);
     const [womenCardInfo, setWomenCardInfo] = useState<any | null>(null);
 
-    const image = require("@/assets/images/HGBackground.png");
+    const image = require("@/assets/images/WhatsHot2.jpg");
+    const backgroundImage = require("@/assets/images/HGBackground.png");
 
     const [isWindowVisible, setisWindowVisible] = useState(false);
     const [content, setContent] = useState<any | null>(null);
@@ -139,7 +142,7 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
             const womenImgUri = `${S3_API_URL}/${femaleBestSeller.replace(/ /g, "+")}.jpg`;
     
             setContent(
-                <>
+                <ScrollView style={{flex: 1, width: '100%'}}> 
                 <View style={{flex: 0.1, width: '100%', paddingBottom: 30}}>
                     <Text style={{fontFamily: 'Edo', color: 'gold', fontSize: 44, textAlign: 'center'}}>
                         Best sellers!
@@ -148,23 +151,34 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
                         As chosen by you...
                     </Text>
                 </View>
+                <View style={{flex: 0.1}}>
+                    <Text style={{color: 'white', textAlign: 'center'}}>Beginners</Text>
+                </View>
                 <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
                     <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
-                        <GymCard
-                            key={1}
-                            imgUri={menImgUri}
-                            cardInfo={menCardInfo}
-                            onPress={() => handleCardPress(menCardInfo)}
-                        />
-                        <GymCard
-                            key={2}
-                            imgUri={womenImgUri}
-                            cardInfo={womenCardInfo}
-                            onPress={() => handleCardPress(womenCardInfo)}
-                        />
+                        <GymCard key={1} imgUri={menImgUri} cardInfo={menCardInfo} onPress={() => handleCardPress(menCardInfo)}/>
+                        <GymCard key={2} imgUri={womenImgUri} cardInfo={womenCardInfo} onPress={() => handleCardPress(womenCardInfo)}/>
                     </View>
                 </View>
-                </>
+                <View style={{flex: 0.1}}>
+                    <Text style={{color: 'white', textAlign: 'center'}}>Intermediate</Text>
+                </View>
+                <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
+                    <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
+                        <GymCard key={1} imgUri={menImgUri} cardInfo={menCardInfo} onPress={() => handleCardPress(menCardInfo)}/>
+                        <GymCard key={2} imgUri={womenImgUri} cardInfo={womenCardInfo} onPress={() => handleCardPress(womenCardInfo)}/>
+                    </View>
+                </View>
+                <View style={{flex: 0.1}}>
+                    <Text style={{color: 'white', textAlign: 'center'}}>Advanced</Text>
+                </View>
+                <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
+                    <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
+                        <GymCard key={1} imgUri={menImgUri} cardInfo={menCardInfo} onPress={() => handleCardPress(menCardInfo)}/>
+                        <GymCard key={2} imgUri={womenImgUri} cardInfo={womenCardInfo} onPress={() => handleCardPress(womenCardInfo)}/>
+                    </View>
+                </View>
+                </ScrollView>
             );
         }
     }, [menCardInfo, womenCardInfo]);
@@ -172,7 +186,7 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     return (
-        <ImageBackground source={image} resizeMode="stretch" style={{ flex: 1, width: "100%", height: "100%" }}>
+        <ImageBackground source={backgroundImage} resizeMode="cover" style={{ flex: 1, width: "100%", height: "100%" }}>
             
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
               
@@ -185,35 +199,34 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
                         <View style={{flex: 1, flexDirection: 'column', width: "100%", height: '100%', paddingHorizontal: 10, paddingBottom: 20}}>
 
                             <View style={[ShopStyles.shopHotRowContainer, {flex: 2}]}>
-                                <View style={[ShopStyles.shopHotSpacer, {flex: 1}]}/>
                                 <Pressable style={[ShopStyles.shopHotButton, {flex: 4}]} onPress={() => [showBestSellers(), setisWindowVisible(true)]}>
-                                    <Text style={{color: 'white', fontSize: 22, textDecorationLine: 'underline'}}>Best sellers</Text>
-                                    <Text style={{color: 'white'}}>What people love</Text>
+                                    <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: "100%", height: "100%", justifyContent: 'center'}}>
+                                        <Text style={{color: 'white', fontSize: 22, textDecorationLine: 'underline'}}>Best sellers</Text>
+                                        <Text style={{color: 'white'}}>What people love</Text>
+                                    </ImageBackground>
                                 </Pressable>
-                                <View style={[ShopStyles.shopHotSpacer, {flex: 2, backgroundColor: 'cyan'}]}/>
+                                <View style={[ShopStyles.shopHotSpacer, {flex: 2}]}/>
                             </View>
                             <View style={[ShopStyles.shopHotRowContainer, {flex: 1}]}>
-                                <View style={[ShopStyles.shopHotSpacer, {flex: 1, backgroundColor: 'magenta'}]}/>
+                                <View style={[ShopStyles.shopHotSpacer, {flex: 1}]}/>
                                 <Pressable style={[ShopStyles.shopHotButton, {flex: 2}]} onPress={() => [showSubscriptions(), setisWindowVisible(true)]}>
                                     <Text style={{color: 'white', fontSize: 22, textDecorationLine: 'underline'}}>Monthly subscription</Text>
                                     <Text style={{color: 'white'}}>New programs every month</Text>
                                 </Pressable>
                             </View>
                             <View style={[ShopStyles.shopHotRowContainer, {flex: 2}]}>
-                                <View style={[ShopStyles.shopHotSpacer, {flex: 0.2}]}/>
                                 <Pressable style={[ShopStyles.shopHotButton, {flex: 2}]} onPress={() => [showChallenges(), setisWindowVisible(true)]}>
                                     <Text style={{color: 'white', fontSize: 22, textDecorationLine: 'underline'}}>Challenges</Text>
                                     <Text style={{color: 'white'}}>Get involved</Text>
                                 </Pressable>
-                                <View style={[ShopStyles.shopHotSpacer, {flex: 2, backgroundColor: 'gold'}]}/>
+                                <View style={[ShopStyles.shopHotSpacer, {flex: 2}]}/>
                             </View>
                             <View style={[ShopStyles.shopHotRowContainer, {flex: 1}]}>
-                                <View style={[ShopStyles.shopHotSpacer, {flex: 1, backgroundColor: 'cyan'}]}/>
+                                <View style={[ShopStyles.shopHotSpacer, {flex: 1}]}/>
                                 <Pressable style={[ShopStyles.shopHotButton, {flex: 5}]} onPress={() => [showFreePrograms(), setisWindowVisible(true)]}>
                                     <Text style={{color: 'white', fontSize: 22, textDecorationLine: 'underline'}}>Free programs</Text>
                                     <Text style={{color: 'white'}}>Get a real feel without paying</Text>
                                 </Pressable>
-                                <View style={[ShopStyles.shopHotSpacer, {flex: 1}]}/>
                             </View>
 
                         </View>

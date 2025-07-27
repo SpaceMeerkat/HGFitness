@@ -14,8 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
 
-  const { profile } = useAppContext(); 
-
+  const { profile, masterGymProgramsDictionary } = useAppContext(); 
   const image = require("@/assets/images/HGBackground.png");
 
   const [loggedIn, setLoggedIn] = useState(true);
