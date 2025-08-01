@@ -4,6 +4,7 @@ import Toast from 'react-native-toast-message';
 import { DefaultTabStyles } from "@/components/HGStyles";
 import { HGHeader } from "@/components/HeaderBar";
 import { ProfileOverview } from "@/components/profile/ProfileLanding";
+import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
 
@@ -14,33 +15,40 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
 
-  const { profile, masterGymProgramsDictionary } = useAppContext(); 
+  // const { profile, masterGymProgramsDictionary } = useAppContext();
+  const { masterGymProgramsDictionary } = useAppContext();
+  const profile = null;
+
   const image = require("@/assets/images/HGBackground.png");
 
   const [loggedIn, setLoggedIn] = useState(true);
+  const [loginSignupActive, setLoginSignupActive] = useState(true);
   const [loginActive, setLoginActive] = useState(true);
   const [signupActive, setSignupActive] = useState(false);
 
   useEffect(() => {
     if (!profile) {
+      setLoginSignupActive(true);
       setLoggedIn(false);
-      setLoginActive(true);
+      setLoginActive(false);
     } else {
       setLoggedIn(true);
     }
   }, [profile]);
 
-  const handleChildPage = (loggedIn: boolean, login: boolean, signup: boolean) => {
+  const handleChildPage = (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => {
     if (loggedIn) {
       setLoginActive(false);
       setSignupActive(false);
     }
     if (login) {
+      setLoginSignupActive(false);
       setLoggedIn(false);
       setLoginActive(true);
       setSignupActive(false);
     }
     if (signup) {
+      setLoginSignupActive(false);
       setLoggedIn(false);
       setLoginActive(false);
       setSignupActive(true);
@@ -50,6 +58,12 @@ export default function ProfilePage() {
   const renderProfile = () => {
     return (
       <ProfileOverview />
+    )
+  }
+
+  const renderLoginSignup = () => {
+    return(
+      <LoginSignupWindow handleChildPage={handleChildPage}/>
     )
   }
 
@@ -68,6 +82,8 @@ export default function ProfilePage() {
   const renderPageContent = () => {
     if (loggedIn && profile) {
       return renderProfile();
+    } else if (loginSignupActive) {
+      return renderLoginSignup();
     } else if (loginActive) {
       return renderLogin();
     } else if (signupActive) {

@@ -1,16 +1,46 @@
- type ExerciseSet = {
+import { useAppContext } from "@/components/appContext";
+
+
+
+type ExerciseSet = {
     activeStatus: boolean;
     type: string;
     uniqueSetKey: string;
     subsetExercises: string[];
+    alternativeExercises: string[];
+    alternativeIDs: string[];
     subsetReps: string[];
     userInputWeights: (string | null)[];
     userInputReps: (string | null)[];
     userNotes:(string | null);
   };
 
+
+  type GymProgramEntry = [string, string, string, string];
+
+  export const getAlternativeByExerciseName = (
+    exerciseName: string,
+    masterGymProgramsDictionary: GymProgramEntry[]
+  ): [string, string] => {
+    // First: find the match by name (column 2)
+    const initialMatch = masterGymProgramsDictionary.find(
+      ([, name]) => name.trim().toLowerCase() === exerciseName.trim().toLowerCase()
+    );
+    if (!initialMatch) return ['', ''];
+    const alternativeId = initialMatch[2];
+    // Second: find the entry whose ID (column 1) matches alternativeId
+    const alternativeMatch = masterGymProgramsDictionary.find(
+      ([id]) => id === alternativeId
+    );
+    // Return the name (column 2) of the matched alternative
+    return [alternativeMatch ? alternativeMatch[1] : '', alternativeId];
+  };
+
   // Initialize the exercise dictionary
   export const InitializeExerciseDictionary = (exerciseKeys: any, exercises: any) => {
+
+    const { masterGymProgramsDictionary } = useAppContext();
+
     const dictionary: { [key: number]: ExerciseSet } = {};
     let setIndex = 0;
   
@@ -41,6 +71,8 @@
   
       // Initialize subset arrays
       const subsetExercises = [];
+      const alternativeExercises = [];
+      const alternativeIDs = [];
       const subsetReps = [];
       const userInputWeights = [];
       const userInputReps = [];
@@ -67,6 +99,9 @@
           // Only add exercise if it has remaining sets
           if (details.remainingSets > 0) {
             subsetExercises.push(supersetExercise);
+            let [alternativeName, alternativeID] = getAlternativeByExerciseName(supersetExercise, masterGymProgramsDictionary)
+            alternativeExercises.push(alternativeName);
+            alternativeIDs.push(alternativeID);
             subsetReps.push(useSplitRange ? (splitRange[details.sets - details.remainingSets] || splitRange[splitRange.length - 1]) : range);
             userInputWeights.push(null); // Placeholder for weights input
             userInputReps.push(null);    // Placeholder for reps input
@@ -91,6 +126,8 @@
         type,
         uniqueSetKey: String(setIndex),
         subsetExercises,
+        alternativeExercises,
+        alternativeIDs,
         subsetReps,
         userInputWeights,
         userInputReps,

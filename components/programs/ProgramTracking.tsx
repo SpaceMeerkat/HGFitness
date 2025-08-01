@@ -1,6 +1,7 @@
 import { DefaultTabStyles, ProgramStyles, ShopStyles } from "@/components/HGStyles";
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { S3_API_URL } from "@/components/network/apiConfig";
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
@@ -58,6 +59,24 @@ export const getDescriptionByExerciseName = (
   return match ? match[3] : null;
 };
 
+export const getAlternativeByExerciseName = (
+  exerciseName: string,
+  masterGymProgramsDictionary: GymProgramEntry[]
+): string => {
+  // First: find the match by name (column 2)
+  const initialMatch = masterGymProgramsDictionary.find(
+    ([, name]) => name.trim().toLowerCase() === exerciseName.trim().toLowerCase()
+  );
+  if (!initialMatch) return '';
+  const alternativeId = initialMatch[2];
+  // Second: find the entry whose ID (column 1) matches alternativeId
+  const alternativeMatch = masterGymProgramsDictionary.find(
+    ([id]) => id === alternativeId
+  );
+  // Return the name (column 2) of the matched alternative
+  return alternativeMatch ? alternativeMatch[1] : '';
+};
+
 export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
 
   const { setTrackingData, trackingData, masterGymProgramsDictionary } = useAppContext();
@@ -84,10 +103,9 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const image = require("@/assets/images/HGBackground.png");
   
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalExercise, setModalExercise] = useState<string | null>(null);
+  const [modalExercise, setModalExercise] = useState<string | ''>('');
   const [modalDescription, setModalDescription] = useState<string[]>([]);
-
-
+  const [alternativeIsPressed, setAlternativeIsPressed] = useState(false);
   // State to hold the index of the exercise for which notes are being edited
   const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(null);
 
@@ -95,7 +113,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     // For showing the exercise descriptions step by step guides
     const description = getDescriptionByExerciseName(exercise, masterGymProgramsDictionary);
     if (description) {
-      const splitDescription = description.split('\\');
+      const splitDescription = description.split('/');
       setModalExercise(exercise);
       setModalDescription(splitDescription);
       setModalVisible(true);
@@ -196,7 +214,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   </Text>
                 </View>
               </View>
-              {exerciseSet.subsetExercises.map((exercise, setIndex) => {
+              {(exerciseSet.subsetExercises.map((exercise, setIndex) => {
                 let weightPlaceholder: string;
                 let repsPlaceholder: string;
                 let rowColour = 'black';
@@ -267,7 +285,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                     </View>
                   </Pressable>
                 );
-              })}
+              }))}
               <Modal visible={modalVisible} animationType="slide" transparent={true} onRequestClose={() => setModalVisible(false)}>
                 <View style={ExerciseDescriptions.ModalBackground}>
                   <Pressable onPress={() => setModalVisible(false)} style={{paddingVertical: 20 }}>
@@ -275,13 +293,80 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   </Pressable>
                   <ScrollView style={ExerciseDescriptions.ModalScrollBox}>
                     <View style={ExerciseDescriptions.ModalDescriptionBox}>
-                      <View style={ExerciseDescriptions.ModalTitleBox}>
-                        <Text style={ExerciseDescriptions.ModalTitle}>
-                          {modalExercise}
-                        </Text>
+                      <View style={{flex: 1, flexDirection: 'row'}}>
+                        <View style={ExerciseDescriptions.ModalTitleParentBox}>
+                          <View style={[ExerciseDescriptions.ModalTitleBox, {borderColor: alternativeIsPressed ? 'gold' : 'grey'}]}>
+                            <Text style={ExerciseDescriptions.ModalTitle}>
+                              {modalExercise}
+                            </Text>
+                          </View>
+                        </View>
+                        <Pressable style={ExerciseDescriptions.ModalSwitchBox} 
+                          onPressIn={() => {
+                            setAlternativeIsPressed(true);
+                            setExerciseDictionary(prevDict => {
+                              const newDict = { ...prevDict };
+                              const index = parseInt(exerciseSet.uniqueSetKey); // use uniqueSetKey as the lookup key
+                              const currentSet = { ...newDict[index] };
+
+                              const newSubsetExercises = [...currentSet.subsetExercises];
+                              const newAlternativeExercises = [...currentSet.alternativeExercises];
+                              const alternativeIDs = currentSet.alternativeIDs;
+
+                              // Find which ID matches the modalExercise (either in subset or alt)
+                              let targetID: string | null = null;
+                              for (let i = 0; i < newSubsetExercises.length; i++) {
+                                if (
+                                  newSubsetExercises[i].trim() === modalExercise.trim() ||
+                                  newAlternativeExercises[i].trim() === modalExercise.trim()
+                                ) {
+                                  targetID = alternativeIDs[i];
+                                  break;
+                                }
+                              }
+
+                              if (!targetID) return newDict; // no match found
+
+                              // Swap all entries with the matching ID
+                              for (let i = 0; i < newSubsetExercises.length; i++) {
+                                if (alternativeIDs[i] === targetID) {
+                                  const temp = newSubsetExercises[i];
+                                  newSubsetExercises[i] = newAlternativeExercises[i];
+                                  newAlternativeExercises[i] = temp;
+                                }
+                              }
+
+                              // Update the set in the dictionary
+                              currentSet.subsetExercises = newSubsetExercises;
+                              currentSet.alternativeExercises = newAlternativeExercises;
+                              newDict[index] = currentSet;
+
+                              // Update modalExercise to the toggled version
+                              const updatedModal = newSubsetExercises.find((e, i) =>
+                                alternativeIDs[i] === targetID &&
+                                e.trim() !== modalExercise.trim()
+                              );
+
+                              if (updatedModal) {
+                                setModalExercise(updatedModal);
+                                const description = getDescriptionByExerciseName(updatedModal, masterGymProgramsDictionary);
+                                if (description) {
+                                  const splitDescription = description.split('/');
+                                  setModalDescription(splitDescription);
+                                }
+                              }
+
+                              return newDict;
+                            });
+                          }}
+
+                        onPressOut={() => setAlternativeIsPressed(false)}
+                        >
+                            <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
+                        </Pressable>
                       </View>
-                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignContent: 'center'}}>
-                      <View style={{ height: 200, width: 200, paddingVertical: 10 }}>
+                    <View style={ExerciseDescriptions.ModalGifParentBox}>
+                      <View style={ExerciseDescriptions.ModalGifChildBox}>
                         <WebView
                           source={{ uri: `${S3_API_URL}/testgif.gif` }}
                           style={{ flex: 1, backgroundColor: 'transparent' }}

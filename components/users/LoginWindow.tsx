@@ -1,17 +1,25 @@
-import { View, Text, TextInput, Pressable } from "react-native";
-import { useState } from "react";
-import * as SecureStore from 'expo-secure-store';
-import { BASE_API_URL } from "@/components/network/apiConfig";
 import { useAppContext } from "@/components/appContext";
+import { BASE_API_URL } from "@/components/network/apiConfig";
+import LoadingModal from "@/components/users/LoadingModal";
+import { LoginStyles } from "@/components/users/LoginStyles";
+import * as SecureStore from 'expo-secure-store';
+import { useState } from "react";
+import { ImageBackground, Pressable, Text, TextInput, View } from "react-native";
 
 type LoginWindowProps = {
-    handleChildPage: (loggedIn: boolean, login: boolean, signup: boolean) => void;
+    handleChildPage: (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => void;
   };
 
 export function LoginWindow({ handleChildPage }: LoginWindowProps) {
 
   const { setProfile, setTrackingData, setMyPrograms, setBestSellers, setMealPrograms, setprofileImagePaths } = useAppContext();
 
+  const image = require("@/assets/images/BlackTransparentLogo.png");
+
+  const [emailIsFocused, setEmailIsFocused] = useState(false);
+  const [passwordIsFocused, setPasswordIsFocused] = useState(false);
+  const [loginIsPressed, setLoginIsPressed] = useState(false);
+  const [signupIsPressed, setSignupIsPressed] = useState(false);
   const [email, setEmail] = useState("");  // Track username
   const [password, setPassword] = useState("");  // Track password
 
@@ -51,122 +59,109 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
         setMealPrograms(jsonResponse.mealPrograms);
         setprofileImagePaths(jsonResponse.profileImagePaths);
         setSubmitting(false);
-        handleChildPage(true, false, false);
+        handleChildPage(true, false, false, false);
       } else {
         setSubmitting(false)
         console.error("Login failed with status:", response.status);
         // Handle error, e.g., display an error message
       }
     } catch (error) {
+      setSubmitting(false);
       console.error("Error sending login request:", error);
     }
   };
 
     return (
-      <View style={{flex: 1, justifyContent: "center", paddingHorizontal: 16}}>
-        <View style={{flex:0.85, backgroundColor: "black", 
-          justifyContent: "center", 
-          alignContent: "center", 
-          alignItems: "center",
-          borderColor: "cyan",
-          borderWidth: 2,
-          borderRadius: 50 }}>
-            {/* Log in title block */}
-            <View style={{flex: 0.1, flexDirection: "column", backgroundColor: "black", justifyContent: "center", alignContent: "center"}}>
-              <Text style={{fontFamily: 'Edo', color: "white", fontSize: 25}}>Welcome to HG fitness</Text>
+      <View style={LoginStyles.ParentContainer}>
+        <LoadingModal visible={submitting} />
+        <View style={LoginStyles.ChildContainer}>
+            <View style={LoginStyles.ImageParentContainer}>
+                <View style={LoginStyles.ImageChildContainer}>
+                  <ImageBackground source={image} resizeMode="contain" style={{ flex: 1, width: '100%', height: '100%' }}/>
+                </View>
             </View>
             {/* slogan */}
-            <View style={{flex: 0.1, flexDirection: "column", backgroundColor: "black", justifyContent: "center", alignContent: "center"}}>
-              <Text style={{ color: "white", fontSize: 15}}>Get back to business and log in!</Text>
+            <View style={{flex: 0.1, flexDirection: "row"}}>
+              <Text style={{ color: "grey", fontSize: 15, textAlign: 'center', textAlignVertical: 'center'}}>Get back to business and log in!</Text>
             </View>
+
             {/* Username block */}
-            <View style={{flex: 0.15, flexDirection: "column", backgroundColor: "black", justifyContent: "center", alignItems: "center", paddingHorizontal: 20, paddingVertical: 4}}>
-              <View style={{flex: 0.5, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: "black"}}>
-                <Text style={{color: "white", fontSize: 16}}>Email</Text>
-              </View>
-              <View style={{flex: 0.75, flexDirection: "row", backgroundColor: "black", alignItems: "center", paddingVertical: 4}}>
-                <View style={{flex: 0.1}} />
-                <View style={{flex: 0.8, 
-                  flexDirection: "column", 
-                  backgroundColor: "black", 
-                  justifyContent: "center", 
-                  alignItems: "center",
-                  borderColor: "grey",
-                  borderWidth: 2,
-                  borderRadius: 4,
-                  }}>
-                  <TextInput
-                              cursorColor={'white'}
-                              textAlign={'center'}
-                              style={{ fontSize: 20, flex: 1, color: "white"}}
-                              placeholder="JohnDoe@gmail.com"
-                              value={email}
-                              onChangeText={setEmail}
-                              placeholderTextColor="grey"
-                            />
+            <View style={LoginStyles.InputParentContainer}>
+              <View style={LoginStyles.InputChildContainer}>
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={LoginStyles.InputTextTitleText}>Email</Text>
                 </View>
-                <View style={{flex: 0.1}} />
+
+                <View style={LoginStyles.TextInputParentContainer}>
+                  <View style={[LoginStyles.TextInputContainer, {borderColor: emailIsFocused ? 'black' : 'grey'}]}>
+                    <TextInput
+                                cursorColor={'white'}
+                                textAlign={'left'}
+                                style={LoginStyles.TextInputBox}
+                                value={email}
+                                onChangeText={setEmail}
+                                placeholderTextColor="grey"
+                                onFocus={() => setEmailIsFocused(true)}
+                                onBlur={() => setEmailIsFocused(false)}
+                              />
+                  </View>
+                </View>
               </View>
             </View>
+
             {/* Password block */}
-            <View style={{flex: 0.15, flexDirection: "column", backgroundColor: "black", justifyContent: "center", alignItems: "center", paddingHorizontal: 20, paddingVertical: 4}}>
-              <View style={{flex: 0.5, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: "black"}}>
-                <Text style={{color: "white", fontSize: 16}}>Password</Text>
-              </View>
-              <View style={{flex: 0.75, flexDirection: "row", backgroundColor: "black", alignItems: "center", paddingVertical: 4}}>
-                <View style={{flex: 0.1}} />
-                <View style={{flex: 0.8, 
-                  flexDirection: "column", 
-                  backgroundColor: "black", 
-                  justifyContent: "center", 
-                  alignItems: "center",
-                  borderColor: "grey",
-                  borderWidth: 2,
-                  borderRadius: 4,
-                  }}>
-                  <TextInput
-                              cursorColor={'white'}
-                              textAlign={'center'}
-                              style={{ fontSize: 20, flex: 1, color: "white"}}
-                              placeholder="******"
-                              value={password}
-                              onChangeText={setPassword}
-                              secureTextEntry={true}
-                              placeholderTextColor="grey"
-                            />
+            <View style={LoginStyles.InputParentContainer}>
+              <View style={LoginStyles.InputChildContainer}>
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={LoginStyles.InputTextTitleText}>Password</Text>
                 </View>
-                <View style={{flex: 0.1}} />
+
+                <View style={LoginStyles.TextInputParentContainer}>
+                  <View style={[LoginStyles.TextInputContainer, {borderColor: passwordIsFocused ? 'black' : 'grey'}]}>
+                    <TextInput
+                                cursorColor={'white'}
+                                textAlign={'left'}
+                                style={LoginStyles.TextInputBox}
+                                value={password}
+                                onChangeText={setPassword}
+                                placeholderTextColor="grey"
+                                onFocus={() => setPasswordIsFocused(true)}
+                                onBlur={() => setPasswordIsFocused(false)}
+                              />
+                  </View>
+                </View>
               </View>
             </View>
 
             {/* Submit button block */}
-            <View style={{flex: 0.05, flexDirection: "column", backgroundColor: "black", justifyContent: "center", alignItems: "center", paddingHorizontal: 20, paddingVertical: 0}}>
-              <View style={{flex: 1, flexDirection: "row", backgroundColor: "black", alignItems: "center", paddingVertical: 4}}>
-                <View style={{flex: 0.35}} />
-                <View style={{flex: 0.3, backgroundColor:"black", borderWidth:2, borderRadius:4, borderColor:"green", justifyContent: "center", alignItems: "center"}}>
-                  <Pressable onPress={handleSubmit}>
-                    <Text style={{color: "lime", fontSize: 16}}>
-                        Submit
-                    </Text>
-                  </Pressable>
-                </View>
-                <View style={{flex: 0.35}} />
-              </View>
+            <View style={LoginStyles.ButtonParentContainer}>
+                <Pressable 
+                    onPressIn={() => { setLoginIsPressed(true);}}
+                    onPressOut={() => {setLoginIsPressed(false); handleSubmit();}} 
+                    style={[LoginStyles.ButtonPressable, {backgroundColor: loginIsPressed ? 'white' : 'black'}]}
+                >
+                    <Text style={[LoginStyles.ButtonText, {color: loginIsPressed ? 'black' : 'white'}]}>Submit</Text>
+                </Pressable>
             </View>
+
             
             {/* Make new account text block */}
-            <View style={{flex: 0.1, flexDirection: "row", backgroundColor: "black", justifyContent: "center", alignItems: "flex-end"}}>
-              <Text style={{color: "white", fontSize: 16}}>
+            <View style={{flex: 0.05, flexDirection: "row", justifyContent: "center", alignItems: "flex-end"}}>
+              <Text style={{color: "grey", fontSize: 16}}>
                 Don't have an account?
               </Text>
             </View>
-            <Pressable onPress={() => handleChildPage(false, false, true)}>
-            <View style={{flex: 0.02, flexDirection: "row", backgroundColor: "black", justifyContent: "center", alignItems: "flex-start"}}>
-              <Text style={{color: "cyan", fontSize: 16}}>
-                Sign up
-              </Text>
+
+            <View style={LoginStyles.ButtonParentContainer}>
+                <Pressable 
+                    onPressIn={() => { setSignupIsPressed(true);}}
+                    onPressOut={() => [setSignupIsPressed(false), handleChildPage(false, false, false, true)]} 
+                    style={[LoginStyles.ButtonPressable, {backgroundColor: signupIsPressed ? 'black' : 'white'}]} 
+                >
+                    <Text style={[LoginStyles.ButtonText, {color: signupIsPressed ? 'white' : 'black'}]}>Sign Up</Text>
+                </Pressable>
             </View>
-            </Pressable>
+
           </View>
       </View>
     );

@@ -4,14 +4,14 @@ export const ExerciseDescriptions = StyleSheet.create({
     ModalBackground: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         backgroundColor: '#000000aa',
     },
     ModalScrollBox: {
         backgroundColor: '#111111ff',
         paddingHorizontal: 20,
         borderRadius: 10,
-        borderColor: 'white',
+        borderColor: 'grey',
         borderWidth: 2,
         width: '90%',
         maxHeight: "80%",  // Cap the modal height
@@ -21,9 +21,15 @@ export const ExerciseDescriptions = StyleSheet.create({
         backgroundColor: '#111111ff',
         paddingVertical: 20,
     },
+    ModalTitleParentBox: {
+        flex: 0.9, 
+        flexDirection: 'row', 
+        justifyContent: 'center'
+    },
     ModalTitleBox: {
         backgroundColor: '#000000ff',
         paddingVertical: 15,
+        paddingHorizontal: 5,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: 'grey',
@@ -35,6 +41,17 @@ export const ExerciseDescriptions = StyleSheet.create({
         paddingBottom: 0,
         textAlign: 'center',
         textAlignVertical: 'center',
+    },
+    ModalSwitchBox: {
+        flex: 0.1, 
+        flexDirection: 'row', 
+        paddingHorizontal: 0, 
+        justifyContent: 'center', 
+        alignItems: 'center'
+    },
+    ModalSpacer: {
+        flex: 0.1, 
+        flexDirection: 'row'
     },
     ModalSubtitleBox: {
         paddingTop: 10,
@@ -63,6 +80,18 @@ export const ExerciseDescriptions = StyleSheet.create({
     },
     ModalCloseText: {
         color: 'white', 
-        textAlign: 'left'
+        textAlign: 'left',
+        paddingLeft: 20
+    },
+    ModalGifParentBox: {
+        flex: 1, 
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        alignContent: 'center'
+    },
+    ModalGifChildBox: {
+        height: 200, 
+        width: 200, 
+        paddingVertical: 10
     }
 })
