@@ -8,6 +8,7 @@ import { HGHeader } from "@/components/HeaderBar";
 import { MyProgramsLanding } from "@/components/programs/MyPrograms";
 import { ProgramOverview } from "@/components/programs/ProgramOverview";
 import { ProgramTracker } from "@/components/programs/ProgramTracking";
+import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
 
@@ -16,7 +17,8 @@ type PageType = 'programs' | 'programOverview' | 'programTracking';
 export default function MyPrograms() {
   const image = require("@/assets/images/HGBackground.png");
 
-  const [loggedIn, setLoggedIn] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loginSignupActive, setLoginSignupActive] = useState(false);
   const [loginActive, setLoginActive] = useState(false);
   const [signupActive, setSignupActive] = useState(false);
   const [userProfile, setUserProfile] = useState<string | null>(null);
@@ -33,27 +35,32 @@ export default function MyPrograms() {
 
   useEffect(() => {
     if (!profile) {
+      setLoginSignupActive(true);
       setLoggedIn(false);
-      setLoginActive(true);
+      setLoginActive(false);
     } else if (myPrograms !== null) {
+      setLoginSignupActive(false);
       setLoggedIn(true);
       setLoginActive(false);
       setUserProfile(profile);
     }
   }, [profile, myPrograms]);
 
-  const handleLoginChildPage = (loggedIn: boolean, login: boolean, signup: boolean) => {
+  const handleLoginChildPage = (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => {
     if (loggedIn) {
+      setLoginSignupActive(false);
       setLoggedIn(true);
       setLoginActive(false);
       setSignupActive(false);
     }
     if (login) {
+      setLoginSignupActive(false);
       setLoggedIn(false);
       setLoginActive(true);
       setSignupActive(false);
     }
     if (signup) {
+      setLoginSignupActive(false);
       setLoggedIn(false);
       setLoginActive(false);
       setSignupActive(true);
@@ -114,6 +121,12 @@ export default function MyPrograms() {
     setProgramTrackingOpen(page === 'programTracking');
   };
 
+  const renderLoginSignup = () => {
+      return(
+        <LoginSignupWindow handleChildPage={handleLoginChildPage}/>
+      )
+    }
+
   const renderLogin = () => {
     return <LoginWindow handleChildPage={handleLoginChildPage} />;
   };
@@ -125,6 +138,8 @@ export default function MyPrograms() {
   const renderPageContent = () => {
     if (loginActive) {
       return renderLogin();
+    } else if (loginSignupActive) {
+      return renderLoginSignup();
     } else if (signupActive) {
       return renderSignup();
     } else if (loggedIn && userProfile) {

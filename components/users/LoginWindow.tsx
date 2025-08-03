@@ -12,7 +12,7 @@ type LoginWindowProps = {
 
 export function LoginWindow({ handleChildPage }: LoginWindowProps) {
 
-  const { setProfile, setTrackingData, setMyPrograms, setBestSellers, setMealPrograms, setprofileImagePaths } = useAppContext();
+  const { setProfile, setTrackingData, setMyPrograms, setBestSellers, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary, setNotifications } = useAppContext();
 
   const image = require("@/assets/images/BlackTransparentLogo.png");
 
@@ -55,9 +55,11 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
         setProfile(jsonResponse.profile);
         setMyPrograms(jsonResponse.myPrograms);
         setTrackingData(jsonResponse.trackingData);
+        setMasterGymProgramsDictionary(jsonResponse.gymMasterDictionary);
         setBestSellers(jsonResponse.bestSellers);
         setMealPrograms(jsonResponse.mealPrograms);
         setprofileImagePaths(jsonResponse.profileImagePaths);
+        setNotifications(jsonResponse.notifications);
         setSubmitting(false);
         handleChildPage(true, false, false, false);
       } else {

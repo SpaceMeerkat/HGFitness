@@ -5,6 +5,7 @@ import { useAppContext } from "@/components/appContext";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
 import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
+import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
 import Entypo from '@expo/vector-icons/Entypo';
@@ -22,8 +23,9 @@ export default function MealScreen() {
   const premiumImage = require("@/assets/images/OfficialLogo.jpg");
 
   const { profile, mealPrograms, trackingData, setTrackingData } = useAppContext(); 
+  const [loginSignupActive, setLoginSignupActive] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [loginActive, setLoginActive] = useState(true);
+  const [loginActive, setLoginActive] = useState(false);
   const [signupActive, setSignupActive] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
   // const [mealItem, setMealItem] = useState<any | null>(null);
@@ -57,7 +59,7 @@ export default function MealScreen() {
     if (trackingData) {
       setDictionary(trackingData?.meals || undefined);
     } else {
-      setLoginActive(true);
+      setLoginSignupActive(true);
     }
   }, [trackingData]);
   
@@ -65,13 +67,14 @@ export default function MealScreen() {
   useEffect(() => {
     if (profile === null) {
       setLoggedIn(false);
-      setLoginActive(true);
+      setLoginActive(false);
+      setLoginSignupActive(true);
     } else {
       setLoggedIn(true);
     }
   }, [profile]);
 
-  const handleChildPage = (loggedIn: boolean, login: boolean, signup: boolean) => {
+  const handleChildPage = (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => {
     if (loggedIn) {
       setLoggedIn(true);
       setLoginActive(false);
@@ -81,11 +84,13 @@ export default function MealScreen() {
       setLoggedIn(false);
       setLoginActive(true);
       setSignupActive(false);
+      setLoginSignupActive(false);
     }
     if (signup) {
       setLoggedIn(false);
       setLoginActive(false);
       setSignupActive(true);
+      setLoginSignupActive(false);
     } 
   };
 
@@ -439,6 +444,12 @@ export default function MealScreen() {
     )
   }
 
+  const renderLoginSignup = () => {
+    return(
+      <LoginSignupWindow handleChildPage={handleChildPage}/>
+    )
+  }
+
   const renderLogin = () => {
     return(
       <LoginWindow handleChildPage={handleChildPage}/>
@@ -454,6 +465,8 @@ export default function MealScreen() {
   const renderPageContent = () => {
     if (loggedIn && profile && mealPrograms && trackingData && dictionary) {
       return renderMeals()
+    } else if (loginSignupActive) {
+      return renderLoginSignup();
     } else if (loginActive) {
       return renderLogin();
     } else if (signupActive) {

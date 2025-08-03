@@ -1,15 +1,16 @@
 import { useAppContext } from "@/components/appContext";
+import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { BASE_API_URL } from "@/components/network/apiConfig";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import React from 'react';
-import { Alert, Button } from 'react-native';
+import { Alert, Pressable } from 'react-native';
 
 const LAST_UPDATE_KEY = 'lastUpdate'; // Define your LAST_UPDATE_KEY here
 
 const LogoutButton = () => {
 
-  const { trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary, setNotifications } = useAppContext();
+  const { trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary } = useAppContext();
 
   const clearStorage = async () => {
     try {
@@ -20,7 +21,6 @@ const LogoutButton = () => {
         await AsyncStorage.removeItem('mealPrograms');
         await AsyncStorage.removeItem('profileImagePaths');
         await AsyncStorage.removeItem('masterGymProgramsDictionary');
-        await AsyncStorage.removeItem('notifications');
         await AsyncStorage.removeItem(LAST_UPDATE_KEY);
 
         // Remove authentication token from SecureStore
@@ -31,7 +31,6 @@ const LogoutButton = () => {
         setMealPrograms(undefined);
         setprofileImagePaths(undefined);
         setMasterGymProgramsDictionary(undefined);
-        setNotifications(undefined);
 
       Alert.alert('Logout Successful', 'You have been logged out.', [{ text: 'OK' }]);
     } catch (error) {
@@ -69,7 +68,9 @@ const LogoutButton = () => {
   }
 
   return (
-    <Button title="Logout" onPress={()=>SubmitTrackingData(trackingData)}/>
+    <Pressable onPress={()=>SubmitTrackingData(trackingData)}>
+        <TabBarIcon name={'notifications'} color="white" />
+    </Pressable>
   );
 };
 

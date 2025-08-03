@@ -15,15 +15,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
 
-  // const { profile, masterGymProgramsDictionary } = useAppContext();
-  const { masterGymProgramsDictionary } = useAppContext();
-  const profile = null;
+  const { profile } = useAppContext();
 
   const image = require("@/assets/images/HGBackground.png");
 
-  const [loggedIn, setLoggedIn] = useState(true);
-  const [loginSignupActive, setLoginSignupActive] = useState(true);
-  const [loginActive, setLoginActive] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loginSignupActive, setLoginSignupActive] = useState(false);
+  const [loginActive, setLoginActive] = useState(false);
   const [signupActive, setSignupActive] = useState(false);
 
   useEffect(() => {
@@ -31,15 +29,21 @@ export default function ProfilePage() {
       setLoginSignupActive(true);
       setLoggedIn(false);
       setLoginActive(false);
+      setSignupActive(false);
     } else {
       setLoggedIn(true);
+      setLoginSignupActive(false);
+      setLoginActive(false);
+      setSignupActive(false);
     }
   }, [profile]);
 
   const handleChildPage = (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => {
     if (loggedIn) {
+      setLoggedIn(true);
       setLoginActive(false);
       setSignupActive(false);
+      setLoginSignupActive(false);
     }
     if (login) {
       setLoginSignupActive(false);
