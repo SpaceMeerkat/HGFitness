@@ -3,6 +3,7 @@ import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native
 
 type NotificationItem = {
   date: string;
+  time: string;
   title: string;
   message: string;
 };
@@ -61,10 +62,16 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       );
     }
 
-    // Sort entries by key (ID) descending numerically
-    const sortedEntries = Object.entries(notifications).sort(
-      ([keyA], [keyB]) => parseInt(keyB, 10) - parseInt(keyA, 10)
-    );
+    const sortedEntries = Object.entries(notifications).sort(([, a], [, b]) => {
+      const dateA = new Date(
+        `${a.date.split('/').reverse().join('-')}T${a.time}`
+      );
+      const dateB = new Date(
+        `${b.date.split('/').reverse().join('-')}T${b.time}`
+      );
+
+      return dateB.getTime() - dateA.getTime(); // newest to oldest
+    });
 
     return (
       <View style={styles.modalContent}>

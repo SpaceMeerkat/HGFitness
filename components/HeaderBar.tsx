@@ -7,14 +7,14 @@ import NotificationsModal from "./NotificationsModal";
 
 export function HGHeader() {
     const title = "HOOLIGAINS";
-    const { notifications } = useAppContext();
+    const { profile } = useAppContext();
     const [notificationsVisible, setNotificationsVisible] = useState(false);
 
     return(
         <>
         <NotificationsModal
         visible={notificationsVisible}
-        notifications={notifications}
+        notifications={profile?.notifications}
         onClose={() => setNotificationsVisible(false)}
         />
         <View style={DefaultTabStyles.hgHeaderContainer}>

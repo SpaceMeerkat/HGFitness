@@ -9,7 +9,7 @@ const LAST_UPDATE_KEY = 'lastUpdate'; // Define your LAST_UPDATE_KEY here
 
 const LogoutButton = () => {
 
-  const { trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary, setNotifications } = useAppContext();
+  const { trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary } = useAppContext();
 
   const clearStorage = async () => {
     try {
@@ -20,7 +20,6 @@ const LogoutButton = () => {
         await AsyncStorage.removeItem('mealPrograms');
         await AsyncStorage.removeItem('profileImagePaths');
         await AsyncStorage.removeItem('masterGymProgramsDictionary');
-        await AsyncStorage.removeItem('notifications');
         await AsyncStorage.removeItem(LAST_UPDATE_KEY);
 
         // Remove authentication token from SecureStore
@@ -31,7 +30,6 @@ const LogoutButton = () => {
         setMealPrograms(undefined);
         setprofileImagePaths(undefined);
         setMasterGymProgramsDictionary(undefined);
-        setNotifications(undefined);
 
       Alert.alert('Logout Successful', 'You have been logged out.', [{ text: 'OK' }]);
     } catch (error) {
