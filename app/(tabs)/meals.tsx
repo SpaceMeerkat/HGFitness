@@ -2,6 +2,7 @@ import { MealTrackingStyles } from "@/components/HGMealStyles";
 import { DefaultTabStyles } from "@/components/HGStyles";
 import { HGHeader } from "@/components/HeaderBar";
 import { useAppContext } from "@/components/appContext";
+import { MealStyles } from "@/components/meals/MealStyles";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
 import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
@@ -14,7 +15,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MealScreen() {
@@ -124,6 +125,7 @@ export default function MealScreen() {
           setMealProgramsState = {setMealProgramsState}
           setCurrentInstructions={setCurrentInstructions}
           setCurrentIngredients={setCurrentIngredients}
+          instructionsVisible={instructionsVisible}
           mealProgramState = {mealProgramsState}
           activeMeal = {activeMeal}
           currentMealIndex = {mealIndex}
@@ -136,12 +138,13 @@ export default function MealScreen() {
     if (loggedIn && overlayVisible && activeMeal) {
       // Show the default overlay if overlayVisible and activeMeal are true
       return (
-      <View style={MealTrackingStyles.TrackingOverlay}>
+      <Modal visible={overlayVisible} animationType="slide" transparent>
+        <View style={MealStyles.modalBackground}>
         <Pressable
             onPress={() => setOverlayVisible(false)}
             style={MealTrackingStyles.TrackingBackButton}
           >
-            <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingLeft: 15}}>Back</Text>
+            <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingBottom: 10}}>Back</Text>
         </Pressable>
         <View style={MealTrackingStyles.TrackingOptionsContainer}>
           <ImageBackground source={image} resizeMode="cover" style={{flex: 1, overflow: "hidden"}}>
@@ -220,7 +223,7 @@ export default function MealScreen() {
                     >
                       {/* Meal name */}
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
-                        <Text style={{ color: "white", fontSize: 22, fontWeight: 'bold' }}>{item.name}</Text>
+                        <Text style={{ color: "white", fontSize: 22, fontWeight: 'bold', textAlign: 'center' }}>{item.name}</Text>
                       </View>
 
                       {/* Protein + Calories */}
@@ -294,6 +297,7 @@ export default function MealScreen() {
         </ImageBackground>
         </View>
       </View>
+      </Modal>
     )}
   };
 

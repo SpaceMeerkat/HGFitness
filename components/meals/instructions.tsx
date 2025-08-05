@@ -1,15 +1,17 @@
 import { MealTrackingStyles } from "@/components/HGMealStyles";
+import { MealStyles } from "@/components/meals/MealStyles";
 import { updateActiveVersion } from "@/components/meals/mealUtils";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
+import { ImageBackground, Modal, Pressable, ScrollView, Text, View } from "react-native";
 
 type HandleInstructionsClickProps = {
     setInstructionsVisible: (visible: boolean) => void;
     setMealProgramsState: (data: any) => void;
     setCurrentInstructions: (data: any) => void;
     setCurrentIngredients: (data: any) => void;
+    instructionsVisible: boolean;
     mealProgramState: any;
     activeMeal: any;
     currentMealIndex: number;
@@ -19,7 +21,7 @@ type HandleInstructionsClickProps = {
   };
 
 export function MealInstructions({ setInstructionsVisible, setMealProgramsState, setCurrentInstructions, setCurrentIngredients, 
-    mealProgramState, activeMeal, currentMealIndex, versionLength, instructions, ingredients }: HandleInstructionsClickProps) {
+    instructionsVisible, mealProgramState, activeMeal, currentMealIndex, versionLength, instructions, ingredients }: HandleInstructionsClickProps) {
 
     const handleInstructionsClick = (openWindow: boolean) => {
         setInstructionsVisible(openWindow);
@@ -35,7 +37,8 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
     const mealTitle = mealProgramState[activeMeal][currentMealIndex + 1].name;
       
     return(
-        <View style={MealTrackingStyles.InstructionsOverlay}>
+        <Modal visible={instructionsVisible} animationType="slide" transparent>
+            <View style={MealStyles.modalBackground}>
             <Pressable
                 onPress={() => handleInstructionsClick(false)}
                 style={MealTrackingStyles.TrackingBackButton}>
@@ -169,6 +172,7 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
             </ScrollView>
         </View>
         </View>
+    </Modal>
     );
 }
 

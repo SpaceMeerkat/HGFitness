@@ -7,7 +7,7 @@ import NotificationsModal from "./NotificationsModal";
 
 export function HGHeader() {
     const title = "HOOLIGAINS";
-    const { profile } = useAppContext();
+    const { profile, setProfile } = useAppContext();
     const [notificationsVisible, setNotificationsVisible] = useState(false);
 
     return(

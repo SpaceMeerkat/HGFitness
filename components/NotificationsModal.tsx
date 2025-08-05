@@ -6,6 +6,7 @@ type NotificationItem = {
   time: string;
   title: string;
   message: string;
+  read: boolean;
 };
 
 type NotificationsModalProps = {
@@ -13,7 +14,6 @@ type NotificationsModalProps = {
   notifications?: Record<string, NotificationItem>; // optional
   onClose: () => void;
 };
-
 
 const NotificationsModal: React.FC<NotificationsModalProps> = ({
   visible,
@@ -30,7 +30,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     if (!selectedKey || !notifications || !notifications[selectedKey]) return null;
 
     const { title, message } = notifications[selectedKey];
-    const lines = message.split('\\');
+    const lines = message.split('\\'); 
 
     return (
       <View style={styles.modalContent}>
@@ -80,9 +80,10 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
           data={sortedEntries}
           keyExtractor={([key]) => key}
           renderItem={({ item: [key, notif] }) => (
-            <Pressable onPress={() => setSelectedKey(key)} style={styles.row}>
-              <Text style={styles.title}>{notif.title}</Text>
-              <Text style={styles.date}>{notif.date}</Text>
+            // Remove exclamation marks for future boolean read changes
+            <Pressable onPress={() => setSelectedKey(key)} style={[styles.row, {backgroundColor: !notif.read? 'white':'grey'}]}>
+              <Text style={[styles.title, {color: !notif.read? 'black':'white'}]}>{notif.title}</Text>
+              <Text style={[styles.date, {color: !notif.read? 'black':'white'}]}>{notif.date}</Text>
             </Pressable>
           )}
         />
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
   },
   row: {
     paddingVertical: 12,
+    paddingHorizontal: 5,
     borderBottomWidth: 1,
     borderColor: '#ddd',
     flexDirection: 'row',

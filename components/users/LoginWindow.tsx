@@ -53,7 +53,6 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
         // Store the JWT (using AsyncStorage or any state management you prefer)
         await SecureStore.setItemAsync('jwtToken', jsonResponse.token);
         setProfile(jsonResponse.profile);
-        // console.log(jsonResponse.profile.notifications);
         setMyPrograms(jsonResponse.myPrograms);
         setTrackingData(jsonResponse.trackingData);
         setMasterGymProgramsDictionary(jsonResponse.gymMasterDictionary);

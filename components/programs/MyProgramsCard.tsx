@@ -1,7 +1,7 @@
-import { View, Text, Image, Pressable, ActivityIndicator, StyleSheet } from "react-native";
-import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles"
-import { useState, useEffect } from "react";
 import { useAppContext } from "@/components/appContext";
+import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
+import { useState } from "react";
+import { ActivityIndicator, Image, ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
 
 type CardLevel = 'beginner' | 'advanced' | 'intermediate';
 
@@ -77,6 +77,53 @@ export function MyProgramCard({ imgUri, cardLevel, cardTitle, cardInfo, newStatu
                     </View>
                 )}
             </View>
+            <Pressable onPress={handlePress} style={styles.pressableCover} />
+        </View>
+    );
+}
+
+interface SubscriptionCardProps {
+    cardImage: any;
+    cardTitle: string;
+    cardInfo: string;
+    handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', 
+        programID?: any, 
+        programData?: any, 
+        programDay?: any, 
+        memoryKeys?: any,
+        memoryData?: any
+    ) => void;
+  }
+
+export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handleChildPage }: SubscriptionCardProps) {
+
+    const { trackingData, profile } = useAppContext(); 
+    const shortCardTitle = cardTitle.split('-')[0];  
+    const premiumStatus = profile.premium;
+
+    const handlePress = async () => {
+        const programRawData = trackingData[cardTitle]
+        if (programRawData !== null && programRawData !== undefined) {
+            handleChildPage('programOverview', cardTitle, programRawData["data"], null, programRawData["memoryKeys"], programRawData["memoryData"]); 
+        } else {
+            console.log("woops!!!");
+        }
+    };
+
+    let content = null;
+
+    return (
+        <View style={styles.container}>
+            <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', borderColor: 'grey', backgroundColor: 'transparent'}]}>
+                {content}
+                <View style={{ flex: 0.8 }}>
+                    <Text style={[DefaultTabStyles.defaultBoldText, { color: 'white' }]}>{shortCardTitle}</Text>
+                    <Text style={[DefaultTabStyles.defaultMediumText, { color: 'white' }]}>{cardInfo}</Text>
+                </View>
+                <View style={{ flex: 0.3, paddingRight: 10 }}>
+                    <Image source={require("@/assets/images/WhiteTransparentLogo.png")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
+                </View>
+            </ImageBackground>
             <Pressable onPress={handlePress} style={styles.pressableCover} />
         </View>
     );
