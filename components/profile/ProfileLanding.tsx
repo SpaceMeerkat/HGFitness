@@ -1,11 +1,11 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
 import { BASE_API_URL } from "@/components/network/apiConfig";
-import LogoutButton from "@/components/profile/Logout";
 // import { MealChart, NoMealsChart } from "@/components/profile/MealChart";
 import { PremiumButton } from "@/components/profile/PremiumButton";
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ImageBackground } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
@@ -18,17 +18,20 @@ export function ProfileOverview() {
   const [profileAvatar, setProfileAvatar] = useState(profileImagePaths["avatarDefault"]);
   const [dictionary, setDictionary] = useState(trackingData?.profileStats || undefined); 
   const [selected, setSelected] = useState<number | 0>(0);
-  const [premiumButton, setPremiumButton] = useState(true);
+  const [premium, setPremium] = useState(true);
+  const [accountLevel, setAccountLevel] = useState('free tier');
 
-  // console.log(trackingData?.profileStats);
+  // console.log(trackingData?.meals);
 
   useEffect(() => {
     if (profile?.premium) {
-      setPremiumButton(false);
+      setPremium(true);
+      setAccountLevel('premium');
     } else {
-      setPremiumButton(true);
+      setPremium(false);
+      setAccountLevel('free tier');
     }
-  }, [trackingData]);
+  }, [profile]);
 
   useEffect(() => {
     if (trackingData) {
@@ -122,21 +125,34 @@ export function ProfileOverview() {
 
   if (!profile) return <Text style={{color:'cyan'}}>Loading profile...</Text>;
 
+  const Wrapper = premium ? ImageBackground : View;
+
   return (
     <View style={{ flex: 1, width: '100%', zIndex: 9}}>
       <ScrollView style={[{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 20 }]}>
 
         <PremiumButton />
 
-        <View style={{flex: 0.25, borderWidth: 2, borderRadius: 4, borderColor: 'grey'}}>
+        <Wrapper
+          {...(premium
+            ? {
+                source: require("@/assets/images/profileBackground.jpg"),
+                contentFit: "cover",
+              }
+            : {})}
+          style={{
+            flex: 0.25,
+            borderWidth: 2,
+            borderRadius: 4,
+            borderColor: "grey",
+            backgroundColor: 'black'
+          }}
+        >
         {/* Main header component */}
         <View style={{
-          borderWidth: 1,
-          borderRadius: 4,
           flexDirection: "row",
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-          backgroundColor: "black",
+          paddingTop: 12,
+          paddingHorizontal: 14,
         }}>
           {/* Profile image - pressable */}
           <Pressable onPress={handleProfileImageClick} style={{flex: 0.5}}>
@@ -148,28 +164,67 @@ export function ProfileOverview() {
           {/* Profile mini info - username and sex */}
           <View style={{ flex: 0.8, justifyContent: "center" }}>
             <Text style={DefaultTabStyles.defaultBoldText}>{profile.username}</Text>
-            <Text style={DefaultTabStyles.defaultBodyText}>Program types: {profile.sex}</Text>
+            <Text style={[DefaultTabStyles.defaultBodyText, {fontSize: 14}]}>Account level: {accountLevel}</Text>
+          </View>
+        </View>
+
+        {/* Main stats bar */}
+        <View style={{flex: 1, paddingVertical: 8}}>
+          <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
+            <View style={{flex: 0.3, flexDirection: 'column'}}>
+              <View style={{flex: 0.7}}>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>16</Text>
+              </View>
+              <View style={{flex: 0.3}}>
+                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Sessions</Text>
+              </View>
+            </View>
+            <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
+            <View style={{flex: 0.4, flexDirection: 'column'}}>
+              <View style={{flex: 0.7}}>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>6</Text>
+              </View>
+              <View style={{flex: 0.3}}>
+                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Achievements</Text>
+              </View>
+            </View>
+            <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
+            <View style={{flex: 0.3, flexDirection: 'column'}}>
+              <View style={{flex: 0.7}}>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>20</Text>
+              </View>
+              <View style={{flex: 0.3}}>
+                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Programs</Text>
+              </View>
+            </View>
           </View>
         </View>
 
         {/* Row for displaying badges */}
-        <View style={{ backgroundColor: "black", height: 50, flexDirection: "row", paddingHorizontal: 26 }}>
-          <View style={{ flex: 0.25, justifyContent: "center", alignItems: "center" }}>
-            <Ionicons name="star-outline" size={30} color="magenta" />
+        <View style={{ flex: 1, flexDirection: "row", paddingHorizontal: 12, paddingVertical: 12}}>
+          <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'center'}}>
+            <Text style={{color: 'white', fontWeight: 'bold', fontSize: 20, textAlign: 'center'}}>
+              Medals:
+            </Text>
           </View>
-          <View style={{ flex: 0.25, justifyContent: "center", alignItems: "center" }}>
-            <Ionicons name="medal-outline" size={24} color="gold" />
-          </View>
-          <View style={{ flex: 0.25, justifyContent: "center", alignItems: "center" }}>
-            <Ionicons name="water-outline" size={30} color="cyan" />
-          </View>
-          <View style={{ flex: 0.25, justifyContent: "center", alignItems: "center" }}>
-            <Ionicons name="repeat-outline" size={30} color="white" />
+          <View style={{flex: 0.4, flexDirection: 'row'}}>
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <Ionicons name="star-outline" size={30} color="magenta" />
+            </View>
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <Ionicons name="medal-outline" size={30} color="gold" />
+            </View>
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <Ionicons name="water-outline" size={30} color="cyan" />
+            </View>
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <Ionicons name="repeat-outline" size={30} color="white" />
+            </View>
           </View>
         </View>
 
-        <LogoutButton />
-        </View>
+        {/* <LogoutButton /> */}
+        </Wrapper>
 
         {/* Gap between the Profile header and the stats */}
         <View style={ProfileStyles.ProfileSpacer}/>

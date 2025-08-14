@@ -14,6 +14,7 @@ interface AppContextType {
   intermediatePrograms: any | null;
   advancedPrograms: any | null;
   trackingData: any | null;
+  // subscriptionTrackingData: any | null;
   profileImagePaths: {[key: string]: string};
   bestSellers: any | null;
   loading: boolean | null;
@@ -22,6 +23,7 @@ interface AppContextType {
   setMealPrograms: (mealPrograms: any | null) => void;
   setMyPrograms: (myPrograms: any | null) => void; // Add setMyPrograms function;
   setTrackingData: (trackingData: any | null) => void; // Add setTrackingData function;
+  // setSubscriptionTrackingData: (subscriptionTrackingData: any | null) => void;
   setBestSellers: (bestSellers: any | null) => void;
   setprofileImagePaths: (profileImagePaths: any | null) => void;
   setBeginnerPrograms: (beginnerPrograms: any | null) => void;
@@ -68,6 +70,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
   const [intermediatePrograms, setIntermediatePrograms] = useState<any | null>(null);
   const [advancedPrograms, setAdvancedPrograms] = useState<any | null>(null);
   const [trackingData, setTrackingData] = useState<any | null>(null);
+  // const [subscriptionTrackingData , setSubscriptionTrackingData] = useState<any | null>(null);
   const [profileImagePaths, setprofileImagePaths] = useState<any | null>(null);
   const [bestSellers, setBestSellers] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean | null>(true);
@@ -95,6 +98,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       const storedIntermediatePrograms = await AsyncStorage.getItem('intermediatePrograms');
       const storedAdvancedPrograms = await AsyncStorage.getItem('advancedPrograms');
       const storedTrackingData = await AsyncStorage.getItem('trackingData');
+      // const storedSubscriptionTrackingData = await AsyncStorage.getItem('subscriptionTrackingData');
       const storedProfileImagePaths = await AsyncStorage.getItem('profileImagePaths');
       const bestSellers = await AsyncStorage.getItem('bestSellers');
       const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
@@ -104,11 +108,12 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         setProfile(JSON.parse(storedProfile));
         setMasterGymProgramsDictionary(JSON.parse(storedMasterGymProgramsDictionary));
         setMealPrograms(JSON.parse(storedMealPrograms));
-        setMyPrograms(JSON.parse(storedMyPrograms));  // Load myPrograms from AsyncStorage
+        setMyPrograms(JSON.parse(storedMyPrograms)); 
         setBeginnerPrograms(JSON.parse(storedBeginnerPrograms));
         setIntermediatePrograms(JSON.parse(storedIntermediatePrograms));
         setAdvancedPrograms(JSON.parse(storedAdvancedPrograms));
         setTrackingData(JSON.parse(storedTrackingData));
+        // setSubscriptionTrackingData(JSON.parse(storedSubscriptionTrackingData));
         setprofileImagePaths(JSON.parse(storedProfileImagePaths));
         setBestSellers(JSON.parse(bestSellers));
         console.log('all data already present in async storage, leaving...');
@@ -151,6 +156,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
         await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));  // Save myPrograms to AsyncStorage
         await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
+        // await AsyncStorage.setItem('subscriptionTrackingData', JSON.stringify(jsonResponse.subscriptionTrackingData));
         await AsyncStorage.setItem('beginnerPrograms', JSON.stringify(jsonResponse.beginner));
         await AsyncStorage.setItem('intermediatePrograms', JSON.stringify(jsonResponse.intermediate));
         await AsyncStorage.setItem('advancedPrograms', JSON.stringify(jsonResponse.advanced));
@@ -166,6 +172,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         setIntermediatePrograms(jsonResponse.intermediate);
         setAdvancedPrograms(jsonResponse.advanced);
         setTrackingData(jsonResponse.trackingData);
+        // setSubscriptionTrackingData(jsonResponse.subscriptionTrackingData);
         setprofileImagePaths(jsonResponse.profileImagePaths);
         setBestSellers(jsonResponse.bestSellers);
 
@@ -214,6 +221,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       setIntermediatePrograms(null);
       setAdvancedPrograms(null);
       setTrackingData(null);
+      // setSubscriptionTrackingData(null);
       setprofileImagePaths(null);
       setBestSellers(null);
       setLoading(false);

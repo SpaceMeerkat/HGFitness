@@ -5,7 +5,7 @@ import { useAppContext } from "@/components/appContext";
 import { MealStyles } from "@/components/meals/MealStyles";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
-import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
+import { addMealItem, getMealNames, getWaterNames, handleMealPress, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
 import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
@@ -125,6 +125,12 @@ export default function MealScreen() {
           setMealProgramsState = {setMealProgramsState}
           setCurrentInstructions={setCurrentInstructions}
           setCurrentIngredients={setCurrentIngredients}
+          setDictionary={setDictionary}
+          storeTrackingAsync={storeTrackingAsync}
+          setTrackingData={setTrackingData}
+          setOverlayVisible={setOverlayVisible}
+          dictionary={dictionary}
+          trackingData={trackingData}
           instructionsVisible={instructionsVisible}
           mealProgramState = {mealProgramsState}
           activeMeal = {activeMeal}
@@ -302,6 +308,12 @@ export default function MealScreen() {
   };
 
   const renderMeals = () => {
+    const iconDict: Record<string, React.ReactNode> = {
+      Breakfast: <MaterialCommunityIcons name="egg-fried" size={24} color="gold" />,
+      Lunch: <MaterialCommunityIcons name="hamburger" size={24} color="chocolate" />,
+      Dinner: <MaterialCommunityIcons name="food-turkey" size={24} color="brown" />,
+      Snack: <FontAwesome6 name="apple-whole" size={24} color="lime" />,
+    };
     return (
       <ScrollView contentContainerStyle={{ flexGrow: 1}}>
         <ImageBackground source={image} resizeMode="cover" style={{flex: 1}}>
@@ -383,7 +395,7 @@ export default function MealScreen() {
 
           <Pressable onLongPress={() => setRemovableIcons(true)} key={meal} style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 10, paddingVertical: 6}}>
             <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 4, borderColor: 'grey', paddingHorizontal: 10, paddingVertical: 4}}>
-              <Text style={{textAlign: 'left', color: 'white', fontSize: 22}}><Ionicons name={"restaurant-outline"} size={20} color={iconColors[meal as keyof typeof iconColors]} textAlignVertical='bottom' /> {meal}</Text>
+              <Text style={{textAlign: 'left', color: 'white', fontSize: 22}}>{iconDict[meal]} {meal}</Text>
               <View style={{height: 1, backgroundColor: 'white'}} />
               {getMealNames(meal, dictionary, mealPrograms).map(({ mealName, calorieValue, proteinValue }, index) => (
                 <View key={`${meal}_${index}`} style={{ paddingVertical: 8, paddingHorizontal: 5, flexDirection: 'row' }}>
@@ -397,8 +409,13 @@ export default function MealScreen() {
                     <Ionicons name="remove-circle-outline" size={24} color="red" />
                   </Pressable>
                   ) : null }
-                  <View style={{flex:0.85, flexDirection:'column'}}>
-                    <Text style={{ color: "white", fontSize: 18 }}>{mealName}</Text>
+                  <View style={{flex:1, flexDirection:'row'}}>
+                    <View style={{flex:0.7, flexDirection:'column'}}>
+                      <Text style={{ color: "white", fontSize: 18 }}>{mealName}</Text>
+                    </View>
+                    <View style={{flex:0.3, flexDirection:'column'}}>
+                      <Text style={{ color: "white", fontSize: 18, textAlign: 'right'}}>{calorieValue} <FontAwesome6 name="fire" size={14} color="orange" /></Text>
+                    </View>
                   </View>
                 </View>
               ))}
