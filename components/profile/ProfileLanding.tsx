@@ -9,19 +9,18 @@ import { ImageBackground } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import LogoutButton from "./Logout";
 
 export function ProfileOverview() {
 
-  const { profileImagePaths, profile, trackingData, setProfile } = useAppContext();
+  const { profileImagePaths, profile, trackingData, setProfile, myPrograms } = useAppContext();
 
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const [profileAvatar, setProfileAvatar] = useState(profileImagePaths["avatarDefault"]);
   const [dictionary, setDictionary] = useState(trackingData?.profileStats || undefined); 
   const [selected, setSelected] = useState<number | 0>(0);
-  const [premium, setPremium] = useState(true);
+  const [premium, setPremium] = useState(false);
   const [accountLevel, setAccountLevel] = useState('free tier');
-
-  // console.log(trackingData?.meals);
 
   useEffect(() => {
     if (profile?.premium) {
@@ -223,7 +222,7 @@ export function ProfileOverview() {
           </View>
         </View>
 
-        {/* <LogoutButton /> */}
+        <LogoutButton />
         </Wrapper>
 
         {/* Gap between the Profile header and the stats */}

@@ -46,12 +46,15 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
         },
         body: JSON.stringify(loginData),
       });
+
+      console.log(response);
   
       if (response.ok) {
         const jsonResponse = await response.json();
-
+        console.log("made it here");
         // Store the JWT (using AsyncStorage or any state management you prefer)
         await SecureStore.setItemAsync('jwtToken', jsonResponse.token);
+        console.log(jsonResponse.profile);
         setProfile(jsonResponse.profile);
         setMyPrograms(jsonResponse.myPrograms);
         setTrackingData(jsonResponse.trackingData);
@@ -63,7 +66,7 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
         handleChildPage(true, false, false, false);
       } else {
         setSubmitting(false)
-        console.error("Login failed with status:", response.status);
+        console.error("Login failed with status A:", response.status);
         // Handle error, e.g., display an error message
       }
     } catch (error) {

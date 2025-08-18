@@ -33,7 +33,7 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
         <SubscriptionProgramCard
           key={'subscription4'}
           cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
-          cardTitle={"Monthly Subscription"}  // Display the program name
+          cardTitle={"Subscription4Day-1-Men"}  // Display the program name
           cardInfo={`4 days/week`}  // Display number of days per week
           handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
         />
@@ -42,7 +42,7 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
         <SubscriptionProgramCard
           key={'subscription2'}
           cardImage={require('@/assets/images/SubscriptionCard2day.jpg')}
-          cardTitle={"Monthly Subscription"}  // Display the program name
+          cardTitle={"Subscription2Day-1-Men"}  // Display the program name
           cardInfo={`2 days/week`}  // Display number of days per week
           handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
         />
@@ -59,8 +59,10 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
         {/* Display Purchased Programs */}
         {Object.keys(purchasedPrograms).length > 0 ? (
           Object.keys(purchasedPrograms).map((programName: string, index: number) => {
+            if (programName.toLowerCase().includes('subscription')) {
+              return null;
+            }
             const programDetails = purchasedPrograms[programName]; // Get the details for each program
-
             return (
               <MyProgramCard
                 key={index}

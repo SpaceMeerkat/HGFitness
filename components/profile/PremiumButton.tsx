@@ -10,7 +10,7 @@ type premiumButtonProps = {
 
 export function PremiumButton() {
 
-    const { profile, setProfile, setMealPrograms, mealPrograms } = useAppContext();
+    const { profile, setProfile, mealPrograms, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData  } = useAppContext();
 
     let textChoice = 'Upgrade To Premium';
     let colorChoice = 'gold'
@@ -45,7 +45,9 @@ export function PremiumButton() {
                 },
                 body: JSON.stringify({
                     token: token,
-                    currentPremiumState: currentPremiumState
+                    currentPremiumState: currentPremiumState,
+                    trackingData: trackingData,
+                    myPrograms: myPrograms
                 }),
             });
 
@@ -53,9 +55,9 @@ export function PremiumButton() {
                 const jsonResponse = await response.json();
                 const newPremiumState = jsonResponse.newPremiumState;
                 const allMealPrograms = jsonResponse.mealPrograms;
-                const unlockedPrograms = jsonResponse.unlockedPrograms;
-                const gymTrackingData = jsonResponse.gymTrackingData;
-                return {newPremiumState, allMealPrograms, unlockedPrograms, gymTrackingData}; // Return the updated profile
+                const updatedMyPrograms = jsonResponse.myPrograms;
+                const updatedGymTrackingData = jsonResponse.trackingData;
+                return {newPremiumState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData}; // Return the updated profile
             } else {
                 console.error("Premium toggle failed with status:", response.status, await response.text());
                 return null;
@@ -76,19 +78,33 @@ export function PremiumButton() {
             return;
         }
 
-        const {newPremiumState, allMealPrograms, unlockedPrograms, gymTrackingData} = await sendPriumToggleRequest(token, profile.premium);
+        const {newPremiumState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData} = await sendPriumToggleRequest(token, profile.premium);
 
         // Step 3: Use the returned profile data
         if (newPremiumState != null) {
+            //--------------------------------------------------------------------------
+            // Update the accessible meal data
             setMealPrograms(allMealPrograms);
             await AsyncStorage.setItem('mealPrograms', JSON.stringify(allMealPrograms));
+            //--------------------------------------------------------------------------
+            // Update the profile premium status
             const updatedProfile = {
                 ...profile,
-                premium: newPremiumState
+                premium: newPremiumState,
+                myPrograms: updatedMyPrograms
                 
             };
             setProfile(updatedProfile);
             await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
+            //--------------------------------------------------------------------------
+            // Update the booleans for accessible programs
+            setMyPrograms(updatedMyPrograms);
+            await AsyncStorage.setItem('myPrograms', JSON.stringify(updatedMyPrograms));
+            //--------------------------------------------------------------------------
+            // Update the tracking data to include memory keys for the subscription gym programs
+            setTrackingData(updatedGymTrackingData);
+            await AsyncStorage.setItem('trackingData', JSON.stringify(updatedGymTrackingData));
+            //--------------------------------------------------------------------------
         } else {
             console.warn("Premium toggle operation did not return an updated profile.");
         }

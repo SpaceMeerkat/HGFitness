@@ -99,7 +99,6 @@ export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handle
 
     const { trackingData, profile } = useAppContext(); 
     const shortCardTitle = cardTitle.split('-')[0];  
-    const premiumStatus = profile.premium;
 
     const handlePress = async () => {
         const programRawData = trackingData[cardTitle]
