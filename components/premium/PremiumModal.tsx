@@ -1,229 +1,149 @@
+import { PricingStyles } from '@/components/premium/PricingStyles';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, Pressable, Text, View } from 'react-native';
 
-type PremiumModalProps = {
-  visible: boolean;
-  onClose: () => void;
+
+type PricingPricingProps = {
+    typeString: string;
 };
 
-const PremiumModal: React.FC<PremiumModalProps> = ({
-  visible,
-  onClose,
-}) => {
+const PremiumPricing = ({typeString}: PricingPricingProps) => {
+
+    const imageSource = require("@/assets/images/premiumModal.jpg");
+
+      // Dictionary of benefits
+      const premiumBenefits: { yes: string[]; no: string[] } = {
+        yes: [
+          "Gym program progress tracking",
+          "One shot gym program tracking",
+          "Meal nutrition tracking",
+          "Individual exercise progress monitoring",
+          "Fresh gym programs every month",
+          "Unlimited gym program re-tracking",
+          "Expanded meal options",
+          "Guided nutrition tracking",
+          "Expanded exercise progress monitoring"
+        ],
+        no: [
+        ],
+      };
+
+      const subscriptionBenefits: { yes: string[]; no: string[] } = {
+        yes: [
+          "Gym program progress tracking",
+          "One shot gym program tracking",
+          "Meal nutrition tracking",
+          "Individual exercise progress monitoring",
+          "Fresh gym programs every month",
+        ],
+        no: [
+          "Unlimited gym program re-tracking",
+          "Expanded meal options",
+          "Guided nutrition tracking",
+          "Expanded exercise progress monitoring"
+        ],
+      };
+
+      const freeBenefits: { yes: string[]; no: string[] } = {
+        yes: [
+          "Gym program progress tracking",
+          "One shot gym program tracking",
+          "Meal nutrition tracking",
+          "Individual exercise progress monitoring",
+        ],
+        no: [
+          "Fresh gym programs every month",
+          "Unlimited gym program re-tracking",
+          "Expanded meal options",
+          "Guided nutrition tracking",
+          "Expanded exercise progress monitoring"
+        ],
+      };
+
+      const benefitsMap: Record<string, { yes: string[]; no: string[] }> = {
+        premium: premiumBenefits,
+        subscription: subscriptionBenefits,
+        free: freeBenefits,
+      };
+
+      const renderBenefit = (text: string, type: "yes" | "no", index: number) => {
+        const iconName = type === "yes" ? "checkmark" : "close-outline";
+        const iconColor = type === "yes" ? "lime" : "red";
+
+        return (
+          <View key={`${type}-${index}`} style={PricingStyles.cell}>
+            <View style={PricingStyles.infoRow}>
+              <View style={PricingStyles.infoIcon}>
+                <Ionicons name={iconName} size={24} color={iconColor} />
+              </View>
+              <View style={PricingStyles.infoTextContainer}>
+                <Text style={PricingStyles.infoText}>{text}</Text>
+              </View>
+            </View>
+          </View>
+        );
+      };
+
+    const imageSourceMap: Record<string, any> = {
+      free: require("@/assets/images/Subscription.jpg"),
+      subscription: require("@/assets/images/subscriptionModal.jpg"),
+      premium: require("@/assets/images/premiumModal.jpg"),
+    };
+
+    const imageSourceString = (typeString: string) => {
+      return imageSourceMap[typeString] || imageSourceMap["free"];
+    };
 
     const renderModal = () => {
+      const benefits = benefitsMap[typeString] || { yes: [], no: [] };
+      
     return (
-        <View style={styles.modalContent}>
+        <View style={PricingStyles.modalContent}>
+        {/* Color block imageBackground */}
+        <ImageBackground source={imageSourceString(typeString)} resizeMode="stretch" style={[PricingStyles.colorCell, {overflow: 'hidden'}]}>
+          {/* Title */}
+          <View style={PricingStyles.titleRow}>
+              <View style={PricingStyles.cell}>
+              <Text style={PricingStyles.titleText}>{typeString}</Text>
+              </View>
+          </View>
 
-        <View style={styles.colorCell}>
-        {/* Row 1 */}
-        <View style={styles.row}>
-            <View style={styles.cell}>
-            <Text style={styles.cellTitleText}>PREMIUM</Text>
-            </View>
-        </View>
+          {/* Price */}
+          <View style={PricingStyles.priceRow}>
+              <View style={PricingStyles.cell}>
+              <Text style={PricingStyles.cellPriceText}>R100</Text>
+              </View>
+          </View>
 
-        {/* Row 2 */}
-        <View style={styles.row}>
-            <View style={styles.cell}>
-            <Text style={styles.cellPriceText}>R100</Text>
-            </View>
-        </View>
+          {/* Price cadence */}
+          <View style={PricingStyles.cadenceRow}>
+              <View style={PricingStyles.cell}>
+              <Text style={PricingStyles.cellPriceSubText}>per month</Text>
+              </View>
+          </View>
+        </ImageBackground>
 
-        <View style={styles.row}>
-            <View style={styles.cell}>
-            <Text style={styles.cellPriceSubText}>per month</Text>
-            </View>
-        </View>
-        </View>
-
-        <View style={[styles.row, {backgroundColor: 'red', borderRadius: 10}]}>
-            <View style={[styles.cell, {paddingVertical: 4}]}>
-            <Text style={styles.cellPriceSubText}>The best deal on HG Fitness!</Text>
-            </View>
-        </View>
-
-        <View style={[styles.infoCell, {backgroundColor: 'white'}]}>
-        {/* Row 1 */}
-        <View style={styles.row}>
-            <View style={styles.cellInfo}>
-            <Text style={styles.cellInfoText}>&#8226; Fresh new gym programs every month</Text>
-            </View>
-        </View>
-        <View style={styles.row}>
-            <View style={styles.cellInfo}>
-            <Text style={styles.cellInfoText}>&#8226; Paid programs gain unlimited tracking reruns</Text>
-            </View>
-        </View>
-        <View style={styles.row}>
-            <View style={styles.cellInfo}>
-            <Text style={styles.cellInfoText}>&#8226; Choose from more than 100 meals</Text>
-            </View>
-        </View>
-        <View style={styles.row}>
-            <View style={styles.cellInfo}>
-            <Text style={styles.cellInfoText}>&#8226; Expanded profile tracking and customisation options</Text>
-            </View>
-        </View>
-
+        <View style={PricingStyles.infoContainer}>
+          {/* Yes benefits */}
+          {benefits.yes.map((benefit, index) => renderBenefit(benefit, "yes", index))}
+          {/* No benefits */}
+          {benefits.no.map((benefit, index) => renderBenefit(benefit, "no", index))}
         </View>
 
         {/* Purchase Button */}
-        <Pressable onPress={onClose} style={styles.purchaseButton}>
-            <Text style={styles.purchaseText}>PURCHASE</Text>
-        </Pressable>
-
-        {/* Close Button */}
-        <Pressable onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeText}>Close</Text>
+        <Pressable onPress={()=>console.log('pressed')} style={PricingStyles.purchaseButton}>
+            <Text style={PricingStyles.purchaseText}>PURCHASE</Text>
         </Pressable>
         </View>
     );
     };
-  // **Here is the missing return:**
+
   return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.modalBackground}>
-        {renderModal()}
-      </View>
-    </Modal>
+    <>
+      {renderModal()}
+    </>
   );
 };
 
-
-export default PremiumModal;
-
-const styles = StyleSheet.create({
-  modalBackground: {
-    flex: 1,
-    backgroundColor: '#000000aa',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    flex: 1,
-    flexDirection: 'column', // stack rows vertically
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    maxHeight: '100%',
-  },
-  infoCell: {
-    flexDirection: 'column',
-    width: '100%',   // take full modal width
-    justifyContent: 'center',
-    borderRadius: 8,
-    paddingVertical: 4
-  },
-  colorCell: {
-    flexDirection: 'column',
-    backgroundColor: 'black',
-    width: '100%',   // take full modal width
-    justifyContent: 'center',
-    borderRadius: 8,
-    paddingVertical: 30
-  },
-  row: {
-    flexDirection: 'row',
-    width: '100%',   // take full modal width
-    justifyContent: 'center',
-  },
-  cell: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 16
-  },
-  cellInfo: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingVertical: 8,
-    paddingLeft: 8,
-    borderRadius: 16
-  },
-  cellTitleText: {
-    color: 'white',
-    fontSize: 44,
-    textAlign: 'center',
-    fontFamily: 'Edo'
-  },
-  cellInfoText: {
-    color: 'grey',
-    fontSize: 16,
-    textAlign: 'left',
-  },
-  cellPriceText: {
-    color: 'white',
-    fontSize: 32,
-    textAlign: 'center',
-  },
-  cellPriceSubText: {
-    color: 'white',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    color: 'black',
-    fontWeight: 'bold',
-    paddingVertical: 10,
-    textAlign: 'center',
-    borderRadius: 8,
-    borderColor: 'black',
-    borderWidth: 1,
-    backgroundColor: 'white'
-  },
-  title: {
-    fontSize: 16,
-    flex: 1,
-  },
-  date: {
-    fontSize: 14,
-    color: '#888',
-    paddingLeft: 10,
-  },
-  detailTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'grey',
-    paddingBottom: 22,
-  },
-  messageLine: {
-    fontSize: 16,
-    paddingBottom: 6,
-  },
-  purchaseButton: {
-    paddingVertical: 10,
-    padding: 12,
-    backgroundColor: '#000000ff',
-    borderRadius: 100,
-    alignItems: 'center',
-  },
-  purchaseText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    paddingVertical: 10,
-    padding: 12,
-    borderRadius: 100,
-    alignItems: 'center',
-  },
-  closeText: {
-    color: 'black',
-    fontWeight: 'bold',
-  },
-  emptyContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#555',
-    textAlign: 'center',
-  },
-});
+export default PremiumPricing;

@@ -2,7 +2,8 @@ import { useAppContext } from "@/components/appContext";
 import { BASE_API_URL } from "@/components/network/apiConfig";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { Pressable, Text, View } from "react-native";
+import { Pressable } from "react-native";
+import { SubscriptionCard } from "../shop/SubscriptionCard";
 
 type premiumButtonProps = {
     premiumState: boolean;
@@ -115,9 +116,7 @@ export function PremiumButton() {
             style={{ flex: 0.1, paddingVertical: 10 }}
             onPress={executePremiumToggle} // Directly call the async function
         >
-            <View style={{ flex: 1, backgroundColor: 'black', paddingVertical: 10, borderWidth: 1, borderColor: colorChoice, borderRadius: 8, justifyContent: 'center' }}>
-                <Text style={{ color: colorChoice, textAlign: 'center', fontWeight: 'bold' }}>{textChoice}</Text>
-            </View>
+            <SubscriptionCard cardImage={require('@/assets/images/premiumCard.jpg')} cardTitle="Upgrade to premium" cardDays="Monthly rewards" />
         </Pressable>
     )
 }

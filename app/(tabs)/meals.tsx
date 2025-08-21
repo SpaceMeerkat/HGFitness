@@ -10,6 +10,7 @@ import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
 import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -320,9 +321,37 @@ export default function MealScreen() {
 
         {/* Meals header component */}
 
-        <View style={{flex: 0.15, paddingBottom:10}}>
+        <View style={{flex: 0.15, paddingBottom:20}}>
 
           <View style={MealTrackingStyles.HeaderContainer}>
+            {/* floating icon */}
+            {/* <View style={{backgroundColor: 'black', borderRadius: 200, borderWidth: 1, borderColor: 'white',
+              position: 'absolute', padding: 8, paddingHorizontal: 12, justifyContent: 'center', alignContent: 'center', alignItems: 'center',
+                top: 85,   // distance from top of parent
+                right: 18, // distance from right of parent
+                zIndex: 99, // ensures it stays on top
+            }}> */}
+            <FontAwesome name="bolt"
+              size={30}
+              color="orange"
+              style={{
+                position: 'absolute',
+                top: 88,   // distance from top of parent
+                right: 25, // distance from right of parent
+                zIndex: 99, // ensures it stays on top
+              }}
+            />
+            <MaterialCommunityIcons name="numeric-9"
+              size={20}
+              color="orange"
+              style={{
+                position: 'absolute',
+                top: 92,   // distance from top of parent
+                right: 8, // distance from right of parent
+                zIndex: 99, // ensures it stays on top
+              }}
+            />
+            {/* </View> */}
             {/* Column 1 */}
             <View style={MealTrackingStyles.HeaderStackedColumn}>
               <View style={MealTrackingStyles.HeaderBox}>
@@ -460,6 +489,14 @@ export default function MealScreen() {
             </Pressable>
           </View>
         </Pressable>
+
+        <Pressable onLongPress={() => setRemovableIcons(true)} style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>
+          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
+
+            <Text style={{color: 'white', fontSize: 20, textAlignVertical: 'center'}}> Calorie calculator</Text>
+          </View>
+        </Pressable>
+
         </ImageBackground>
       </ScrollView>
     )

@@ -62,7 +62,7 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
         <View style={ShopStyles.shopMealsContainer}>
           <ImageBackground source={require("@/assets/images/mealprograms.jpg")} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%', borderRadius: 8, borderWidth: 0}}>
             <View style={{flex:1, justifyContent:"flex-start", alignItems:"flex-start", paddingTop:65, paddingLeft:12}}>
-              <Text style={{fontFamily: 'Edo', fontSize: 20, color: 'white'}}>Meal programs</Text>
+              <Text style={{fontFamily: 'Edo', fontSize: 19, color: 'white'}}>Eating made easy</Text>
               <Text style={DefaultTabStyles.defaultBodyText}>nom nom nom</Text>
             </View>
           </ImageBackground>

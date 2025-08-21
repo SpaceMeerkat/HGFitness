@@ -5,7 +5,7 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { useState } from "react";
 import { Pressable, Text, View } from 'react-native';
 import NotificationsModal from "./NotificationsModal";
-import PremiumModal from "./premium/PremiumModal";
+import PricingModal from "./premium/PricingModal";
 
 
 export function HGHeader() {
@@ -23,9 +23,10 @@ export function HGHeader() {
         notifications={profile?.notifications}
         onClose={() => setNotificationsVisible(false)}
         />
-        <PremiumModal
+        <PricingModal
         visible={premiumVisible}
         onClose={() => setPremiumVisible(false)}
+        defaultType="free"
         />
         <View style={DefaultTabStyles.hgHeaderContainer}>
             {/* <Image source={require("@/assets/images/OfficialLogo.jpg")} style={{ flex: 0.15, resizeMode: "contain" }} /> */}
