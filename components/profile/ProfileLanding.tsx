@@ -222,7 +222,6 @@ export function ProfileOverview() {
           </View>
         </View>
 
-        <LogoutButton />
         </Wrapper>
 
         {/* Gap between the Profile header and the stats */}
@@ -259,6 +258,8 @@ export function ProfileOverview() {
           decimal = {buttons[selected].decimal} />: <NoMealsChart/>} */}
           <Text style={{color: 'cyan'}}>Meal charts go here</Text>
         </View>
+
+        <LogoutButton />
         
 
       </ScrollView>

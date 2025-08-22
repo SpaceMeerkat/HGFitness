@@ -2,6 +2,7 @@ import { MealTrackingStyles } from "@/components/HGMealStyles";
 import { DefaultTabStyles } from "@/components/HGStyles";
 import { HGHeader } from "@/components/HeaderBar";
 import { useAppContext } from "@/components/appContext";
+import CalorieCalculatorModal from "@/components/meals/CalorieCalculatorInput";
 import { MealStyles } from "@/components/meals/MealStyles";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
@@ -25,6 +26,7 @@ export default function MealScreen() {
   const premiumImage = require("@/assets/images/OfficialLogo.jpg");
 
   const { profile, mealPrograms, trackingData, setTrackingData } = useAppContext(); 
+
   const [loginSignupActive, setLoginSignupActive] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [loginActive, setLoginActive] = useState(false);
@@ -45,6 +47,14 @@ export default function MealScreen() {
   const [runningMealCount, setRunningMealCount] = useState(dictionary?.runningMeals || 0);
   const [runningCalories, setRunningCalories] = useState(dictionary?.runningCalories || 0);
   const [runningProtein, setRunningProtein] = useState(dictionary?.runningProtein || 0);
+
+  const [calculatorVisible, setCalculatorVisible] = useState(false);
+  const [calorieCalculatorClicked, setCalorieCalculatorClicked] = useState(false);
+  const [mealsHit, setMealsHit] = useState(false);
+  const [caloriesHit, setCaloriesHit] = useState(false);
+  const [proteinHit, setProteinHit] = useState(false);
+  const [waterHit, setWaterHit] = useState(false);
+
 
   useEffect(() => {
     setRunningMealCount(dictionary?.runningMeals || 0);
@@ -316,6 +326,13 @@ export default function MealScreen() {
       Snack: <FontAwesome6 name="apple-whole" size={24} color="lime" />,
     };
     return (
+      <>
+      {/* Calorie Calculator modal */}
+      <CalorieCalculatorModal 
+        visible={calculatorVisible}
+        onClose={() => setCalculatorVisible(false)}
+      />
+      
       <ScrollView contentContainerStyle={{ flexGrow: 1}}>
         <ImageBackground source={image} resizeMode="cover" style={{flex: 1}}>
 
@@ -358,7 +375,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Meals</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningMealCount}</Text>
+                <Text style={{textAlign: 'center', color: runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white', fontSize: 22}}>{runningMealCount}{profile.premium ? `/${profile.calorieCalculator.meals}` : ""}</Text>
               </View>
             </View>
 
@@ -371,7 +388,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Calories</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningCalories.toFixed(0)}</Text>
+                <Text style={{textAlign: 'center', color: runningCalories >= profile.calorieCalculator.calories? 'lime': 'white', fontSize: 24}}>{runningCalories.toFixed(0)}{profile.premium ? `/${profile.calorieCalculator.calories}` : ""}</Text>
               </View>
             </View>
 
@@ -384,7 +401,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Protein</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningProtein.toFixed(0)}</Text>
+                <Text style={{textAlign: 'center', color: runningProtein >= profile.calorieCalculator.protein? 'lime': 'white', fontSize: 24}}>{runningProtein.toFixed(0)}{profile.premium ? `/${profile.calorieCalculator.protein}` : ""}</Text>
               </View>
             </View>
 
@@ -397,7 +414,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Water</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningWater}L</Text>
+                <Text style={{textAlign: 'center', color: runningWater >= profile.calorieCalculator.water? 'lime': 'white', fontSize: 24}}>{runningWater}{profile.premium ? `/${profile.calorieCalculator.water}` : ""}L</Text>
               </View>
             </View>
           </View>
@@ -490,8 +507,11 @@ export default function MealScreen() {
           </View>
         </Pressable>
 
-        <Pressable onLongPress={() => setRemovableIcons(true)} style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>
-          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
+        <Pressable onPress={() => setCalculatorVisible(true)} 
+          onPressIn={()=>setCalorieCalculatorClicked(true)} 
+          onPressOut={()=>setCalorieCalculatorClicked(false)}
+          style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>
+          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: calorieCalculatorClicked? 'lime': 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
 
             <Text style={{color: 'white', fontSize: 20, textAlignVertical: 'center'}}> Calorie calculator</Text>
           </View>
@@ -499,6 +519,7 @@ export default function MealScreen() {
 
         </ImageBackground>
       </ScrollView>
+      </>
     )
   }
 
