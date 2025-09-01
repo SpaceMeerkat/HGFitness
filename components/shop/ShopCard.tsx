@@ -1,5 +1,5 @@
-import { View, Text, Pressable, Image } from "react-native";
 import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
+import { Image, Pressable, Text, View } from "react-native";
 
 interface GymCardProps {
     imgUri: string;

@@ -7,6 +7,7 @@ import { BASE_API_URL } from "../network/apiConfig";
 import * as Linking from 'expo-linking';
 
 interface CardInfoProps {
+    cardFullName: string;
     cardInfo: {
         Name: string[];
         Level: ("beginner" | "advanced" | "intermediate")[];
@@ -22,7 +23,7 @@ interface CardInfoProps {
     };
 }
 
-export function CardInfo({ cardInfo }: CardInfoProps) {
+export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
     const cardName = cardInfo.Name[0];
     const cardSlogan = cardInfo.Slogan[0];
     const cardLevel = cardInfo.Level[0];
@@ -35,13 +36,9 @@ export function CardInfo({ cardInfo }: CardInfoProps) {
     const { profile } = useAppContext(); // needed for the client being logged in
     const image = require("@/assets/images/HGBackground.png");
 
-    const SubmitPayFastQuery = async (prgramName: String, programPrice: Number, profile: any) => { 
+    const SubmitPayFastQuery = async (programName: String, programPrice: Number, profile: any) => { 
         // Fetch the jwt from securestore
-        console.log("pressed!");
-        // const url = Linking.useURL();
-        // console.log(url);
         const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-        console.log(profile);
         if (retrievedToken && profile) {
           try {
               const url = `${BASE_API_URL}/query_payment`;
@@ -51,20 +48,18 @@ export function CardInfo({ cardInfo }: CardInfoProps) {
                       'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
-                      item_name: prgramName,
+                      item_name: programName,
                       item_price: programPrice,
-                      token: retrievedToken
+                      item_category: "gymplan",
+                      token: retrievedToken,
                   }),
               });
               if (response.ok) {
-                console.log('status OK');
                 const jsonResponse = await response.json();
                 const query = jsonResponse.PayFastQuery;
-                console.log('Received PayFast query: ', query)
                 const urlParams = new URLSearchParams(query).toString();
-                // const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
-                const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
-                console.log("url: ", url);
+                const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
+                // const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
                 const supported = await Linking.canOpenURL(url);
                 if (supported) {
                     await Linking.openURL(url);
@@ -144,7 +139,7 @@ export function CardInfo({ cardInfo }: CardInfoProps) {
                 <Pressable style={[{
                     flex: 1, flexDirection: 'column', 
                     justifyContent: 'center', alignItems: 'center',
-                    borderWidth: 1, borderRadius: 8, borderColor: 'white', paddingVertical: 12}]} onPress={() => SubmitPayFastQuery(cardName, cardPrice, profile)}>
+                    borderWidth: 1, borderRadius: 8, borderColor: 'white', paddingVertical: 12}]} onPress={() => SubmitPayFastQuery(cardFullName, cardPrice, profile)}>
                     <Text style={{color: 'white', fontSize: 15, fontWeight: 'bold'}}>PURCHASE THIS PROGRAM!</Text>
                 </Pressable>
             </ImageBackground>

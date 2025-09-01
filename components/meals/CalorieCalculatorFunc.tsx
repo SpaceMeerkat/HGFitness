@@ -42,12 +42,12 @@ export function calculateCalories(
   let finalCalories = weightedBmr * goalMultipliers[goal];
 
   // --- Step 6: Calculate Protein ---
-  const proteinMultipliers: Record<Goal, number> = {
-    "lose weight": 0.8,
-    maintain: 1.4,
-    gain: 2,
+  // LIMIT THIS TO 200g maximum
+  const proteinMultipliers: Record<Gender, number> = {
+    female: 1.5,
+    male: 2,
   };
-  let finalProtein = weight * proteinMultipliers[goal];
+  let finalProtein = Math.min(weight * proteinMultipliers[gender], 200);
 
   // --- Step 7: Calculate Water 1dp---
   let finalWater = Math.round(weight * 0.035 * 10) / 10;

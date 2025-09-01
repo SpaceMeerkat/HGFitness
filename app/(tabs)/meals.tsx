@@ -375,7 +375,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Meals</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white', fontSize: 22}}>{runningMealCount}{profile.premium ? `/${profile.calorieCalculator.meals}` : ""}</Text>
+                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white', fontSize: 22}}>{runningMealCount}{profile.calorieCalculator.active ? `/${profile.calorieCalculator.meals}` : ""}</Text>
               </View>
             </View>
 
@@ -388,7 +388,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Calories</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: runningCalories >= profile.calorieCalculator.calories? 'lime': 'white', fontSize: 24}}>{runningCalories.toFixed(0)}{profile.premium ? `/${profile.calorieCalculator.calories}` : ""}</Text>
+                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningCalories >= profile.calorieCalculator.calories? 'lime': 'white', fontSize: 24}}>{runningCalories.toFixed(0)}{profile.calorieCalculator.active ? `/${profile.calorieCalculator.calories}` : ""}</Text>
               </View>
             </View>
 
@@ -401,7 +401,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Protein</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: runningProtein >= profile.calorieCalculator.protein? 'lime': 'white', fontSize: 24}}>{runningProtein.toFixed(0)}{profile.premium ? `/${profile.calorieCalculator.protein}` : ""}</Text>
+                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningProtein >= profile.calorieCalculator.protein? 'lime': 'white', fontSize: 24}}>{runningProtein.toFixed(0)}{profile.calorieCalculator.active ? `/${profile.calorieCalculator.protein}` : ""}</Text>
               </View>
             </View>
 
@@ -414,7 +414,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Water</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: runningWater >= profile.calorieCalculator.water? 'lime': 'white', fontSize: 24}}>{runningWater}{profile.premium ? `/${profile.calorieCalculator.water}` : ""}L</Text>
+                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningWater >= profile.calorieCalculator.water? 'lime': 'white', fontSize: 24}}>{runningWater}{profile.calorieCalculator.active ? `/${profile.calorieCalculator.water}` : ""}L</Text>
               </View>
             </View>
           </View>

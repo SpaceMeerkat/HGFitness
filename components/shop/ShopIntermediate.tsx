@@ -1,20 +1,22 @@
-import { useState } from "react";
-import { View, Text, ScrollView, ImageBackground, StyleSheet, TouchableOpacity } from "react-native";
+import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
+import { S3_API_URL } from "@/components/network/apiConfig";
 import { GymCard } from "@/components/shop/ShopCard";
 import { CardInfo } from "@/components/shop/ShopCardInfo";
-import { S3_API_URL } from "@/components/network/apiConfig";
-import { useAppContext } from "@/components/appContext";
+import { useState } from "react";
+import { ImageBackground, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export function IntermediatePrograms() {
     const { intermediatePrograms } = useAppContext();
     const [overlayVisible, setOverlayVisible] = useState(false);
     const [selectedCardInfo, setSelectedCardInfo] = useState(null); // New state for selected card info
+    const [selectedCardName, setSelectedCardName] = useState(''); 
     const image = require("@/assets/images/HGBackground.png");
 
     // Toggle overlay visibility and set selected card info
-    const handleCardPress = (programDetails: any) => {
+    const handleCardPress = (programDetails: any, programName: string) => {
         setSelectedCardInfo(programDetails);
+        setSelectedCardName(programName);
         setOverlayVisible(true);
     };
 
@@ -30,7 +32,7 @@ export function IntermediatePrograms() {
                                 key={index}
                                 imgUri={`${S3_API_URL}/${programKey.replace(/ /g, "+")}.jpg`}
                                 cardInfo={programDetails}
-                                onPress={() => handleCardPress(programDetails)} // Pass programDetails on press
+                                onPress={() => handleCardPress(programDetails, programKey)} // Pass programDetails on press
                             />
                         );
                     })}
@@ -43,7 +45,7 @@ export function IntermediatePrograms() {
                     <Text style={[TrackingNotesStyles.backButtonText, {paddingBottom: 20}]}>Back</Text>
                     </TouchableOpacity>
                     {/* Display CardInfo with the selected card details */}
-                    {selectedCardInfo && <CardInfo cardInfo={selectedCardInfo} />}
+                    {selectedCardInfo && <CardInfo cardFullName={selectedCardName} cardInfo={selectedCardInfo} />}
                 </View>
             )}
         </ImageBackground>

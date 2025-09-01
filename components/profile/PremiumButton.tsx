@@ -55,10 +55,11 @@ export function PremiumButton() {
             if (response.ok) {
                 const jsonResponse = await response.json();
                 const newPremiumState = jsonResponse.newPremiumState;
+                const newCalorieTrackingState = jsonResponse.newCalorieTracking;
                 const allMealPrograms = jsonResponse.mealPrograms;
                 const updatedMyPrograms = jsonResponse.myPrograms;
                 const updatedGymTrackingData = jsonResponse.trackingData;
-                return {newPremiumState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData}; // Return the updated profile
+                return {newPremiumState, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData}; // Return the updated profile
             } else {
                 console.error("Premium toggle failed with status:", response.status, await response.text());
                 return null;
@@ -79,7 +80,7 @@ export function PremiumButton() {
             return;
         }
 
-        const {newPremiumState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData} = await sendPriumToggleRequest(token, profile.premium);
+        const {newPremiumState, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData} = await sendPriumToggleRequest(token, profile.premium);
 
         // Step 3: Use the returned profile data
         if (newPremiumState != null) {
@@ -92,8 +93,8 @@ export function PremiumButton() {
             const updatedProfile = {
                 ...profile,
                 premium: newPremiumState,
-                myPrograms: updatedMyPrograms
-                
+                myPrograms: updatedMyPrograms,
+                calorieCalculator: newCalorieTrackingState
             };
             setProfile(updatedProfile);
             await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
