@@ -1,6 +1,6 @@
 import { DefaultTabStyles } from "@/components/HGStyles";
-import { useRoute } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from "react";
+
 import { BackHandler, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,11 +14,11 @@ import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
 
-
 type PageType = 'programs' | 'programOverview' | 'programTracking';
 
 export default function MyPrograms() {
-  const image = require("@/assets/images/HGBackground.png");
+
+  // const [purchaseQueue, setPurchaseQueue] = useState<Record<string, string> | null>(null);
 
   const [loggedIn, setLoggedIn] = useState(false);
   const [loginSignupActive, setLoginSignupActive] = useState(false);
@@ -35,12 +35,6 @@ export default function MyPrograms() {
 
   const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms } = useAppContext(); 
   const scrollViewRef = useRef<ScrollView>(null); // Add reference
-
-  console.log(myPrograms);
-
-  // Parse the deep link parameters
-  const route = useRoute();
-  const paymentParams = route.params as { m_payment_id: string } | undefined;
 
   useEffect(() => {
     if (!profile) {
@@ -180,10 +174,8 @@ export default function MyPrograms() {
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
-        {paymentParams?.m_payment_id ? (
-        <PaymentStatus mPaymentId={paymentParams.m_payment_id} />
-       ) : null}
-      {/* <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}> */}
+        <PaymentStatus initialQueue={profile?.purchaseQueue}/>
+        {/* <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}> */}
         <ScrollView 
           contentContainerStyle={{ flexGrow: 1 }} 
           keyboardShouldPersistTaps="handled" 

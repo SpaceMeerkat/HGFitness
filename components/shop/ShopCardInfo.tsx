@@ -1,5 +1,6 @@
 import { useAppContext } from "@/components/appContext";
 import { ShopStyles } from "@/components/HGStyles";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
 import { BASE_API_URL } from "../network/apiConfig";
@@ -33,7 +34,7 @@ export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
     const cardFeatures = cardInfo.Features;
     const cardGoals = cardInfo.Goals;
     const cardWhy = cardInfo.Why[0];    
-    const { profile } = useAppContext(); // needed for the client being logged in
+    const { profile, setProfile } = useAppContext(); // needed for the client being logged in
     const image = require("@/assets/images/HGBackground.png");
 
     const SubmitPayFastQuery = async (programName: String, programPrice: Number, profile: any) => { 
@@ -57,6 +58,17 @@ export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
               if (response.ok) {
                 const jsonResponse = await response.json();
                 const query = jsonResponse.PayFastQuery;
+                // Set the profile purchaseQuery dict to match the separately updated backend profile -----------
+                const updatedProfile = {
+                    ...profile,
+                    purchaseQueue: {
+                        ...profile.purchaseQueue, // Spreads the existing items in purchaseQueue
+                        [query.m_payment_id]: "PENDING", // Adds the new key-value pair
+                    },
+                };
+                setProfile(updatedProfile);
+                await AsyncStorage.setItem("profile", JSON.stringify(profile));
+                // ----------------------------------------------------------------------------------------------
                 const urlParams = new URLSearchParams(query).toString();
                 const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
                 // const url = `https://www.payfast.co.za/eng/process?${urlParams}`;

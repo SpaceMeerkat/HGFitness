@@ -21,6 +21,7 @@ const LogoutButton = () => {
         await AsyncStorage.removeItem('profileImagePaths');
         await AsyncStorage.removeItem('masterGymProgramsDictionary');
         await AsyncStorage.removeItem(LAST_UPDATE_KEY);
+        await AsyncStorage.removeItem("purchaseQueue");
 
         // Remove authentication token from SecureStore
         await SecureStore.deleteItemAsync('jwtToken');

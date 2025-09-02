@@ -1,125 +1,123 @@
 import { useAppContext } from "@/components/appContext";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import * as SecureStore from "expo-secure-store";
+import React, { useCallback, useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
 import { BASE_API_URL } from "../network/apiConfig";
 
-
 const getSecureToken = async () => {
-    try {
-        const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-        if (!retrievedToken) {
-            console.warn("No JWT token found in SecureStore.");
-            // Optionally handle this error, e.g., redirect to login
-        }
-        return retrievedToken;
-    } catch (error) {
-        console.error("Failed to retrieve token from SecureStore:", error);
-        return null; // Return null on error
-    }
+  try {
+    return await SecureStore.getItemAsync("jwtToken");
+  } catch (err) {
+    console.error("Failed to retrieve token:", err);
+    return null;
+  }
 };
 
-
 interface PaymentStatusProps {
-  mPaymentId: string;
+  initialQueue: Record<string, string> | null;
 }
 
-export default function PaymentStatus({ mPaymentId }: PaymentStatusProps) {
-  const [status, setStatus] = useState<string>('PENDING');
-  const [loading, setLoading] = useState<boolean>(true);
-  const { myPrograms, trackingData, setMyPrograms, setTrackingData } = useAppContext(); 
+export default function PaymentStatus({ initialQueue }: PaymentStatusProps) {
+  const { profile, myPrograms, trackingData, setProfile, setMyPrograms, setTrackingData } =
+    useAppContext();
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    let interval: number;
-
-    const pollPaymentStatus = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_API_URL}/payment-status?m_payment_id=${mPaymentId}`
-        );
-        if (response.ok) {
-            const json = await response.json();
-            const currentStatus = json.status;
-            const item_name = json.item_name;
-            const item_category = json.item_category;
-            setStatus(currentStatus);
-
-            // Now if the status is COMPLETE update the backend and push changes to context here   
-            if (currentStatus === 'COMPLETE') {
-                clearInterval(interval); // stop polling once final status is reached
-                try{
-                    const token = await getSecureToken();
-                    const response = await fetch(`${BASE_API_URL}/postPaymentProcessing`, {
-                        method: 'POST',
-                        headers: {
-                        'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            "token": token,
-                            "myPrograms": myPrograms,
-                            "trackingData": trackingData,
-                            "item_name": item_name,
-                            "item_category": item_category
-                        }),
-                    });
-                    if (response.ok) {
-                        const jsonResponse = await response.json();
-                        const myProgramsUpdated = jsonResponse.myPrograms;
-                        const trackingDataNewProgram = jsonResponse.trackingDataNewProgram;
-                        setMyPrograms(myProgramsUpdated)
-                        await AsyncStorage.setItem('myPrograms', JSON.stringify(myProgramsUpdated))
-                        // Update the trackingData
-                        const updatedTrackingData = {
-                            ...trackingData,
-                            // Creates a new key value pair when item_name doesn't exist in keys already
-                            [item_name]: trackingDataNewProgram,
-                        };
-                        setTrackingData(updatedTrackingData);
-                        await AsyncStorage.setItem('trackingData', JSON.stringify(updatedTrackingData));
-                    } else {
-                    console.error("postPaymentProcessing failed with status:", response.status, await response.text());
-                    setLoading(false);
-                    return null;
-                    }
-                } catch (error) {
-                console.error("postPaymentProcessing failed:", error);
-                setLoading(false);
-                return null;
-                }
-            };
-            // End of inner backend update POST request
-
-          if (currentStatus === 'COMPLETE' || currentStatus === 'FAILED') {
-            clearInterval(interval); // stop polling once final status is reached
-            setLoading(false);
-          }
-        } else {
-          console.error('Error fetching payment status:', response.status);
-        }
-      } catch (err) {
-        console.error('Polling error:', err);
+  // useFocusEffect is the correct hook for this use case
+  useFocusEffect(
+    useCallback(() => {
+      // Return early if the queue is empty
+      if (!initialQueue || Object.keys(initialQueue).length === 0) {
+        return;
       }
-    };
+      
+      setLoading(true);
 
-    // Poll immediately, then every 5 seconds
-    pollPaymentStatus();
+      const pollPaymentStatus = async (currentQueue: Record<string, string>) => {
+        const updatedQueue = { ...currentQueue };
 
-    interval = window.setInterval(pollPaymentStatus, 5000);
+        for (const [paymentId] of Object.entries(updatedQueue)) {
+          try {
+            const response = await fetch(
+              `${BASE_API_URL}/payment-status?m_payment_id=${paymentId}`
+            );
 
-    return () => clearInterval(interval); // cleanup on unmount
-  }, [mPaymentId]);
+            if (!response.ok) {
+              console.error("Fetch failed:", response.status);
+              continue;
+            }
+
+            const { status: currentStatus, item_name, item_category } = await response.json();
+
+            if (currentStatus === "FAILED" || currentStatus === "COMPLETE") {
+              const token = await getSecureToken();
+              const postResponse = await fetch(`${BASE_API_URL}/postPaymentProcessing`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  token,
+                  myPrograms,
+                  trackingData,
+                  item_name,
+                  item_category,
+                  purchaseID: paymentId,
+                  status: currentStatus,
+                }),
+              });
+
+              if (postResponse.ok) {
+                const jsonResponse = currentStatus === "COMPLETE" ? await postResponse.json() : null;
+
+                delete updatedQueue[paymentId];
+                const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
+                setProfile(updatedProfile);
+                await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
+
+                if (currentStatus === "COMPLETE" && jsonResponse) {
+                  setMyPrograms(jsonResponse.myPrograms);
+                  await AsyncStorage.setItem("myPrograms", JSON.stringify(jsonResponse.myPrograms));
+
+                  const updatedTrackingData = {
+                    ...trackingData,
+                    [item_name]: jsonResponse.trackingDataNewProgram,
+                  };
+                  setTrackingData(updatedTrackingData);
+                  await AsyncStorage.setItem("trackingData", JSON.stringify(updatedTrackingData));
+                }
+              }
+            }
+          } catch (err) {
+            console.error("Polling error:", err);
+          }
+        }
+        setLoading(false);
+      };
+
+      // Call the polling function immediately
+      pollPaymentStatus(initialQueue);
+      
+      // Cleanup function is not strictly needed since we are not using an interval,
+      // but it's good practice for useFocusEffect
+      return () => {
+        // Any cleanup logic can go here
+      };
+    }, [initialQueue, myPrograms, trackingData, profile, setProfile, setMyPrograms, setTrackingData])
+  );
+
+  if (!loading || !initialQueue || Object.keys(initialQueue).length === 0) return null;
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'plum' }}>
-      {loading ? (
-        <>
-          <ActivityIndicator size="large" />
-          <Text>Checking payment status...</Text>
-        </>
-      ) : (
-        <Text>Payment {status}</Text>
-      )}
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "plum",
+      }}
+    >
+      <ActivityIndicator size="large" />
+      <Text>Checking payment status...</Text>
     </View>
   );
 }
