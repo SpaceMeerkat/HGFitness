@@ -2,6 +2,7 @@ import { useAppContext } from "@/components/appContext";
 import { ShopStyles } from "@/components/HGStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from "react";
 import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
 import { BASE_API_URL } from "../network/apiConfig";
 // import { Linking } from 'react-native';
@@ -34,8 +35,15 @@ export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
     const cardFeatures = cardInfo.Features;
     const cardGoals = cardInfo.Goals;
     const cardWhy = cardInfo.Why[0];    
-    const { profile, setProfile } = useAppContext(); // needed for the client being logged in
+    const { myPrograms, profile, setProfile } = useAppContext(); // needed for the client being logged in
+    const [isPurchased, setIsPurchased] = useState(false);
     const image = require("@/assets/images/HGBackground.png");
+
+    useEffect(() => {
+        const keys = Object.keys(myPrograms);
+        const found = keys.some((key) => key === cardFullName);
+        setIsPurchased(found);
+    }, [cardFullName, myPrograms]);  
 
     const SubmitPayFastQuery = async (programName: String, programPrice: Number, profile: any) => { 
         // Fetch the jwt from securestore
@@ -151,7 +159,13 @@ export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
                 <Pressable style={[{
                     flex: 1, flexDirection: 'column', 
                     justifyContent: 'center', alignItems: 'center',
-                    borderWidth: 1, borderRadius: 8, borderColor: 'white', paddingVertical: 12}]} onPress={() => SubmitPayFastQuery(cardFullName, cardPrice, profile)}>
+                    borderWidth: 1, borderRadius: 8, borderColor: 'white', paddingVertical: 12,
+                    opacity: isPurchased? 0.5: 1}]} 
+                    onPress={
+                        isPurchased
+                        ? undefined // 👈 do nothing
+                        : () => SubmitPayFastQuery(cardFullName, cardPrice, profile)
+                    }>
                     <Text style={{color: 'white', fontSize: 15, fontWeight: 'bold'}}>PURCHASE THIS PROGRAM!</Text>
                 </Pressable>
             </ImageBackground>

@@ -46,8 +46,6 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
         },
         body: JSON.stringify(loginData),
       });
-
-      console.log(response);
   
       if (response.ok) {
         const jsonResponse = await response.json();

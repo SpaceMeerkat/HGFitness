@@ -10,7 +10,7 @@ import { BeginnerPrograms } from "@/components/shop/ShopBeginner";
 import { GymPrograms } from "@/components/shop/ShopGymPrograms";
 import { IntermediatePrograms } from "@/components/shop/ShopIntermediate";
 import { ShopLanding } from "@/components/shop/ShopLanding";
-import { MealPrograms } from "@/components/shop/ShopMealPrograms";
+import MealPrograms from "@/components/shop/ShopMealPrograms";
 import { SubscriptionPage } from "@/components/shop/Subscription";
 import { WhatsHot } from "@/components/shop/WhatsHot";
 

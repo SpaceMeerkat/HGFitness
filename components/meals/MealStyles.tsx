@@ -7,7 +7,7 @@ export const MealStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 60,
-    maxHeight: '100%',
+    maxHeight: '90%',
     paddingBottom: 20,
     paddingHorizontal: 10
   },

@@ -30,6 +30,7 @@ export function BeginnerPrograms() {
                         return (
                             <GymCard
                                 key={index}
+                                cardFullName={programKey}
                                 imgUri={`${S3_API_URL}/${programKey.replace(/ /g, "+")}.jpg`}
                                 cardInfo={programDetails}
                                 onPress={() => handleCardPress(programDetails, programKey)} // Pass programDetails on press
