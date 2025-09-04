@@ -101,6 +101,7 @@ export default function ShopScreen() {
     }
   };
 
+
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',

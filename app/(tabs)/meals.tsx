@@ -10,8 +10,8 @@ import { addMealItem, getMealNames, getWaterNames, handleMealPress, MealPrograms
 import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
+import { FontAwesome } from "@expo/vector-icons";
 import Entypo from '@expo/vector-icons/Entypo';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -338,46 +338,20 @@ export default function MealScreen() {
 
         {/* Meals header component */}
 
-        <View style={{flex: 0.15, paddingBottom:20}}>
+        <View style={{flex: 0.15}}>
 
           <View style={MealTrackingStyles.HeaderContainer}>
-            {/* floating icon */}
-            {/* <View style={{backgroundColor: 'black', borderRadius: 200, borderWidth: 1, borderColor: 'white',
-              position: 'absolute', padding: 8, paddingHorizontal: 12, justifyContent: 'center', alignContent: 'center', alignItems: 'center',
-                top: 85,   // distance from top of parent
-                right: 18, // distance from right of parent
-                zIndex: 99, // ensures it stays on top
-            }}> */}
-            <FontAwesome name="bolt"
-              size={30}
-              color="orange"
-              style={{
-                position: 'absolute',
-                top: 88,   // distance from top of parent
-                right: 25, // distance from right of parent
-                zIndex: 99, // ensures it stays on top
-              }}
-            />
-            <MaterialCommunityIcons name="numeric-9"
-              size={20}
-              color="orange"
-              style={{
-                position: 'absolute',
-                top: 92,   // distance from top of parent
-                right: 8, // distance from right of parent
-                zIndex: 99, // ensures it stays on top
-              }}
-            />
-            {/* </View> */}
+
             {/* Column 1 */}
             <View style={MealTrackingStyles.HeaderStackedColumn}>
               <View style={MealTrackingStyles.HeaderBox}>
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Meals</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white', fontSize: 22}}>{runningMealCount}{profile.calorieCalculator.active ? `/${profile.calorieCalculator.meals}` : ""}</Text>
+                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white', fontSize: 22}}>{runningMealCount}</Text>
               </View>
             </View>
+            {/* {profile.calorieCalculator.active ? `/${profile.calorieCalculator.meals}` : ""} */}
 
             {/* Separator 1 */}
             <View style={MealTrackingStyles.HeaderSeparator} />
@@ -388,7 +362,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Calories</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningCalories >= profile.calorieCalculator.calories? 'lime': 'white', fontSize: 24}}>{runningCalories.toFixed(0)}{profile.calorieCalculator.active ? `/${profile.calorieCalculator.calories}` : ""}</Text>
+                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningCalories >= profile.calorieCalculator.calories? 'lime': 'white', fontSize: 24}}>{runningCalories.toFixed(0)}</Text>
               </View>
             </View>
 
@@ -401,7 +375,7 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Protein</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningProtein >= profile.calorieCalculator.protein? 'lime': 'white', fontSize: 24}}>{runningProtein.toFixed(0)}{profile.calorieCalculator.active ? `/${profile.calorieCalculator.protein}` : ""}</Text>
+                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningProtein >= profile.calorieCalculator.protein? 'lime': 'white', fontSize: 24}}>{runningProtein.toFixed(0)}g</Text>
               </View>
             </View>
 
@@ -414,16 +388,59 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Water</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningWater >= profile.calorieCalculator.water? 'lime': 'white', fontSize: 24}}>{runningWater}{profile.calorieCalculator.active ? `/${profile.calorieCalculator.water}` : ""}L</Text>
+                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningWater >= profile.calorieCalculator.water? 'lime': 'white', fontSize: 24}}>{runningWater}L</Text>
               </View>
             </View>
           </View>
 
           {/* Divider */}
-
-          <View style={{paddingVertical: 10}}>
+          <View style={{paddingVertical:8}}>
+            {profile.calorieCalculator.active ? `/${profile.calorieCalculator.meals}` : ""}
             <View style={{height: 1, backgroundColor: 'white'}} />
           </View>
+
+          {profile.calorieCalculator.active ? (
+            <View style={{flex: 1, flexDirection: 'row'}}>
+
+              <View style={{flex: 0.8, flexDirection: 'column', justifyContent: 'center', paddingLeft: 12}}>
+                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}> / {profile.calorieCalculator.meals} </Text>
+              </View>
+
+              <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center', paddingLeft: 20}}>
+                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}> / {profile.calorieCalculator.calories} </Text>
+              </View>
+
+              <View style={{flex: 0.4, flexDirection: 'column', paddingLeft: 4}}>
+                <View style={{flex: 1, flexDirection: 'row',justifyContent: 'flex-start'}}>
+                <FontAwesome name="bolt" size={30} color="orange" style= {{textAlign: 'right', textAlignVertical: 'center'}}/>
+                <MaterialCommunityIcons name="numeric-9" size={20} color="orange" 
+                  style= {{textAlign: 'left', textAlignVertical: 'center',
+                  }}
+                  />
+                  </View>
+                  {/* <MaterialCommunityIcons name="numeric-9" size={20} color="orange" 
+                  style= {{textAlign: 'center', textAlignVertical: 'center',
+                    position: "absolute",
+                      left: 0,
+                      right: 0,
+                      zIndex: 1000
+                  }}
+                  /> */}
+              </View>
+
+              <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center'}}>
+                <Text style={{color: 'grey', textAlign: 'left', fontSize: 18, paddingLeft: 0}}> / {profile.calorieCalculator.protein}g </Text>
+              </View>
+
+              <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center'}}>
+                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}> / {profile.calorieCalculator.water}L </Text>
+              </View>
+
+            </View>
+          ) : null
+        }
+
+          
 
           {removableIcons === true ? (
             <View style={{flex: 1, paddingHorizontal: 10, paddingTop: 10, justifyContent: 'center'}}>

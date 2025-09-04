@@ -1,7 +1,11 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
-import { ActivityIndicator, Image, ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, ImageBackground, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { BASE_API_URL } from "../network/apiConfig";
 
 type CardLevel = 'beginner' | 'advanced' | 'intermediate';
 
@@ -10,6 +14,7 @@ interface GymCardProps {
     cardLevel: CardLevel;
     cardTitle: string;
     cardInfo: string;
+    rerunNumber: any;
     newStatus: boolean;
     handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', 
         programID?: any, 
@@ -20,7 +25,7 @@ interface GymCardProps {
     ) => void;
   }
 
-export function MyProgramCard({ imgUri, cardLevel, cardTitle, cardInfo, newStatus, handleChildPage }: GymCardProps) {
+export function MyProgramCard({ imgUri, cardLevel, cardTitle, cardInfo, rerunNumber, newStatus, handleChildPage }: GymCardProps) {
 
     const { trackingData } = useAppContext(); 
 
@@ -62,6 +67,11 @@ export function MyProgramCard({ imgUri, cardLevel, cardTitle, cardInfo, newStatu
 
     return (
         <View style={styles.container}>
+            {rerunNumber > 0 && (
+                <View style={{ position: "absolute", top: 8, left: 8, zIndex: 10 }}>
+                    <Text style={[ShopStyles[cardLevel], { fontSize: 12}]}>Rerun: {rerunNumber}</Text>
+                </View>
+            )}
             <View style={[ShopStyles.myProgramsBlockContainer, ShopStyles[cardLevel], loading ? styles.overlay : null]}>
                 {content}
                 <View style={{ flex: 0.8 }}>
@@ -77,7 +87,195 @@ export function MyProgramCard({ imgUri, cardLevel, cardTitle, cardInfo, newStatu
                     </View>
                 )}
             </View>
-            <Pressable onPress={handlePress} style={styles.pressableCover} />
+            <Pressable onPress={(handlePress)} style={styles.pressableCover} />
+        </View>
+    );
+}
+
+const UpdateBackendRerun = async (
+    cardTitle: string,
+    trackingData: any,
+    setTrackingData: (data: any) => void
+) => {
+    const retrievedToken = await SecureStore.getItemAsync("jwtToken");
+    if (retrievedToken) {
+        try {
+            const url = `${BASE_API_URL}/rerunGymProgram`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    programID: cardTitle,
+                    token: retrievedToken,
+                }),
+            });
+            if (response.ok) {
+                const jsonResponse = await response.json();
+                const freshProgramTrackingData =
+                    jsonResponse.freshProgramTrackingData;
+                const updatedTrackingData = {
+                    ...trackingData,
+                    [cardTitle]: freshProgramTrackingData,
+                };
+                setTrackingData(updatedTrackingData);
+                await AsyncStorage.setItem(
+                    "trackingData",
+                    JSON.stringify(updatedTrackingData)
+                );
+            }
+        } catch (err) {
+            console.error("Updating backend error:", err);
+        }
+    }
+};
+
+
+const stylesModal = StyleSheet.create({
+    modalBackground: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContainer: {
+        backgroundColor: "white",
+        borderRadius: 12,
+        padding: 20,
+        width: "85%",
+    },
+    modalText: {
+        fontSize: 16,
+        marginBottom: 20,
+        textAlign: "center",
+    },
+    buttonRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    button: {
+        flex: 1,
+        marginHorizontal: 5,
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    cancelButton: {
+        backgroundColor: "grey",
+    },
+    rerunButton: {
+        backgroundColor: "limegreen",
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 16,
+    },
+});
+
+
+interface RerunProgramModalProps {
+    cardTitle: string;
+    visible: boolean;
+    onClose: () => void;
+}
+
+export function RerunProgramModal({ cardTitle, visible, onClose }: RerunProgramModalProps) {
+    const { profile, trackingData, setTrackingData } = useAppContext();
+
+    return (
+        <Modal
+            visible={visible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={onClose}
+        >
+            <View style={stylesModal.modalBackground}>
+                <View style={stylesModal.modalContainer}>
+                    <Text style={stylesModal.modalText}>
+                        Would you like to rerun this program? {"\n\n"}
+                        Clicking "Rerun" will allow you to rerun the program with a fresh start!
+                        But don't worry, all previously tracked gym progress will remain in your
+                        profile and stats.
+                    </Text>
+
+                    <View style={stylesModal.buttonRow}>
+                        <Pressable
+                            style={[stylesModal.button, stylesModal.cancelButton]}
+                            onPress={onClose}
+                        >
+                            <Text style={stylesModal.buttonText}>Cancel</Text>
+                        </Pressable>
+
+                        <Pressable
+                            style={[stylesModal.button, stylesModal.rerunButton]}
+                            onPress={async () => {
+                                await UpdateBackendRerun(cardTitle, trackingData, setTrackingData);
+                                onClose();
+                            }}
+                        >
+                            <Text style={stylesModal.buttonText}>Rerun</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
+}
+
+interface CompletedGymCardProps {
+    imgUri: any;
+    cardTitle: string;
+    cardLevel: CardLevel;
+    cardInfo: string;
+}
+
+export function CompletedGymCard({ imgUri, cardLevel, cardTitle, cardInfo }: CompletedGymCardProps) {
+    const [modalVisible, setModalVisible] = useState(false);
+    const { profile } = useAppContext();
+
+    const imageSource = typeof imgUri === "string" ? { uri: imgUri } : imgUri;
+    const shortCardTitle = cardTitle.split("-")[0];
+
+    const levelColors: { [key: string]: string } = {
+        beginner: "cyan",
+        intermediate: "gold",
+        advanced: "magenta",
+    };
+
+    const textColor = levelColors[cardLevel] || "defaultColor";
+
+    return (
+        <View style={styles.container}>
+            <View style={{ position: "absolute", top: -10, right: -10, zIndex: 10 }}>
+                <Ionicons name="checkmark-circle" size={24} color="lime" />
+            </View>
+
+            <View style={[ShopStyles.myProgramsBlockContainer, { borderColor: "grey", opacity: 0.7 }]}>
+                <View style={{ flex: 0.8 }}>
+                    <Text style={[DefaultTabStyles.defaultBoldText, { color: textColor, opacity: 0.7 }]}>
+                        {shortCardTitle}
+                    </Text>
+                    <Text style={[DefaultTabStyles.defaultMediumText, { opacity: 0.7 }]}>{cardInfo}</Text>
+                </View>
+                <View style={{ flex: 0.3 }}>
+                    <Image
+                        source={imageSource}
+                        style={{ flex: 1, width: "100%", resizeMode: "contain", opacity: 0.7 }}
+                    />
+                </View>
+            </View>
+
+            {/* Overlay pressable that opens modal */}
+            <Pressable onPress={profile.premium !== true ? undefined : () => setModalVisible(true)} style={styles.pressableCover} />
+
+            {/* Rerun modal */}
+            <RerunProgramModal
+                cardTitle={cardTitle}
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+            />
         </View>
     );
 }
@@ -115,9 +313,16 @@ export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handle
         <View style={styles.container}>
             <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', borderColor: 'grey', backgroundColor: 'transparent'}]}>
                 {content}
-                <View style={{ flex: 0.8 }}>
+                <View style={{ flex: 0.3, backgroundColor: 'black', borderColor: 'white', borderWidth: 2, borderRadius: 100, padding: 0 }}>
+                    <View style={{flex: 0.4, flexDirection: 'column', justifyContent: 'flex-end'}}>
+                        <Text style={{ color: 'white', fontSize: 26, fontWeight: 'bold', textAlign: 'center', textAlignVertical: 'bottom' }}>{cardInfo}</Text>
+                    </View>
+                    <View style={{flex: 0.3, flexDirection: 'column', justifyContent: 'flex-start'}}>
+                        <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center', textAlignVertical: 'top' }}>day</Text>
+                    </View>
+                </View>
+                <View style={{ flex: 0.7, paddingLeft: 8}}>
                     <Text style={[DefaultTabStyles.defaultBoldText, { color: 'white' }]}>{shortCardTitle}</Text>
-                    <Text style={[DefaultTabStyles.defaultMediumText, { color: 'white' }]}>{cardInfo}</Text>
                 </View>
                 <View style={{ flex: 0.3, paddingRight: 10 }}>
                     <Image source={require("@/assets/images/WhiteTransparentLogo.png")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
@@ -154,3 +359,27 @@ const styles = StyleSheet.create({
         zIndex: 1, // Ensure it's on top
     },
 });
+
+
+interface FreeSessionsProps {
+    cardTitle: string;
+    cardInfo: string;
+  }
+export function FreeSessionsCard({ cardTitle, cardInfo }: FreeSessionsProps) {
+
+    return (
+        <View style={styles.container}>
+            <View style={[ShopStyles.myProgramsBlockContainer, {borderColor: 'grey', backgroundColor: 'rgba(0, 0, 0, 1)'}]}>
+                <View style={{ flex: 0.8 }}>
+                    <Text style={[DefaultTabStyles.defaultBoldText, { color: 'green' }]}>{cardTitle}</Text>
+                    <Text style={[DefaultTabStyles.defaultMediumText, { color: 'white' }]}>{cardInfo}</Text>
+                </View>
+                <View style={{ flex: 0.3, paddingRight: 10 }}>
+                    <Image source={require("@/assets/images/cards/FreeCard.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
+                </View>
+            </View>
+            <Pressable onPress={() => console.log("cool!!!")} style={styles.pressableCover} />
+        </View>
+    );
+}
+
