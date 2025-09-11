@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
 
-  const { profile } = useAppContext();
+  const { profile, trackingData } = useAppContext();
 
   const image = require("@/assets/images/HGBackground.png");
 
@@ -23,6 +23,15 @@ export default function ProfilePage() {
   const [loginSignupActive, setLoginSignupActive] = useState(false);
   const [loginActive, setLoginActive] = useState(false);
   const [signupActive, setSignupActive] = useState(false);
+  const [childTrackingData, setChildTrackingData] = useState(null);
+
+  useEffect(() => {
+    if (trackingData) {
+      setChildTrackingData(trackingData);
+    } else {
+      setChildTrackingData(null);
+    }
+  }, [trackingData]); 
 
   useEffect(() => {
     if (!profile) {

@@ -2,7 +2,7 @@ import { useAppContext } from "@/components/appContext";
 import { ShopStyles } from "@/components/HGStyles";
 import { CompletedGymCard, FreeSessionsCard, MyProgramCard, SubscriptionProgramCard } from "@/components/programs/MyProgramsCard";
 import React, { useEffect, useState } from "react";
-import { ImageBackground, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { S3_API_URL } from "../network/apiConfig";
 
 type PageType = 'programs' | 'programOverview' | 'programTracking';
@@ -19,28 +19,22 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
   const [trackingDataSoft, setTrackingDataSoft] = useState<any>({}); // Store API response as an object
 
-  // Check if the user is logged in and if myPrograms exists
   useEffect(() => {
-    if (myPrograms !== null) {
-      setPurchasedPrograms(myPrograms); // Set purchased programs to myPrograms if it exists
-    }
-  }, [myPrograms]);
-
-  useEffect(() => {
-    if (trackingData !== null) {
+    if (trackingData !== null && myPrograms !== null) {
+      console.log('Triggered');
       setTrackingDataSoft(trackingData); // Set purchased programs to myPrograms if it exists
+      setPurchasedPrograms(myPrograms);
     }
   }, [trackingData]);
 
   return (
-    <ImageBackground source={image} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
-      <ScrollView style={[{paddingTop: 8, paddingBottom: 20}, ShopStyles.shopScrollContainer]}>
+      <ScrollView style={[ShopStyles.shopScrollContainer, {flex: 1, paddingTop: 8, paddingBottom: 20}]}>
 
         {/* Subscription card */}
         <SubscriptionProgramCard
           key={'subscription4'}
           cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
-          cardTitle={"Subscription"}  // Display the program name
+          cardTitle={"Subscription4Day-1-Men"}  // Display the program name
           cardInfo={`4`}  // Display number of days per week
           handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
         />
@@ -49,7 +43,7 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
         <SubscriptionProgramCard
           key={'subscription2'}
           cardImage={require('@/assets/images/SubscriptionCard2day.jpg')}
-          cardTitle={"Subscription"}  // Display the program name
+          cardTitle={"Subscription2Day-1-Men"}  // Display the program name
           cardInfo={`2`}  // Display number of days per week
           handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
         />
@@ -134,7 +128,6 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
         )}
 
       </ScrollView>
-    </ImageBackground>
   );
 }
 

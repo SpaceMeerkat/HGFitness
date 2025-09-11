@@ -9,6 +9,7 @@ import { ImageBackground } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
 import LogoutButton from "./Logout";
 
 export function ProfileOverview() {
@@ -21,6 +22,7 @@ export function ProfileOverview() {
   const [selected, setSelected] = useState<number | 0>(0);
   const [premium, setPremium] = useState(false);
   const [accountLevel, setAccountLevel] = useState('free tier');
+  const [achievements, setAchievements] = useState<number[]>([0,0,0]);
 
   useEffect(() => {
     if (profile?.premium) {
@@ -33,8 +35,12 @@ export function ProfileOverview() {
   }, [profile]);
 
   useEffect(() => {
-    if (trackingData) {
+    if (trackingData) { 
       setDictionary(trackingData?.profileStats || undefined);
+      const completedProgramsCount = getTotalPrograms(trackingData);
+      const completedSessionsCount = getTotalSessions(trackingData);
+      const achievementsList = [completedProgramsCount, 0, completedSessionsCount];
+      setAchievements(achievementsList);
     } else {
     }
   }, [trackingData]);
@@ -172,7 +178,7 @@ export function ProfileOverview() {
           <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
             <View style={{flex: 0.3, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
-                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>16</Text>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[2]}</Text>
               </View>
               <View style={{flex: 0.3}}>
                 <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Sessions</Text>
@@ -181,7 +187,7 @@ export function ProfileOverview() {
             <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
             <View style={{flex: 0.4, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
-                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>6</Text>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[1]}</Text>
               </View>
               <View style={{flex: 0.3}}>
                 <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Achievements</Text>
@@ -190,7 +196,7 @@ export function ProfileOverview() {
             <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
             <View style={{flex: 0.3, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
-                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>20</Text>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[0]}</Text>
               </View>
               <View style={{flex: 0.3}}>
                 <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Programs</Text>

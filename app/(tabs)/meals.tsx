@@ -334,7 +334,6 @@ export default function MealScreen() {
       />
       
       <ScrollView contentContainerStyle={{ flexGrow: 1}}>
-        <ImageBackground source={image} resizeMode="cover" style={{flex: 1}}>
 
         {/* Meals header component */}
 
@@ -534,7 +533,6 @@ export default function MealScreen() {
           </View>
         </Pressable>
 
-        </ImageBackground>
       </ScrollView>
       </>
     )
@@ -576,6 +574,7 @@ export default function MealScreen() {
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
+      <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
       <ScrollView 
         contentContainerStyle={{ flexGrow: 1 }} 
         keyboardShouldPersistTaps="handled"
@@ -585,6 +584,7 @@ export default function MealScreen() {
       {renderOverlay()}
 
       </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 }

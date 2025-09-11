@@ -81,8 +81,8 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                 <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingLeft: 15}}>Back</Text>
             </Pressable>
             <View style={MealTrackingStyles.TrackingOptionsContainer}>
-                <ScrollView contentContainerStyle={{ flexGrow: 1}}>
                 <ImageBackground source={image} resizeMode="cover" style={{ flex: 1 }}>
+                    <ScrollView contentContainerStyle={{ flexGrow: 1}}>
                     <View style={{paddingTop: 12, paddingHorizontal: 12, paddingBottom: 15 }}>
 
                     <View style={{flex: 0.25, flexDirection: 'column'}}>
@@ -215,8 +215,8 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                         ))}
                     </View>
                 </View>
-            </ImageBackground>
             </ScrollView>
+            </ImageBackground>
         </View>
         </View>
     </Modal>

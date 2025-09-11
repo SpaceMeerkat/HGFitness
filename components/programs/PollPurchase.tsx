@@ -71,7 +71,6 @@ export default function PaymentStatus({ initialQueue }: PaymentStatusProps) {
 
                 delete updatedQueue[paymentId];
                 const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
-                setProfile(updatedProfile);
                 await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
 
                 if (currentStatus === "COMPLETE" && jsonResponse) {

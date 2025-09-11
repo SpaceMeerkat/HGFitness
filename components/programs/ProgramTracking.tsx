@@ -5,7 +5,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { WebView } from 'react-native-webview';
 import { FindPrecedingNumber } from './FindPrecedingNumber';
 import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
@@ -477,7 +477,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const saveOpacity = completedDay ? 0.5 : 1;
 
   return (
-    <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
+    <>
       <ScrollView style={ShopStyles.shopScrollContainer}>
         <View>
           {renderExercises()}
@@ -517,6 +517,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
         setSaving = {setSaving}
         handleChildPage={handleChildPage}
       />
-    </ImageBackground>
+      </>
   );
 }

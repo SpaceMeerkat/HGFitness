@@ -11,7 +11,8 @@ export const SubmitSession = async (
     setSaving: (saving: boolean) => void
 ) => { 
     setSaving(true);
-    let updatedTrackingData = trackingData;
+    let updatedTrackingData = { ...trackingData };
+    
     // Submit to the asyncStorage
     // Submit to the backend as a POST request
     try {
@@ -32,11 +33,15 @@ export const SubmitSession = async (
         if (response.ok) {
           const jsonResponse = await response.json();
           const completedStatus = jsonResponse.completed;
-          updatedTrackingData[programID]['memoryData'][`week-${programDay[0]}-day-${programDay[1]}`] = {};
-          updatedTrackingData[programID]['memoryData'][`week-${programDay[0]}-day-${programDay[1]}`]['trackingData'] = trackingDictionary;
-          // Update the completed status of this program which is calculated on the backend
-          updatedTrackingData[programID]['completed'] = completedStatus
-          console.log('completed status: ', completedStatus);
+          updatedTrackingData[programID] = { ...updatedTrackingData[programID] };
+            updatedTrackingData[programID]['memoryData'] = { 
+            ...updatedTrackingData[programID]['memoryData'], 
+            [`week-${programDay[0]}-day-${programDay[1]}`]: {
+                trackingData: trackingDictionary
+            }
+            };
+            // Update the completed status
+          updatedTrackingData[programID]['completed'] = completedStatus;
           await AsyncStorage.setItem('trackingData', JSON.stringify(updatedTrackingData));
           setTrackingData(updatedTrackingData);
         } else {

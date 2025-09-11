@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { BackHandler } from "react-native";
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 
@@ -102,14 +101,14 @@ export default function ShopScreen() {
   };
 
 
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      handleBackButton
-    );
+  // useEffect(() => {
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     handleBackButton
+  //   );
 
-    return () => backHandler.remove();
-  }, [shopOpen, programsOpen, mealProgramsOpen, beginnerOpen, intermediateOpen, advancedOpen, hotOpen, subscriptionOpen]);
+  //   return () => backHandler.remove();
+  // }, [shopOpen, programsOpen, mealProgramsOpen, beginnerOpen, intermediateOpen, advancedOpen, hotOpen, subscriptionOpen]);
 
   let content = null;
 
@@ -118,23 +117,23 @@ export default function ShopScreen() {
   }
 
   if (programsOpen) {
-    content = <GymPrograms handleChildPage={handleChildPage}/>;
+    content = <GymPrograms handleChildPage={handleChildPage} handleBackButton={handleBackButton}/>;
   }
 
   if (beginnerOpen) {
-    content = <BeginnerPrograms />;
+    content = <BeginnerPrograms handleBackButton={handleBackButton}/>;
   }
 
   if (intermediateOpen) {
-    content = <IntermediatePrograms />;
+    content = <IntermediatePrograms handleBackButton={handleBackButton}/>;
   }
 
   if (advancedOpen) {
-    content = <AdvancedPrograms />;
+    content = <AdvancedPrograms handleBackButton={handleBackButton}/>;
   }
 
   if (mealProgramsOpen) {
-    content = <MealPrograms />;
+    content = <MealPrograms handleBackButton={handleBackButton}/>;
   }
 
   if (hotOpen) {

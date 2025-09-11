@@ -1,8 +1,10 @@
 import { DefaultTabStyles } from "@/components/HGStyles";
 import React, { useEffect, useRef, useState } from "react";
 
-import { BackHandler, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { ImageBackground } from "react-native";
 
 import { useAppContext } from "@/components/appContext";
 import { HGHeader } from "@/components/HeaderBar";
@@ -70,26 +72,26 @@ export default function MyPrograms() {
     }
   };
 
-  useEffect(() => {
-    const backAction = () => {
-      if (programOverviewOpen) {
-        handleChildPage('programs');
-        return true;
-      }
-      if (programTrackingOpen) {
-        handleChildPage('programOverview');
-        return true;
-      }
-      return false;
-    };
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     if (programOverviewOpen) {
+  //       handleChildPage('programs');
+  //       return true;
+  //     }
+  //     if (programTrackingOpen) {
+  //       handleChildPage('programOverview');
+  //       return true;
+  //     }
+  //     return false;
+  //   };
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
+  //   const backHandler = BackHandler.addEventListener(
+  //     "hardwareBackPress",
+  //     backAction
+  //   );
 
-    return () => backHandler.remove();
-  }, [programOverviewOpen, programTrackingOpen]);
+  //   return () => backHandler.remove();
+  // }, [programOverviewOpen, programTrackingOpen]);
 
   const getProgramLevel = (selectedProgramID: string): 'advanced' | 'intermediate' | 'beginner' | null => {
     if (advancedPrograms.hasOwnProperty(selectedProgramID)) {
@@ -171,11 +173,13 @@ export default function MyPrograms() {
     return null;
   };
 
+  const image = require("@/assets/images/HGBackground.png");
+
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
         <PaymentStatus initialQueue={profile?.purchaseQueue}/>
-        {/* <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}> */}
+        <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
         <ScrollView 
           contentContainerStyle={{ flexGrow: 1 }} 
           keyboardShouldPersistTaps="handled" 
@@ -183,7 +187,7 @@ export default function MyPrograms() {
         >
           {renderPageContent()}
         </ScrollView>
-      {/* </ImageBackground> */}
+      </ImageBackground>
     </SafeAreaView>
   );
 }

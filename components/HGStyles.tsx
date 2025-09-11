@@ -157,9 +157,7 @@ export const ShopStyles = StyleSheet.create({
     shopScrollContainer: {
       paddingHorizontal: 16,
       paddingTop: 8,
-      paddingBottom: 16,
-      marginBottom: 0,
-      marginTop: 0,
+      paddingBottom: 0,
     },
     shopBlockContainer: {
       flexDirection: "row",
@@ -200,9 +198,9 @@ export const ShopStyles = StyleSheet.create({
         borderColor: "grey",
         borderWidth: 2,
         borderRadius: 8,
-        marginVertical: 5,
         alignItems: "center",
         height: 155,
+        overflow: 'hidden'
       },
     shopHotRowContainer: {
         flexDirection: 'row', gap: 4, paddingVertical: 2

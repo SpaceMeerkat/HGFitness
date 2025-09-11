@@ -296,7 +296,12 @@ interface SubscriptionCardProps {
 export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handleChildPage }: SubscriptionCardProps) {
 
     const { trackingData, profile } = useAppContext(); 
-    const shortCardTitle = cardTitle.split('-')[0];  
+    const shortCardTitle = "Subscription";  
+
+    const images: Record<string, any> = {
+    "4": require("@/assets/images/4Days.png"),
+    "2": require("@/assets/images/2Days.png"),
+    };
 
     const handlePress = async () => {
         const programRawData = trackingData[cardTitle]
@@ -313,13 +318,8 @@ export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handle
         <View style={styles.container}>
             <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', borderColor: 'grey', backgroundColor: 'transparent'}]}>
                 {content}
-                <View style={{ flex: 0.3, backgroundColor: 'black', borderColor: 'white', borderWidth: 2, borderRadius: 100, padding: 0 }}>
-                    <View style={{flex: 0.4, flexDirection: 'column', justifyContent: 'flex-end'}}>
-                        <Text style={{ color: 'white', fontSize: 26, fontWeight: 'bold', textAlign: 'center', textAlignVertical: 'bottom' }}>{cardInfo}</Text>
-                    </View>
-                    <View style={{flex: 0.3, flexDirection: 'column', justifyContent: 'flex-start'}}>
-                        <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center', textAlignVertical: 'top' }}>day</Text>
-                    </View>
+                <View style={{ flex: 0.3, paddingRight: 0 }}>
+                    <Image source={images[cardInfo]} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
                 </View>
                 <View style={{ flex: 0.7, paddingLeft: 8}}>
                     <Text style={[DefaultTabStyles.defaultBoldText, { color: 'white' }]}>{shortCardTitle}</Text>

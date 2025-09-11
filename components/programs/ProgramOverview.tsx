@@ -1,6 +1,7 @@
-import { DefaultTabStyles, ProgramStyles, ShopStyles } from "@/components/HGStyles";
+import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import Calendar from "./StreakCalendar";
 
 type Exercise = any; // Define the type of exercises if you have more details
 
@@ -32,7 +33,21 @@ type ProgramOverviewProps = {
 
 export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage }: ProgramOverviewProps) {
   
-  const image = require("@/assets/images/HGBackground.png");
+  const renderCalendar = () => {
+    // Renders the streak calendar if the user is showing the subscription page
+    const calendarBoolean = programID.toLowerCase().includes("subscription");
+
+    if (calendarBoolean) {
+    return (
+      <View style={{flex: 1, paddingBottom: 16, paddingTop: 6}}>
+        <Calendar />
+      </View>
+    )
+  } else {
+    return (
+      null
+    )
+  }}
 
   const renderDays = (weekData: Week, weekNumber: string, completedKeys?: any) => {
     return Object.keys(weekData).map(day => {
@@ -82,12 +97,14 @@ export function ProgramOverview({ programLevel, programData, programDay, program
 
 
   return (
-    <ImageBackground source={image} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
       <ScrollView contentContainerStyle={{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 16 }}>
+        <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} onPress={() => handleChildPage('programs')}>
+            <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+        </Pressable>
         <View>
+          {renderCalendar()}
           {renderWeeks(programData, completedKeys)}
         </View>
       </ScrollView>
-    </ImageBackground>
   );
 }

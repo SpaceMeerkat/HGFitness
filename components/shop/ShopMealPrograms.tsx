@@ -1,13 +1,22 @@
 import React from "react";
-import { Image, ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { TrackingNotesStyles } from "../HGStyles";
 
-const MealPrograms = () => {
+type MealProgramProps = {
+    handleBackButton: () => boolean;
+  };
+
+const MealPrograms = ({handleBackButton}: MealProgramProps) => {
   return (
     <ImageBackground
       source={require("@/assets/images/caloriecalculator.jpg")}
       style={MealsMadeEasyStyles.background}
     >
       <ScrollView contentContainerStyle={MealsMadeEasyStyles.scrollContainer}>
+
+        <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 8, paddingTop: 10, paddingBottom: 10, justifyContent: 'center'}} onPress={handleBackButton}>
+            <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+        </Pressable>
 
         {/* Row 1 (image on right) */}
         <View style={MealsMadeEasyStyles.rowFlex03}>
