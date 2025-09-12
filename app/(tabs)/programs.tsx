@@ -8,8 +8,8 @@ import { ImageBackground } from "react-native";
 
 import { useAppContext } from "@/components/appContext";
 import { HGHeader } from "@/components/HeaderBar";
+import PaymentStatus from "@/components/network/PollPurchase";
 import { MyProgramsLanding } from "@/components/programs/MyPrograms";
-import PaymentStatus from "@/components/programs/PollPurchase";
 import { ProgramOverview } from "@/components/programs/ProgramOverview";
 import { ProgramTracker } from "@/components/programs/ProgramTracking";
 import { LoginSignupWindow } from "@/components/users/LoginSignup";

@@ -17,16 +17,20 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
 
     const { bestSellers, beginnerPrograms, intermediatePrograms, advancedPrograms } = useAppContext();
 
-    const [menCardInfo, setMenCardInfo] = useState<any | null>(null);
     const [menCardInfoBeginners, setMenCardInfoBeginners] = useState<any | null>(null);
     const [menCardInfoIntermediate, setMenCardInfoIntermediate] = useState<any | null>(null);
     const [menCardInfoAdvanced, setMenCardInfoAdvanced] = useState<any | null>(null);
     const [womenCardInfoBeginners, setWomenCardInfoBeginners] = useState<any | null>(null);
     const [womenCardInfoIntermediate, setWomenCardInfoIntermediate] = useState<any | null>(null);
     const [womenCardInfoAdvanced, setWomenCardInfoAdvanced] = useState<any | null>(null);
-    
-    const [womenCardInfo, setWomenCardInfo] = useState<any | null>(null);
 
+    const [menCardNameBeginners, setMenCardNameBeginners] = useState<string | ''>('');
+    const [menCardNameIntermediate, setMenCardNameIntermediate] = useState<string | ''>('');
+    const [menCardNameAdvanced, setMenCardNameAdvanced] = useState<string | ''>('');
+    const [womenCardNameBeginners, setWomenCardNameBeginners] = useState<string | ''>('');
+    const [womenCardNameIntermediate, setWomenCardNameIntermediate] = useState<string | ''>('');
+    const [womenCardNameAdvanced, setWomenCardNameAdvanced] = useState<string | ''>('');
+    
     const image = require("@/assets/images/WhatsHot2.jpg");
     const backgroundImage = require("@/assets/images/HGBackground.png");
 
@@ -40,18 +44,19 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
     const [defaultPricing, setDefaultPricing] = useState("premium");
 
     useEffect(() => {
-    if (!bestSellers) return;
-
-    setMenCardInfoBeginners(beginnerPrograms[bestSellers.beginner.men]);
-    setWomenCardInfoBeginners(beginnerPrograms[bestSellers.beginner.women]);
-    setMenCardInfoIntermediate(intermediatePrograms[bestSellers.intermediate.men]);
-    setWomenCardInfoIntermediate(intermediatePrograms[bestSellers.intermediate.women]);
-    setMenCardInfoAdvanced(advancedPrograms[bestSellers.advanced.men]);
-    setWomenCardInfoAdvanced(advancedPrograms[bestSellers.advanced.women]);
-
-    // build your content directly here...
+        setMenCardInfoBeginners(beginnerPrograms[bestSellers.beginner.men]);
+        setWomenCardInfoBeginners(beginnerPrograms[bestSellers.beginner.women]);
+        setMenCardInfoIntermediate(intermediatePrograms[bestSellers.intermediate.men]);
+        setWomenCardInfoIntermediate(intermediatePrograms[bestSellers.intermediate.women]);
+        setMenCardInfoAdvanced(advancedPrograms[bestSellers.advanced.men]);
+        setWomenCardInfoAdvanced(advancedPrograms[bestSellers.advanced.women]);
+        setMenCardNameBeginners(bestSellers.beginner.men);
+        setWomenCardNameBeginners(bestSellers.beginner.women);
+        setMenCardNameIntermediate(bestSellers.intermediate.men);
+        setWomenCardNameIntermediate(bestSellers.intermediate.women);
+        setMenCardNameAdvanced(bestSellers.advanced.men);
+        setWomenCardNameAdvanced(bestSellers.advanced.women);
     }, [bestSellers, beginnerPrograms, intermediatePrograms, advancedPrograms]);
-
 
     // Section for handling the Free Programs overlay @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -138,63 +143,76 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
         setOverlayVisible(true);
     };
 
-    const showBestSellers = () => {
-    
-    // Effect to update content after card info is set
+    const showBestSellers = () => { 
+        
+        const menImgUriBeginner = `${S3_API_URL}/${menCardNameBeginners?.replace(/ /g, "+")}.jpg`;
+        const menImgUriIntermediate = `${S3_API_URL}/${menCardNameIntermediate?.replace(/ /g, "+")}.jpg`;
+        const menImgUriAdvanced = `${S3_API_URL}/${menCardNameAdvanced?.replace(/ /g, "+")}.jpg`;
 
-    const maleBestSellerBeginner = bestSellers.beginner.men;
-    const menImgUriBeginner = `${S3_API_URL}/${maleBestSellerBeginner.replace(/ /g, "+")}.jpg`;
-    const maleBestSellerIntermediate = bestSellers.intermediate.men;
-    const menImgUriIntermediate = `${S3_API_URL}/${maleBestSellerIntermediate.replace(/ /g, "+")}.jpg`;
-    const maleBestSellerAdvanced = bestSellers.advanced.men;
-    const menImgUriAdvanced = `${S3_API_URL}/${maleBestSellerAdvanced.replace(/ /g, "+")}.jpg`;
+        const womenImgUriBeginner = `${S3_API_URL}/${womenCardNameBeginners?.replace(/ /g, "+")}.jpg`;
+        const womenImgUriIntermediate = `${S3_API_URL}/${womenCardNameIntermediate?.replace(/ /g, "+")}.jpg`;
+        const womenImgUriAdvanced = `${S3_API_URL}/${womenCardNameAdvanced?.replace(/ /g, "+")}.jpg`;
 
-    const womenBestSellerBeginner = bestSellers.beginner.women;
-    const womenImgUriBeginner = `${S3_API_URL}/${womenBestSellerBeginner.replace(/ /g, "+")}.jpg`;
-    const womenBestSellerIntermediate = bestSellers.intermediate.women;
-    const womenImgUriIntermediate = `${S3_API_URL}/${womenBestSellerIntermediate.replace(/ /g, "+")}.jpg`;
-    const womenBestSellerAdvanced = bestSellers.advanced.women;
-    const womenImgUriAdvanced = `${S3_API_URL}/${womenBestSellerAdvanced.replace(/ /g, "+")}.jpg`;
+        // console.log("#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#")
+        // console.log('card names inside showBestSellers ',menCardNameBeginners,menCardNameIntermediate,menCardNameAdvanced,womenCardNameBeginners,womenCardNameIntermediate,womenCardNameAdvanced);
+        // console.log("#---------------------------------#")
+        // console.log("menImgURIs inside: ", menImgUriBeginner,menImgUriIntermediate,menImgUriAdvanced);
+        // console.log("#---------------------------------#")
+        // console.log("womenImgURIs inside: ", womenImgUriBeginner,womenImgUriIntermediate,womenImgUriAdvanced);
+        // console.log("#---------------------------------#")
+        // console.log('menCardInfo inside beginners: ', menCardInfoBeginners);
+        // console.log("#---------------------------------#")
+        // console.log('menCardInfo inside intermediate: ', menCardInfoIntermediate);
+        // console.log("#---------------------------------#")
+        // console.log('menCardInfo inside advanced: ', menCardInfoAdvanced);
+        // console.log("#---------------------------------#")
+        // console.log('womenCardInfo inside beginners: ', womenCardInfoBeginners);
+        // console.log("#---------------------------------#")
+        // console.log('womenCardInfo inside intermediate: ', womenCardInfoIntermediate);
+        // console.log("#---------------------------------#")
+        // console.log('womenCardInfo inside advanced: ', womenCardInfoAdvanced);
+        // console.log("#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#")
 
-    setContent(
-        <ScrollView style={{flex: 1, width: '100%'}}> 
-        <View style={{flex: 0.1, width: '100%', paddingBottom: 30}}>
-            <Text style={{fontFamily: 'Edo', color: 'gold', fontSize: 44, textAlign: 'center'}}>
-                Best sellers!
-            </Text>
-            <Text style={{color: 'white', fontSize: 15, textAlign: 'center', paddingTop: 10}}>
-                As chosen by you...
-            </Text>
-        </View>
-        <View style={{flex: 0.1}}>
-            <Text style={{color: 'white', textAlign: 'center'}}>Beginners</Text>
-        </View>
-        <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
-            <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
-                <GymCard key={1} cardFullName={maleBestSellerBeginner} imgUri={menImgUriBeginner} cardInfo={menCardInfoBeginners} onPress={() => handleCardPress(maleBestSellerBeginner, menCardInfoBeginners)}/>
-                <GymCard key={2} cardFullName={womenBestSellerBeginner} imgUri={womenImgUriBeginner} cardInfo={womenCardInfoBeginners} onPress={() => handleCardPress(womenBestSellerBeginner, womenCardInfoBeginners)}/>
+        setContent(
+            <ScrollView style={{flex: 1, width: '100%'}}> 
+            <View style={{flex: 0.1, width: '100%', paddingBottom: 30}}>
+                <Text style={{fontFamily: 'Edo', color: 'gold', fontSize: 44, textAlign: 'center'}}>
+                    Best sellers!
+                </Text>
+                <Text style={{color: 'white', fontSize: 15, textAlign: 'center', paddingTop: 10}}>
+                    As chosen by you...
+                </Text>
             </View>
-        </View>
-        <View style={{flex: 0.1}}>
-            <Text style={{color: 'white', textAlign: 'center'}}>Intermediate</Text>
-        </View>
-        <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
-            <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
-                <GymCard key={1} cardFullName={maleBestSellerIntermediate} imgUri={menImgUriIntermediate} cardInfo={menCardInfoIntermediate} onPress={() => handleCardPress(maleBestSellerIntermediate, menCardInfoIntermediate)}/>
-                <GymCard key={2} cardFullName={womenBestSellerIntermediate} imgUri={womenImgUriIntermediate} cardInfo={womenCardInfoIntermediate} onPress={() => handleCardPress(womenBestSellerIntermediate, womenCardInfoIntermediate)}/>
+            <View style={{flex: 0.1}}>
+                <Text style={{color: 'white', textAlign: 'center'}}>Beginners</Text>
             </View>
-        </View>
-        <View style={{flex: 0.1}}>
-            <Text style={{color: 'white', textAlign: 'center'}}>Advanced</Text>
-        </View>
-        <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
-            <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
-                <GymCard key={1} cardFullName={maleBestSellerAdvanced} imgUri={menImgUriAdvanced} cardInfo={menCardInfoAdvanced} onPress={() => handleCardPress(maleBestSellerAdvanced, menCardInfoAdvanced)}/>
-                <GymCard key={2} cardFullName={womenBestSellerAdvanced} imgUri={womenImgUriAdvanced} cardInfo={womenCardInfoAdvanced} onPress={() => handleCardPress(womenBestSellerAdvanced, womenCardInfoAdvanced)}/>
+            <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
+                <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
+                    <GymCard key={1} cardFullName={menCardNameBeginners} imgUri={menImgUriBeginner} cardInfo={menCardInfoBeginners} onPress={() => handleCardPress(menCardNameBeginners, menCardInfoBeginners)}/>
+                    <GymCard key={2} cardFullName={womenCardNameBeginners} imgUri={womenImgUriBeginner} cardInfo={womenCardInfoBeginners} onPress={() => handleCardPress(womenCardNameBeginners, womenCardInfoBeginners)}/>
+                </View>
             </View>
-        </View>
-        </ScrollView> 
-    )};
+            <View style={{flex: 0.1}}>
+                <Text style={{color: 'white', textAlign: 'center'}}>Intermediate</Text>
+            </View>
+            <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
+                <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
+                    <GymCard key={1} cardFullName={menCardNameIntermediate} imgUri={menImgUriIntermediate} cardInfo={menCardInfoIntermediate} onPress={() => handleCardPress(menCardNameIntermediate, menCardInfoIntermediate)}/>
+                    <GymCard key={2} cardFullName={womenCardNameIntermediate} imgUri={womenImgUriIntermediate} cardInfo={womenCardInfoIntermediate} onPress={() => handleCardPress(womenCardNameIntermediate, womenCardInfoIntermediate)}/>
+                </View>
+            </View>
+            <View style={{flex: 0.1}}>
+                <Text style={{color: 'white', textAlign: 'center'}}>Advanced</Text>
+            </View>
+            <View style={{ flex: 0.8, width: '100%', backgroundColor: 'black', paddingTop: 10 }}>
+                <View style={[ShopStyles.cardBlockContainer, { backgroundColor: 'black' }]}>
+                    <GymCard key={1} cardFullName={menCardNameAdvanced} imgUri={menImgUriAdvanced} cardInfo={menCardInfoAdvanced} onPress={() => handleCardPress(menCardNameAdvanced, menCardInfoAdvanced)}/>
+                    <GymCard key={2} cardFullName={womenCardNameAdvanced} imgUri={womenImgUriAdvanced} cardInfo={womenCardInfoAdvanced} onPress={() => handleCardPress(womenCardNameAdvanced, womenCardInfoAdvanced)}/>
+                </View>
+            </View>
+            </ScrollView> 
+        )
+    };
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
@@ -275,9 +293,7 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
                         <Pressable style={{flex: 0.1, width: "20%", paddingLeft: 20, marginTop: 0, 
                             marginBottom: 30, justifyContent: 'flex-end'}} onPress={() => [
                                 setisWindowVisible(false), 
-                                setContent(null), 
-                                setMenCardInfo(null), 
-                                setWomenCardInfo(null)]}>
+                                setContent(null)]}>
                             <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
                         </Pressable>
 

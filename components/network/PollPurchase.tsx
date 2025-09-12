@@ -4,7 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import React, { useCallback, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
-import { BASE_API_URL } from "../network/apiConfig";
+import { BASE_API_URL } from "./apiConfig";
 
 const getSecureToken = async () => {
   try {

@@ -22,9 +22,11 @@ export function GymCard({ cardFullName, imgUri, cardInfo, onPress }: GymCardProp
     const { myPrograms } = useAppContext();
 
     useEffect(() => {
-        const keys = Object.keys(myPrograms);
-        const found = keys.some((key) => key === cardFullName);
-        setIsPurchased(found);
+        if (myPrograms) {
+            const keys = Object.keys(myPrograms);
+            const found = keys.some((key) => key === cardFullName);
+            setIsPurchased(found);
+        }
     }, [cardFullName, myPrograms]);  
 
     return (
