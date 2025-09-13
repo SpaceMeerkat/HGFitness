@@ -2,6 +2,8 @@ import { PricingStyles } from '@/components/premium/PricingStyles';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
 import { ImageBackground, Pressable, Text, View } from 'react-native';
+import { useAppContext } from "../appContext";
+import { SubscriptionPayment } from "../premium/PremiumPayment";
 
 
 type PricingPricingProps = {
@@ -9,6 +11,8 @@ type PricingPricingProps = {
 };
 
 const PremiumPricing = ({typeString}: PricingPricingProps) => {
+
+    const { profile, setProfile } = useAppContext();
 
     const imageSource = require("@/assets/images/premiumModal.jpg");
 
@@ -97,6 +101,8 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
 
     const renderModal = () => {
       const benefits = benefitsMap[typeString] || { yes: [], no: [] };
+
+    const itemCategory = "premium";
       
     return (
         <View style={PricingStyles.modalContent}>
@@ -132,7 +138,7 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
         </View>
 
         {/* Purchase Button */}
-        <Pressable onPress={()=>console.log('pressed')} style={PricingStyles.purchaseButton}>
+        <Pressable onPress={async () =>  await SubscriptionPayment({itemCategory, profile, setProfile})} style={PricingStyles.purchaseButton}>
             <Text style={PricingStyles.purchaseText}>PURCHASE</Text>
         </Pressable>
         </View>

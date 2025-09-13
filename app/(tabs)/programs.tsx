@@ -9,6 +9,7 @@ import { ImageBackground } from "react-native";
 import { useAppContext } from "@/components/appContext";
 import { HGHeader } from "@/components/HeaderBar";
 import PaymentStatus from "@/components/network/PollPurchase";
+import SubscriptionPolling from "@/components/network/PollSubscription";
 import { MyProgramsLanding } from "@/components/programs/MyPrograms";
 import { ProgramOverview } from "@/components/programs/ProgramOverview";
 import { ProgramTracker } from "@/components/programs/ProgramTracking";
@@ -179,6 +180,7 @@ export default function MyPrograms() {
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
         <PaymentStatus initialQueue={profile?.purchaseQueue}/>
+        <SubscriptionPolling initialQueue={profile?.purchaseQueue}/>
         <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
         <ScrollView 
           contentContainerStyle={{ flexGrow: 1 }} 

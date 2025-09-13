@@ -2,8 +2,7 @@ import { useAppContext } from "@/components/appContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
-import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { useCallback, useState } from "react";
 import { ActivateGymToggle } from "./ActivateGymSubscription";
 import { ActivatePremiumToggle } from "./ActivatePremium";
 import { BASE_API_URL } from "./apiConfig";
@@ -51,6 +50,7 @@ interface SubscriptionPollingProps {
 }
 
 export default function SubscriptionPolling({ initialQueue }: SubscriptionPollingProps) {
+  console.log("beginning to poll the subscriptions from queue: ", initialQueue);
   const { profile, myPrograms, trackingData, setMealPrograms, setProfile, setMyPrograms, setTrackingData } =
     useAppContext();
   const [loading, setLoading] = useState(false);
@@ -78,7 +78,7 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
 
           try {
             const response = await fetch(
-              `${BASE_API_URL}/subscription-status?m_payment_id=${paymentId}`
+              `${BASE_API_URL}/payment-status?m_payment_id=${paymentId}`
             );
 
             if (!response.ok) {
@@ -106,7 +106,9 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
 
               if (postResponse.ok) {
                 // Roll forward billing date locally
+                console.log("billing date prior to roll forward is ", billingDate);
                 const updated_billing_date = rollForwardOneMonth(billingDate);
+                console.log("roller forward billing date is: ", updated_billing_date);
                 updatedQueue[paymentId] = updated_billing_date;
 
                 // Update the transaction queue in the user's clientside profile
@@ -115,6 +117,7 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
 
                 //  Toggle the user's premium status if premium purchase is COMPLETE
                 if (status === "COMPLETE" && item_category === "premium") {
+                  console.log("Triggering the premium toggle given COMPLETE and Premium tags");
                   await ActivatePremiumToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData});
                 }
 
@@ -143,16 +146,6 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
   if (!loading || !initialQueue || Object.keys(initialQueue).length === 0) return null;
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "plum",
-      }}
-    >
-      <ActivityIndicator size="large" />
-      <Text>Checking subscription status...</Text>
-    </View>
+    null
   );
 }

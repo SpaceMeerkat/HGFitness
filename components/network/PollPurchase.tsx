@@ -2,8 +2,7 @@ import { useAppContext } from "@/components/appContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
-import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { useCallback, useState } from "react";
 import { BASE_API_URL } from "./apiConfig";
 
 const getSecureToken = async () => {
@@ -23,6 +22,7 @@ export default function PaymentStatus({ initialQueue }: PaymentStatusProps) {
   const { profile, myPrograms, trackingData, setProfile, setMyPrograms, setTrackingData } =
     useAppContext();
   const [loading, setLoading] = useState(false);
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
   // useFocusEffect is the correct hook for this use case
   useFocusEffect(
@@ -37,7 +37,11 @@ export default function PaymentStatus({ initialQueue }: PaymentStatusProps) {
       const pollPaymentStatus = async (currentQueue: Record<string, string>) => {
         const updatedQueue = { ...currentQueue };
 
-        for (const [paymentId] of Object.entries(updatedQueue)) {
+        for (const [paymentId, status] of Object.entries(updatedQueue)) {
+          if (dateRegex.test(status)) {
+            console.log(`Skipping ${paymentId} for single payments because status is YYYY-MM-DD:`, status);
+            continue; // Skip the transaction if the value is of the form YYYY-MM-DD. i.e. it is a subscription plan payment
+          }
           try {
             const response = await fetch(
               `${BASE_API_URL}/payment-status?m_payment_id=${paymentId}`
@@ -107,16 +111,6 @@ export default function PaymentStatus({ initialQueue }: PaymentStatusProps) {
   if (!loading || !initialQueue || Object.keys(initialQueue).length === 0) return null;
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "plum",
-      }}
-    >
-      <ActivityIndicator size="large" />
-      <Text>Checking payment status...</Text>
-    </View>
+    null
   );
 }

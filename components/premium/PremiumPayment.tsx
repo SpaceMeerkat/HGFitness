@@ -1,4 +1,3 @@
-import { useAppContext } from "@/components/appContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from 'expo-secure-store';
 import { Linking } from "react-native";
@@ -6,67 +5,61 @@ import { BASE_API_URL } from "../network/apiConfig";
 
 interface SubscriptionPayFastProps {
         itemCategory: string;
+        profile: any;
+        setProfile: any;
 };
 
-export function SubscriptionPayment({itemCategory}: SubscriptionPayFastProps) {
+export async function SubscriptionPayment({itemCategory, profile, setProfile}: SubscriptionPayFastProps) {
 
-    const { myPrograms, profile, setProfile } = useAppContext();
-
-    const SubmitPayFastQuery = async (itemCategory: string, profile: any) => { 
-        // Fetch the jwt from securestore
-        const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-        if (retrievedToken && profile) {
-          try {
-              const url = `${BASE_API_URL}/query_subscription`;
-              const response = await fetch(url, {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-                //   Send the itemCategory and jwt
-                  body: JSON.stringify({
-                      item_category: itemCategory,
-                      token: retrievedToken,
-                  }),
-              });
-              if (response.ok) {
-                const jsonResponse = await response.json();
-                const query = jsonResponse.PayFastQuery;
-                // Set the profile purchaseQuery dict to match the separately updated backend profile -----------
-                const updatedProfile = {
-                    ...profile,
-                    purchaseQueue: {
-                        ...profile.purchaseQueue, // Spreads the existing items in purchaseQueue
-                        // Add some 'subscription' string tag in order to differentiate the pollPurchase operation
-                        // so that it deletes from the queue after assigning the transaction_id to the profile
-                        // persistently, for cancellation and recurrence.
-                        [itemCategory]: query.billing_date, // Adds the new key-value pair
-                    },
-                };
-                setProfile(updatedProfile);
-                await AsyncStorage.setItem("profile", JSON.stringify(profile));
-                // ----------------------------------------------------------------------------------------------
-                const urlParams = new URLSearchParams(query).toString();
-                const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
-                // const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
-                const supported = await Linking.canOpenURL(url);
-                if (supported) {
-                    await Linking.openURL(url);
-                } else {
-                    console.error("Cannot open PayFast URL:", url);
-                }
-              } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-          } catch (error) {
-              console.error('Error making payment:', error);
-             return null; 
-          }
-        } else {
-            console.log("User is not currently logged in")
-            // Replace with user warning (attention)
+    const retrievedToken = await SecureStore.getItemAsync('jwtToken');
+    if (retrievedToken && profile) {
+        try {
+            const url = `${BASE_API_URL}/query_subscription`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            //   Send the itemCategory and jwt
+                body: JSON.stringify({
+                    item_category: itemCategory,
+                    token: retrievedToken,
+                }),
+            });
+            console.log("response: ", response);
+            if (response.ok) {
+            const jsonResponse = await response.json();
+            const query = jsonResponse.PayFastQuery;
+            console.log("query: ", query);
+            // Set the profile purchaseQuery dict to match the separately updated backend profile -----------
+            const updatedProfile = {
+                ...profile,
+                purchaseQueue: {
+                    ...profile.purchaseQueue, // Spreads the existing items in purchaseQueue
+                    [itemCategory]: query.billing_date, // Adds the new key-value pair
+                },
+            };
+            setProfile(updatedProfile);
+            await AsyncStorage.setItem("profile", JSON.stringify(profile));
+            // ----------------------------------------------------------------------------------------------
+            const urlParams = new URLSearchParams(query).toString();
+            const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
+            // const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
+            const supported = await Linking.canOpenURL(url);
+            if (supported) {
+                await Linking.openURL(url);
+            } else {
+                console.error("Cannot open PayFast URL:", url);
+            }
+            } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error making payment:', error);
+            return null; 
         }
-      }
-
-    return (null);
+    } else {
+        console.log("User is not currently logged in")
+        // Replace with user warning (attention)
+    }
 };
