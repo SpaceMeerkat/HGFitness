@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 
 
-interface ActivatePremiumProps {
+interface ActivateGymProps {
     profile: any;
     setProfile: any;
     setMealPrograms: any;
@@ -13,7 +13,7 @@ interface ActivatePremiumProps {
     setTrackingData: any;
 }
 
-export async function ActivatePremiumToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData}: ActivatePremiumProps) {
+export async function ActivateGymToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData}: ActivateGymProps) {
 
     const getSecureToken = async () => {
         try {

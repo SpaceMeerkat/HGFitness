@@ -4,7 +4,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import React, { useCallback, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
-import { ActivatePremium } from "./ActivatePremium";
+import { ActivateGymToggle } from "./ActivateGymSubscription";
+import { ActivatePremiumToggle } from "./ActivatePremium";
 import { BASE_API_URL } from "./apiConfig";
 
 // Helper for getting token
@@ -50,9 +51,10 @@ interface SubscriptionPollingProps {
 }
 
 export default function SubscriptionPolling({ initialQueue }: SubscriptionPollingProps) {
-  const { profile, myPrograms, trackingData, setProfile, setMyPrograms, setTrackingData } =
+  const { profile, myPrograms, trackingData, setMealPrograms, setProfile, setMyPrograms, setTrackingData } =
     useAppContext();
   const [loading, setLoading] = useState(false);
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
   useFocusEffect(
     useCallback(() => {
@@ -64,6 +66,12 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
         const updatedQueue = { ...currentQueue };
 
         for (const [paymentId, billingDate] of Object.entries(updatedQueue)) {
+
+          if (!dateRegex.test(billingDate)) {
+            console.log(`Skipping ${paymentId} because billingDate is not YYYY-MM-DD:`, billingDate);
+            continue; // Skip the transaction if the value is not of the form YYYY-MM-DD. i.e. it is a single gym plan payment
+          }
+
           if (!isToday(billingDate)) {
             continue; // Only poll if today === scheduled billingDate
           }
@@ -101,33 +109,18 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
                 const updated_billing_date = rollForwardOneMonth(billingDate);
                 updatedQueue[paymentId] = updated_billing_date;
 
+                // Update the transaction queue in the user's clientside profile
                 const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
                 await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
 
-                if (item_category === "premium") {
-                  //  Simply trigger the premium upgrade funtion
-                  ActivatePremium();
+                //  Toggle the user's premium status if premium purchase is COMPLETE
+                if (status === "COMPLETE" && item_category === "premium") {
+                  await ActivatePremiumToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData});
                 }
 
-                const jsonResponse = await postResponse.json();
-
                 if (item_category === "gymSubscription") {
-                  // Add two gym programs
-                  const newPrograms = {
-                    ...jsonResponse.myPrograms,
-                    extraGym1: { ...jsonResponse.myPrograms[item_name] },
-                    extraGym2: { ...jsonResponse.myPrograms[item_name] },
-                  };
-                  setMyPrograms(newPrograms);
-                  await AsyncStorage.setItem("myPrograms", JSON.stringify(newPrograms));
-                  const updatedTrackingData = {
-                    ...trackingData,
-                    [item_name]: jsonResponse.trackingDataNewProgram,
-                  };
-                  setTrackingData(updatedTrackingData);
-                  await AsyncStorage.setItem("trackingData", JSON.stringify(updatedTrackingData))
-                } else if (item_category === "premium") {
-                  console.log("this is a premium purchase");
+                  const jsonResponse = await postResponse.json(); // Send this to the ActivateGymToggle function
+                  await ActivateGymToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData});
                 }
               }
             } else {
