@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import React, { useCallback, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { ActivatePremium } from "./ActivatePremium";
 import { BASE_API_URL } from "./apiConfig";
 
 // Helper for getting token
@@ -79,7 +80,7 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
 
             const { status, item_name, item_category } = await response.json();
 
-            if (status === "COMPLETE" || status === "FAILED") {
+            if (status === "COMPLETE") {
               const token = await getSecureToken();
               const postResponse = await fetch(`${BASE_API_URL}/postPaymentProcessing`, {
                 method: "POST",
@@ -102,6 +103,11 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
 
                 const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
                 await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
+
+                if (item_category === "premium") {
+                  //  Simply trigger the premium upgrade funtion
+                  ActivatePremium();
+                }
 
                 const jsonResponse = await postResponse.json();
 
