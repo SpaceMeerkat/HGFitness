@@ -78,7 +78,7 @@ export default function SubscriptionPolling({ initialQueue }: SubscriptionPollin
 
           try {
             const response = await fetch(
-              `${BASE_API_URL}/payment-status?m_payment_id=${paymentId}`
+              `${BASE_API_URL}/subscription-status?m_payment_id=${paymentId}`
             );
 
             if (!response.ok) {

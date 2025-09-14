@@ -26,11 +26,9 @@ export async function SubscriptionPayment({itemCategory, profile, setProfile}: S
                     token: retrievedToken,
                 }),
             });
-            console.log("response: ", response);
             if (response.ok) {
             const jsonResponse = await response.json();
             const query = jsonResponse.PayFastQuery;
-            console.log("query: ", query);
             // Set the profile purchaseQuery dict to match the separately updated backend profile -----------
             const updatedProfile = {
                 ...profile,
