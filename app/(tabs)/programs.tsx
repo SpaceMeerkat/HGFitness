@@ -1,5 +1,6 @@
 import { DefaultTabStyles } from "@/components/HGStyles";
-import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,14 +9,15 @@ import { ImageBackground } from "react-native";
 
 import { useAppContext } from "@/components/appContext";
 import { HGHeader } from "@/components/HeaderBar";
-import PaymentStatus from "@/components/network/PollPurchase";
-import SubscriptionPolling from "@/components/network/PollSubscription";
+import { runPaymentStatus } from "@/components/network/PollPurchase";
+import { runSubscriptionPolling } from "@/components/network/PollSubscription";
 import { MyProgramsLanding } from "@/components/programs/MyPrograms";
 import { ProgramOverview } from "@/components/programs/ProgramOverview";
 import { ProgramTracker } from "@/components/programs/ProgramTracking";
 import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
+
 
 type PageType = 'programs' | 'programOverview' | 'programTracking';
 
@@ -36,8 +38,41 @@ export default function MyPrograms() {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms } = useAppContext(); 
   const scrollViewRef = useRef<ScrollView>(null); // Add reference
+
+  const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms, setProfile, setMyPrograms, setTrackingData, setMealPrograms } =
+    useAppContext();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!profile?.purchaseQueue || Object.keys(profile.purchaseQueue).length === 0) return;
+
+      const processQueue = async () => {
+        await runPaymentStatus(profile.purchaseQueue, {
+          profile,
+          myPrograms,
+          trackingData,
+          setProfile,
+          setMyPrograms,
+          setTrackingData,
+        });
+
+        await runSubscriptionPolling(profile.purchaseQueue, {
+          profile,
+          myPrograms,
+          trackingData,
+          setProfile,
+          setMyPrograms,
+          setTrackingData,
+          setMealPrograms,
+        });
+      };
+
+      processQueue();
+    }, [profile?.purchaseQueue]) // 👈 no purchaseQueue dependency
+  );
+
+  console.log(profile?.purchaseQueue);
 
   useEffect(() => {
     if (!profile) {
@@ -72,27 +107,6 @@ export default function MyPrograms() {
       setSignupActive(true);
     }
   };
-
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     if (programOverviewOpen) {
-  //       handleChildPage('programs');
-  //       return true;
-  //     }
-  //     if (programTrackingOpen) {
-  //       handleChildPage('programOverview');
-  //       return true;
-  //     }
-  //     return false;
-  //   };
-
-  //   const backHandler = BackHandler.addEventListener(
-  //     "hardwareBackPress",
-  //     backAction
-  //   );
-
-  //   return () => backHandler.remove();
-  // }, [programOverviewOpen, programTrackingOpen]);
 
   const getProgramLevel = (selectedProgramID: string): 'advanced' | 'intermediate' | 'beginner' | null => {
     if (advancedPrograms.hasOwnProperty(selectedProgramID)) {
@@ -179,8 +193,6 @@ export default function MyPrograms() {
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
-        <PaymentStatus initialQueue={profile?.purchaseQueue}/>
-        <SubscriptionPolling initialQueue={profile?.purchaseQueue}/>
         <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
         <ScrollView 
           contentContainerStyle={{ flexGrow: 1 }} 

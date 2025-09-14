@@ -1,8 +1,5 @@
-import { useAppContext } from "@/components/appContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
-import { useCallback, useState } from "react";
 import { ActivateGymToggle } from "./ActivateGymSubscription";
 import { ActivatePremiumToggle } from "./ActivatePremium";
 import { BASE_API_URL } from "./apiConfig";
@@ -28,124 +25,145 @@ const isToday = (dateString: string): boolean => {
   );
 };
 
-// Roll the billing date forward by one month (accounting for month lengths)
-const rollForwardOneMonth = (dateString: string): string => {
-  const date = new Date(dateString);
-  const newDate = new Date(date);
+const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
-  // Move one month forward
-  newDate.setMonth(date.getMonth() + 1);
-
-  // If the new month doesn’t have the same date (e.g. Feb 30 → Mar 2),
-  // roll back to the last valid day of that month.
-  if (newDate.getDate() !== date.getDate()) {
-    newDate.setDate(0); // sets to the last day of the previous month
-  }
-
-  return newDate.toISOString().split("T")[0]; // YYYY-MM-DD
-};
-
-interface SubscriptionPollingProps {
-  initialQueue: Record<string, string> | null; // { m_transaction_id: "YYYY-MM-DD" }
+interface RunSubscriptionPollingArgs {
+  profile: any;
+  myPrograms: any;
+  trackingData: any;
+  setMealPrograms: (mp: any) => void;
+  setProfile: (p: any) => void;
+  setMyPrograms: (mp: any) => void;
+  setTrackingData: (td: any) => void;
 }
 
-export default function SubscriptionPolling({ initialQueue }: SubscriptionPollingProps) {
-  console.log("beginning to poll the subscriptions from queue: ", initialQueue);
-  const { profile, myPrograms, trackingData, setMealPrograms, setProfile, setMyPrograms, setTrackingData } =
-    useAppContext();
-  const [loading, setLoading] = useState(false);
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+/**
+ * Run subscription polling on a given queue.
+ * To be triggered by parent (e.g. in useFocusEffect).
+ */
+export async function runSubscriptionPolling(
+  currentQueue: Record<string, string>,
+  {
+    profile,
+    myPrograms,
+    trackingData,
+    setMealPrograms,
+    setProfile,
+    setMyPrograms,
+    setTrackingData,
+  }: RunSubscriptionPollingArgs
+): Promise<void> {
+  if (!currentQueue || Object.keys(currentQueue).length === 0) return;
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!initialQueue || Object.keys(initialQueue).length === 0) return;
+  const updatedQueue = { ...currentQueue };
 
-      setLoading(true);
+  for (const [paymentId, billingDate] of Object.entries(updatedQueue)) {
+    if (!dateRegex.test(billingDate)) {
+      console.log(
+        `Skipping ${paymentId} because billingDate is not YYYY-MM-DD:`,
+        billingDate
+      );
+      continue; // Skip single gym plan payments
+    }
 
-      const pollSubscriptionStatus = async (currentQueue: Record<string, string>) => {
-        const updatedQueue = { ...currentQueue };
+    if (!isToday(billingDate)) {
+      console.log(`Skipping ${paymentId} because billingDate is not today:`)
+      continue; // Only poll if today === scheduled billingDate
+    }
 
-        for (const [paymentId, billingDate] of Object.entries(updatedQueue)) {
+    try {
+      const response = await fetch(
+        `${BASE_API_URL}/subscription-status?m_payment_id=${paymentId}&billing_date=${billingDate}`
+      );
 
-          if (!dateRegex.test(billingDate)) {
-            console.log(`Skipping ${paymentId} because billingDate is not YYYY-MM-DD:`, billingDate);
-            continue; // Skip the transaction if the value is not of the form YYYY-MM-DD. i.e. it is a single gym plan payment
-          }
+      if (!response.ok) {
+        console.error("Fetch failed:", response.status);
+        continue;
+      }
 
-          if (!isToday(billingDate)) {
-            continue; // Only poll if today === scheduled billingDate
-          }
+      const {
+        status,
+        item_name,
+        item_category,
+        returned_billing_date,
+        reccurence,
+      } = await response.json();
 
-          try {
-            const response = await fetch(
-              `${BASE_API_URL}/subscription-status?m_payment_id=${paymentId}`
+      console.log(
+        status,
+        item_name,
+        item_category,
+        returned_billing_date,
+        reccurence
+      );
+
+      if (status === "COMPLETE" || status === "FAILED") {
+        const token = await getSecureToken();
+        const postResponse = await fetch(`${BASE_API_URL}/postPaymentProcessing`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token,
+            myPrograms,
+            trackingData,
+            item_name,
+            item_category,
+            purchaseID: paymentId,
+            status,
+          }),
+        });
+
+        console.log("made it here");
+
+        if (postResponse.ok && reccurence === false) {
+          // Covers both COMPLETE and FAILED recurrence payments
+          updatedQueue[paymentId] = returned_billing_date;
+
+          // Toggle premium if applicable
+          if (status === "COMPLETE" && item_category === "premium") {
+            const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
+            // await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
+            // setProfile(updatedProfile);
+            console.log(
+              "Triggering the premium toggle given COMPLETE and Premium tags"
             );
-
-            if (!response.ok) {
-              console.error("Fetch failed:", response.status);
-              continue;
-            }
-
-            const { status, item_name, item_category } = await response.json();
-
-            if (status === "COMPLETE") {
-              const token = await getSecureToken();
-              const postResponse = await fetch(`${BASE_API_URL}/postPaymentProcessing`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  token,
-                  myPrograms,
-                  trackingData,
-                  item_name,
-                  item_category,
-                  purchaseID: paymentId,
-                  status,
-                }),
-              });
-
-              if (postResponse.ok) {
-                // Roll forward billing date locally
-                console.log("billing date prior to roll forward is ", billingDate);
-                const updated_billing_date = rollForwardOneMonth(billingDate);
-                console.log("roller forward billing date is: ", updated_billing_date);
-                updatedQueue[paymentId] = updated_billing_date;
-
-                // Update the transaction queue in the user's clientside profile
-                const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
-                await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
-
-                //  Toggle the user's premium status if premium purchase is COMPLETE
-                if (status === "COMPLETE" && item_category === "premium") {
-                  console.log("Triggering the premium toggle given COMPLETE and Premium tags");
-                  await ActivatePremiumToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData});
-                }
-
-                if (item_category === "gymSubscription") {
-                  const jsonResponse = await postResponse.json(); // Send this to the ActivateGymToggle function
-                  await ActivateGymToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData});
-                }
-              }
-            } else {
-              console.log(`Subscription payment ${paymentId} failed on ${billingDate}`);
-            }
-          } catch (err) {
-            console.error("Polling error:", err);
+            await ActivatePremiumToggle({
+              profile: updatedProfile,
+              setProfile,
+              setMealPrograms,
+              myPrograms,
+              setMyPrograms,
+              trackingData,
+              setTrackingData,
+            });
+            
           }
+
+          // Handle gym subscription
+          if (item_category === "gymSubscription") {
+            const jsonResponse = await postResponse.json();
+            await ActivateGymToggle({
+              profile,
+              setProfile,
+              setMealPrograms,
+              myPrograms,
+              setMyPrograms,
+              trackingData,
+              setTrackingData,
+            });
+          }
+        } else if (postResponse.ok && reccurence === false && status === "FAILED") {
+          // Catches fresh payment fails, delete from queue
+          delete updatedQueue[paymentId];
+          const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
+          await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
+          setProfile(updatedProfile);
         }
-
-        setLoading(false);
-      };
-
-      pollSubscriptionStatus(initialQueue);
-
-      return () => {};
-    }, [initialQueue, myPrograms, trackingData, profile, setProfile, setMyPrograms, setTrackingData])
-  );
-
-  if (!loading || !initialQueue || Object.keys(initialQueue).length === 0) return null;
-
-  return (
-    null
-  );
+      } else {
+        console.log(`Subscription payment ${paymentId} failed on ${billingDate}`);
+      }
+    } catch (err) {
+      console.error("Polling error:", err);
+    }
+  }
 }

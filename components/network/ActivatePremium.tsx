@@ -40,18 +40,21 @@ export async function ActivatePremiumToggle({profile, setProfile, setMealProgram
                     token: token,
                     currentPremiumState: currentPremiumState,
                     trackingData: trackingData,
-                    myPrograms: myPrograms
+                    myPrograms: myPrograms,
+                    transactionQueue: profile.purchaseQueue
                 }),
             });
 
             if (response.ok) {
                 const jsonResponse = await response.json();
                 const newPremiumState = jsonResponse.newPremiumState;
+                const newPurchaseQueue = jsonResponse.newPurchaseQueue;
+                const newNotifications = jsonResponse.newNotifications;
                 const newCalorieTrackingState = jsonResponse.newCalorieTracking;
                 const allMealPrograms = jsonResponse.mealPrograms;
                 const updatedMyPrograms = jsonResponse.myPrograms;
                 const updatedGymTrackingData = jsonResponse.trackingData;
-                return {newPremiumState, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData}; // Return the updated profile
+                return {newPremiumState, newPurchaseQueue, newNotifications, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData}; // Return the updated profile
             } else {
                 console.error("Premium toggle failed with status:", response.status, await response.text());
                 return null;
@@ -72,7 +75,7 @@ export async function ActivatePremiumToggle({profile, setProfile, setMealProgram
             return;
         }
 
-        const {newPremiumState, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData} = await sendPriumToggleRequest(token, profile.premium);
+        const {newPremiumState, newPurchaseQueue, newNotifications, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData} = await sendPriumToggleRequest(token, profile.premium);
 
         // Step 3: Use the returned profile data
         if (newPremiumState != null) {
@@ -86,7 +89,9 @@ export async function ActivatePremiumToggle({profile, setProfile, setMealProgram
                 ...profile,
                 premium: newPremiumState,
                 myPrograms: updatedMyPrograms,
-                calorieCalculator: newCalorieTrackingState
+                calorieCalculator: newCalorieTrackingState,
+                purchaseQueue: newPurchaseQueue,
+                notifications: newNotifications
             };
             setProfile(updatedProfile);
             await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));

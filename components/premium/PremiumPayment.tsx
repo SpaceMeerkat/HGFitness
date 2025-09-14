@@ -29,12 +29,13 @@ export async function SubscriptionPayment({itemCategory, profile, setProfile}: S
             if (response.ok) {
             const jsonResponse = await response.json();
             const query = jsonResponse.PayFastQuery;
+            const m_transaction_id = query.m_payment_id;
             // Set the profile purchaseQuery dict to match the separately updated backend profile -----------
             const updatedProfile = {
                 ...profile,
                 purchaseQueue: {
                     ...profile.purchaseQueue, // Spreads the existing items in purchaseQueue
-                    [itemCategory]: query.billing_date, // Adds the new key-value pair
+                    [m_transaction_id]: query.billing_date, // Adds the new key-value pair
                 },
             };
             setProfile(updatedProfile);
