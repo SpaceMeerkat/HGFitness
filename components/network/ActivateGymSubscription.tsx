@@ -6,14 +6,13 @@ import * as SecureStore from 'expo-secure-store';
 interface ActivateGymProps {
     profile: any;
     setProfile: any;
-    setMealPrograms: any;
     myPrograms: any; 
     setMyPrograms: any;
     trackingData: any;
     setTrackingData: any;
 }
 
-export async function ActivateGymToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData}: ActivateGymProps) {
+export async function ActivateGymSubscriptionToggle({profile, setProfile, myPrograms, setMyPrograms, trackingData, setTrackingData}: ActivateGymProps) {
 
     const getSecureToken = async () => {
         try {
@@ -29,16 +28,16 @@ export async function ActivateGymToggle({profile, setProfile, setMealPrograms, m
         }
     };
 
-    const sendPriumToggleRequest = async (token: string, currentPremiumState: boolean): Promise<any | null> => {
+    const sendPriumToggleRequest = async (token: string, currentSubscriptionState: boolean): Promise<any | null> => {
         try {
-            const response = await fetch(`${BASE_API_URL}/togglePremium`, {
+            const response = await fetch(`${BASE_API_URL}/toggleGymSubscription`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     token: token,
-                    currentPremiumState: currentPremiumState,
+                    currentSubscriptionState: currentSubscriptionState,
                     trackingData: trackingData,
                     myPrograms: myPrograms
                 }),
@@ -46,23 +45,23 @@ export async function ActivateGymToggle({profile, setProfile, setMealPrograms, m
 
             if (response.ok) {
                 const jsonResponse = await response.json();
-                const newPremiumState = jsonResponse.newPremiumState;
-                const newCalorieTrackingState = jsonResponse.newCalorieTracking;
-                const allMealPrograms = jsonResponse.mealPrograms;
+                const newSubscriptionState = jsonResponse.newGymSubscriptionState;
+                const newNotifications = jsonResponse.newNotifications;
                 const updatedMyPrograms = jsonResponse.myPrograms;
                 const updatedGymTrackingData = jsonResponse.trackingData;
-                return {newPremiumState, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData}; // Return the updated profile
+                const newPurchaseQueue = jsonResponse.newPurchaseQueue;
+                return {newSubscriptionState, newNotifications, updatedMyPrograms, updatedGymTrackingData, newPurchaseQueue}; // Return the updated profile
             } else {
-                console.error("Premium toggle failed with status:", response.status, await response.text());
+                console.error("Gym Subscription toggle failed with status:", response.status, await response.text());
                 return null;
             }
         } catch (error) {
-            console.error("Premium toggle request failed:", error);
+            console.error("Gym Subscription toggle request failed:", error);
             return null;
         }
     };
 
-    const executePremiumToggle = async () => { // Make this function async
+    const executeSubscriptionToggle = async () => { // Make this function async
         // Step 1: Retrieve the token (await its resolution)
         const token = await getSecureToken();
 
@@ -72,21 +71,18 @@ export async function ActivateGymToggle({profile, setProfile, setMealPrograms, m
             return;
         }
 
-        const {newPremiumState, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData} = await sendPriumToggleRequest(token, profile.premium);
+        const {newSubscriptionState, newNotifications, updatedMyPrograms, updatedGymTrackingData, newPurchaseQueue} = await sendPriumToggleRequest(token, profile.gymSubscription);
 
         // Step 3: Use the returned profile data
-        if (newPremiumState != null) {
+        if (newSubscriptionState != null) {
             //--------------------------------------------------------------------------
-            // Update the accessible meal data
-            setMealPrograms(allMealPrograms);
-            await AsyncStorage.setItem('mealPrograms', JSON.stringify(allMealPrograms));
-            //--------------------------------------------------------------------------
-            // Update the profile premium status
+            // Update the profile gym subscription status
             const updatedProfile = {
                 ...profile,
-                premium: newPremiumState,
+                gymSubscription: newSubscriptionState,
                 myPrograms: updatedMyPrograms,
-                calorieCalculator: newCalorieTrackingState
+                purchaseQueue: newPurchaseQueue,
+                notifications: newNotifications
             };
             setProfile(updatedProfile);
             await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
@@ -100,9 +96,9 @@ export async function ActivateGymToggle({profile, setProfile, setMealPrograms, m
             await AsyncStorage.setItem('trackingData', JSON.stringify(updatedGymTrackingData));
             //--------------------------------------------------------------------------
         } else {
-            console.warn("Premium toggle operation did not return an updated profile.");
+            console.warn("Gym Subscription toggle operation did not return an updated profile.");
         }
     };
 
-    await executePremiumToggle();
+    await executeSubscriptionToggle();
 }

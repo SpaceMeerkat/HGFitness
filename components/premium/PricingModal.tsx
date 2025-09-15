@@ -6,7 +6,7 @@ import PremiumPricing from './PremiumModal';
 type PricingModalProps = {
   visible: boolean;
   onClose: () => void;
-  defaultType: string;
+  defaultType: "free" | "subscription" | "premium";
 };
 
 const PricingModal: React.FC<PricingModalProps> = ({

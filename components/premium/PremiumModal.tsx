@@ -5,16 +5,28 @@ import { ImageBackground, Pressable, Text, View } from 'react-native';
 import { useAppContext } from "../appContext";
 import { SubscriptionPayment } from "../premium/PremiumPayment";
 
-
 type PricingPricingProps = {
-    typeString: string;
+    typeString: "free" | "subscription" | "premium";
 };
 
 const PremiumPricing = ({typeString}: PricingPricingProps) => {
 
     const { profile, setProfile } = useAppContext();
 
-    const imageSource = require("@/assets/images/premiumModal.jpg");
+    const item_category_dict: Record<"free" | "subscription" | "premium", string> = {
+      free: "free",
+      subscription: "gymSubscription",
+      premium: "premium",
+    };
+
+    const price_category_dict: Record<"free" | "subscription" | "premium", string> = {
+      free: "0",
+      subscription: "70",
+      premium: "100",
+    };
+
+    const itemCategory = item_category_dict[typeString];
+    const itemPrice = price_category_dict[typeString];
 
       // Dictionary of benefits
       const premiumBenefits: { yes: string[]; no: string[] } = {
@@ -101,8 +113,6 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
 
     const renderModal = () => {
       const benefits = benefitsMap[typeString] || { yes: [], no: [] };
-
-    const itemCategory = "premium";
       
     return (
         <View style={PricingStyles.modalContent}>
@@ -118,7 +128,7 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
           {/* Price */}
           <View style={PricingStyles.priceRow}>
               <View style={PricingStyles.cell}>
-              <Text style={PricingStyles.cellPriceText}>R100</Text>
+              <Text style={PricingStyles.cellPriceText}>R{itemPrice}</Text>
               </View>
           </View>
 
@@ -138,7 +148,7 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
         </View>
 
         {/* Purchase Button */}
-        <Pressable onPress={async () =>  await SubscriptionPayment({itemCategory, profile, setProfile})} style={PricingStyles.purchaseButton}>
+        <Pressable onPress={itemCategory === "free"? () => {} : async () =>  await SubscriptionPayment({itemCategory, profile, setProfile})} style={PricingStyles.purchaseButton}>
             <Text style={PricingStyles.purchaseText}>PURCHASE</Text>
         </Pressable>
         </View>

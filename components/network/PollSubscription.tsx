@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
-import { ActivateGymToggle } from "./ActivateGymSubscription";
+import { ActivateGymSubscriptionToggle } from "./ActivateGymSubscription";
 import { ActivatePremiumToggle } from "./ActivatePremium";
 import { BASE_API_URL } from "./apiConfig";
 
@@ -14,16 +14,17 @@ const getSecureToken = async () => {
   }
 };
 
-// Safe function to check if today matches billing date
-const isToday = (dateString: string): boolean => {
+const isTodayOrAfter = (dateString: string): boolean => {
   const today = new Date();
   const billingDate = new Date(dateString);
-  return (
-    today.getFullYear() === billingDate.getFullYear() &&
-    today.getMonth() === billingDate.getMonth() &&
-    today.getDate() === billingDate.getDate()
-  );
+
+  // Normalize today to remove hours/minutes/seconds
+  today.setHours(0, 0, 0, 0);
+  billingDate.setHours(0, 0, 0, 0);
+
+  return today.getTime() >= billingDate.getTime();
 };
+
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -66,7 +67,7 @@ export async function runSubscriptionPolling(
       continue; // Skip single gym plan payments
     }
 
-    if (!isToday(billingDate)) {
+    if (!isTodayOrAfter(billingDate)) {
       console.log(`Skipping ${paymentId} because billingDate is not today:`)
       continue; // Only poll if today === scheduled billingDate
     }
@@ -118,12 +119,10 @@ export async function runSubscriptionPolling(
         if (postResponse.ok && reccurence === false) {
           // Covers both COMPLETE and FAILED recurrence payments
           updatedQueue[paymentId] = returned_billing_date;
+          const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
 
           // Toggle premium if applicable
           if (status === "COMPLETE" && item_category === "premium") {
-            const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
-            // await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
-            // setProfile(updatedProfile);
             console.log(
               "Triggering the premium toggle given COMPLETE and Premium tags"
             );
@@ -140,12 +139,13 @@ export async function runSubscriptionPolling(
           }
 
           // Handle gym subscription
-          if (item_category === "gymSubscription") {
-            const jsonResponse = await postResponse.json();
-            await ActivateGymToggle({
-              profile,
+          if (status === "COMPLETE" && item_category === "gymSubscription") {
+            console.log(
+              "Triggering the gym subscription toggle given COMPLETE and gymSubscription tags"
+            );
+            await ActivateGymSubscriptionToggle({
+              profile: updatedProfile,
               setProfile,
-              setMealPrograms,
               myPrograms,
               setMyPrograms,
               trackingData,
