@@ -61,14 +61,14 @@ export async function runSubscriptionPolling(
   for (const [paymentId, billingDate] of Object.entries(updatedQueue)) {
     if (!dateRegex.test(billingDate)) {
       console.log(
-        `Skipping ${paymentId} because billingDate is not YYYY-MM-DD:`,
+        `Skipping ${paymentId} because billingDate is not of format YYYY-MM-DD:`,
         billingDate
       );
       continue; // Skip single gym plan payments
     }
 
     if (!isTodayOrAfter(billingDate)) {
-      console.log(`Skipping ${paymentId} because billingDate is not today:`)
+      console.log(`Skipping ${paymentId} because billingDate is in the future.`)
       continue; // Only poll if today === scheduled billingDate
     }
 
@@ -114,7 +114,27 @@ export async function runSubscriptionPolling(
           }),
         });
 
-        console.log("made it here");
+        // If error code 500 and response.state present and response.stat==="no_transaction_on_record" then abort gracefully
+
+        if (!postResponse.ok) {
+          let postData: any = {};
+          try {
+            postData = await postResponse.json();
+            if (postData?.state === "no_transaction_on_record") {
+              console.log("Aborting payment gracefully, deleting from transaction queue - no transaction on record.");
+              delete updatedQueue[paymentId];
+              const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
+              await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
+              setProfile(updatedProfile);
+              return; // exit early, don’t continue
+            }
+          } catch (err) {
+            console.warn("Failed to parse backend response", err);
+          }
+
+          // otherwise, real error
+          throw new Error(`Backend error: ${postResponse.status}`);
+}
 
         if (postResponse.ok && reccurence === false) {
           // Covers both COMPLETE and FAILED recurrence payments
@@ -124,7 +144,7 @@ export async function runSubscriptionPolling(
           // Toggle premium if applicable
           if (status === "COMPLETE" && item_category === "premium") {
             console.log(
-              "Triggering the premium toggle given COMPLETE and Premium tags"
+              "Triggering the premium toggle given COMPLETE and Premium tags for: ", paymentId
             );
             await ActivatePremiumToggle({
               profile: updatedProfile,

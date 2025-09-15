@@ -21,7 +21,6 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
 
   useEffect(() => {
     if (trackingData !== null && myPrograms !== null) {
-      console.log('Triggered');
       setTrackingDataSoft(trackingData); // Set purchased programs to myPrograms if it exists
       setPurchasedPrograms(myPrograms);
     }

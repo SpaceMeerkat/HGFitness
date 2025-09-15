@@ -72,7 +72,7 @@ export default function MyPrograms() {
     }, [profile?.purchaseQueue]) // 👈 no purchaseQueue dependency
   );
 
-  console.log(profile?.purchaseQueue);
+  console.log("purchase queue: ", profile?.purchaseQueue);
 
   useEffect(() => {
     if (!profile) {
