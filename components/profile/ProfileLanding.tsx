@@ -10,7 +10,6 @@ import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
-import LogoutButton from "./Logout";
 
 export function ProfileOverview() {
 
@@ -263,10 +262,7 @@ export function ProfileOverview() {
           prefix={buttons[selected].prefix} 
           decimal = {buttons[selected].decimal} />: <NoMealsChart/>} */}
           <Text style={{color: 'cyan'}}>Meal charts go here</Text>
-        </View>
-
-        <LogoutButton />
-        
+        </View>        
 
       </ScrollView>
       

@@ -142,7 +142,7 @@ export async function runSubscriptionPolling(
           const updatedProfile = { ...profile, purchaseQueue: updatedQueue };
 
           // Toggle premium if applicable
-          if (status === "COMPLETE" && item_category === "premium") {
+          if (status === "COMPLETE" && item_category === "premium" && reccurence===false) {
             console.log(
               "Triggering the premium toggle given COMPLETE and Premium tags for: ", paymentId
             );
@@ -159,7 +159,7 @@ export async function runSubscriptionPolling(
           }
 
           // Handle gym subscription
-          if (status === "COMPLETE" && item_category === "gymSubscription") {
+          if (status === "COMPLETE" && item_category === "gymSubscription" && reccurence===false) {
             console.log(
               "Triggering the gym subscription toggle given COMPLETE and gymSubscription tags"
             );

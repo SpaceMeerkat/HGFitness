@@ -148,7 +148,8 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
         </View>
 
         {/* Purchase Button */}
-        <Pressable onPress={itemCategory === "free"? () => {} : async () =>  await SubscriptionPayment({itemCategory, profile, setProfile})} style={PricingStyles.purchaseButton}>
+        <Pressable onPress={itemCategory === "free"? () => {} : async () =>  await SubscriptionPayment({itemCategory, profile, setProfile})} 
+        style={[PricingStyles.purchaseButton, itemCategory === "free"? {opacity: 0.3}: {}]}>
             <Text style={PricingStyles.purchaseText}>PURCHASE</Text>
         </Pressable>
         </View>

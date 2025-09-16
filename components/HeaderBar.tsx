@@ -5,13 +5,13 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { useState } from "react";
 import { Pressable, Text, View } from 'react-native';
 import NotificationsModal from "./NotificationsModal";
-import PricingModal from "./premium/PricingModal";
+import SettingsModal from "./SettingsModal";
 
 
 export function HGHeader() {
     const { profile, setProfile } = useAppContext();
     const [notificationsVisible, setNotificationsVisible] = useState(false);
-    const [premiumVisible, setPremiumVisible] = useState(false);
+    const [settingsVisible, setSettingsVisible] = useState(false);
     const premiumState = profile?.premium;
 
     const title = premiumState ? "HOOLIGAINS PRO" : "HOOLIGAINS";
@@ -23,10 +23,9 @@ export function HGHeader() {
         notifications={profile?.notifications}
         onClose={() => setNotificationsVisible(false)}
         />
-        <PricingModal
-        visible={premiumVisible}
-        onClose={() => setPremiumVisible(false)}
-        defaultType="free"
+        <SettingsModal
+        visible={settingsVisible}
+        onClose={() => setSettingsVisible(false)}
         />
         <View style={DefaultTabStyles.hgHeaderContainer}>
             {/* <Image source={require("@/assets/images/OfficialLogo.jpg")} style={{ flex: 0.15, resizeMode: "contain" }} /> */}
@@ -43,7 +42,7 @@ export function HGHeader() {
             <Pressable onPress={() => setNotificationsVisible(true)} style={{flex: 0.12}}>
                 <TabBarIcon name={'notifications'} size={28} color="white" />
             </Pressable>
-            <Pressable onPress={() => setPremiumVisible(true)} style={{flex: 0.12}}>
+            <Pressable onPress={() => setSettingsVisible(true)} style={{flex: 0.12}}>
                 <SimpleLineIcons name="menu" size={28} color="white" style={{textAlign: 'right'}} />
             </Pressable>
         </View>
