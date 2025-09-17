@@ -72,6 +72,20 @@ export async function runSubscriptionPolling(
       continue; // Only poll if today === scheduled billingDate
     }
 
+    // For CANCELLATIONs, check which is active in profile and then toggle it and continue on in the transaction queue
+    if (paymentId === 'CANCELLATION') {
+      delete updatedQueue[paymentId];
+      if (profile?.premium) {
+        const updatedProfile = { ...profile, purchaseQueue: updatedQueue, premium: "CANCELLATION" };
+        await ActivatePremiumToggle({profile:updatedProfile,setProfile,setMealPrograms,myPrograms,setMyPrograms,trackingData,setTrackingData});
+      continue;
+      } else if (profile?.gymSubscription) {
+        const updatedProfile = { ...profile, purchaseQueue: updatedQueue, gymSubscription: "CANCELLATION" };
+        await ActivateGymSubscriptionToggle({profile:updatedProfile,setProfile,myPrograms,setMyPrograms,trackingData,setTrackingData});
+        continue;
+      }
+    }
+
     try {
       const response = await fetch(
         `${BASE_API_URL}/subscription-status?m_payment_id=${paymentId}&billing_date=${billingDate}`
@@ -134,7 +148,7 @@ export async function runSubscriptionPolling(
 
           // otherwise, real error
           throw new Error(`Backend error: ${postResponse.status}`);
-}
+        }
 
         if (postResponse.ok && reccurence === false) {
           // Covers both COMPLETE and FAILED recurrence payments
