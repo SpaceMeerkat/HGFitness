@@ -56,10 +56,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Text style={[styles.title]}>Contact support</Text>
             </Pressable>
 
-            <Pressable onPress={() => isSubscriber? console.log("pressed!") : {}} style={[styles.row]}>
-                <Text style={[styles.title, !isSubscriber? {opacity: 0.3} : {}, !profile? {opacity: 0.3} : {}]}>Subscription settings</Text>
-            </Pressable>
-
             <Pressable onPress={() => console.log("pressed!")} style={[styles.row]}>
                 <Text style={[styles.title, !profile? {opacity: 0.3} : {}]}>Change email</Text>
             </Pressable>
@@ -68,9 +64,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Text style={[styles.title, !profile? {opacity: 0.3} : {}]}>Change password</Text>
             </Pressable>
 
+            <Pressable onPress={() => isSubscriber? console.log("pressed!") : {}} style={[styles.row]}>
+                <Text style={[styles.title, !isSubscriber? {opacity: 0.3, color: 'black'} : {color: 'coral'}, !profile? {opacity: 0.3, color: 'black'} : {}]}>Cancel subscription</Text>
+            </Pressable>  
+
             <Pressable onPress={profile? logout : () => console.log('pressed!')} style={[styles.row]}>
                 <Text style={[styles.title, !profile? {opacity: 0.3, color: 'black'} : {color: 'coral'}]}>Logout</Text>
             </Pressable>
+            
 
             {/* Close Button */}
             <Pressable onPress={onClose} style={styles.closeButton}>
@@ -82,7 +83,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="fade" transparent>
       <View style={PricingStyles.modalBackground}>
         {renderModal()}
       </View>
