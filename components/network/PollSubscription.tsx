@@ -54,6 +54,7 @@ export async function runSubscriptionPolling(
     setTrackingData,
   }: RunSubscriptionPollingArgs
 ): Promise<void> {
+  
   if (!currentQueue || Object.keys(currentQueue).length === 0) return;
 
   const updatedQueue = { ...currentQueue };
@@ -72,18 +73,23 @@ export async function runSubscriptionPolling(
       continue; // Only poll if today === scheduled billingDate
     }
 
+    
+
     // For CANCELLATIONs, check which is active in profile and then toggle it and continue on in the transaction queue
-    if (paymentId === 'CANCELLATION') {
-      delete updatedQueue[paymentId];
+    if (paymentId === 'CANCELLED' && isTodayOrAfter(billingDate)) {
+      console.log("tiggered CANCELLED state", profile.premium);
+      // delete updatedQueue[paymentId];
       if (profile?.premium) {
-        const updatedProfile = { ...profile, purchaseQueue: updatedQueue, premium: "CANCELLATION" };
+        const updatedProfile = { ...profile, purchaseQueue: updatedQueue, premium: "CANCELLED" };
+        console.log("updated profile: ",updatedProfile);
         await ActivatePremiumToggle({profile:updatedProfile,setProfile,setMealPrograms,myPrograms,setMyPrograms,trackingData,setTrackingData});
-      continue;
+        continue;
       } else if (profile?.gymSubscription) {
-        const updatedProfile = { ...profile, purchaseQueue: updatedQueue, gymSubscription: "CANCELLATION" };
+        const updatedProfile = { ...profile, purchaseQueue: updatedQueue, gymSubscription: "CANCELLED" };
         await ActivateGymSubscriptionToggle({profile:updatedProfile,setProfile,myPrograms,setMyPrograms,trackingData,setTrackingData});
         continue;
       }
+      continue;
     }
 
     try {

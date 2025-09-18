@@ -2,6 +2,7 @@ import { useAppContext } from "@/components/appContext";
 import { PricingStyles } from '@/components/premium/PricingStyles';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { runSubscriptionCancellation } from "./network/CancelSubscription";
 import { useLogout } from "./users/LogoutUser";
 
 type SettingsModalProps = {
@@ -16,6 +17,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
 
     const { profile,
+            myPrograms,
             trackingData,
             setProfile,
             setMyPrograms,
@@ -24,6 +26,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setprofileImagePaths,
             setMasterGymProgramsDictionary,
     } = useAppContext();
+
+    const transactionQueue = profile?.purchaseQueue
 
     const { logout } = useLogout({
         trackingData,
@@ -64,11 +68,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Text style={[styles.title, !profile? {opacity: 0.3} : {}]}>Change password</Text>
             </Pressable>
 
-            <Pressable onPress={() => isSubscriber? console.log("pressed!") : {}} style={[styles.row]}>
+            <Pressable onPress={async () => {
+              if (isSubscriber) {
+               await runSubscriptionCancellation({profile, setProfile})
+              }
+              }} style={[styles.row]}>
                 <Text style={[styles.title, !isSubscriber? {opacity: 0.3, color: 'black'} : {color: 'coral'}, !profile? {opacity: 0.3, color: 'black'} : {}]}>Cancel subscription</Text>
             </Pressable>  
 
-            <Pressable onPress={profile? logout : () => console.log('pressed!')} style={[styles.row]}>
+            <Pressable onPress={profile? () => {onClose; logout();} : () => console.log('pressed!')} style={[styles.row]}>
                 <Text style={[styles.title, !profile? {opacity: 0.3, color: 'black'} : {color: 'coral'}]}>Logout</Text>
             </Pressable>
             

@@ -1,6 +1,4 @@
 import * as SecureStore from "expo-secure-store";
-import { ActivateGymSubscriptionToggle } from "./ActivateGymSubscription";
-import { ActivatePremiumToggle } from "./ActivatePremium";
 import { BASE_API_URL } from "./apiConfig";
 
 // Helper for getting token
@@ -28,28 +26,20 @@ const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
 interface RunSubscriptionCancellationArgs {
   profile: any;
-  myPrograms: any;
-  trackingData: any;
-  setMealPrograms: (mp: any) => void;
   setProfile: (p: any) => void;
-  setMyPrograms: (mp: any) => void;
-  setTrackingData: (td: any) => void;
 }
 
 export async function runSubscriptionCancellation(
-  currentQueue: Record<string, string>,
   { profile,
-    myPrograms,
-    trackingData,
-    setMealPrograms,
     setProfile,
-    setMyPrograms,
-    setTrackingData,
   }: RunSubscriptionCancellationArgs
 ): Promise<void> {
+    const currentQueue : Record<string, string> = profile?.purchaseQueue;
   if (!currentQueue || Object.keys(currentQueue).length === 0) return;
 
     const sendCancellationRequest = async (token: string, paymentId: string): Promise<any | null> => {
+
+        console.log("triggered sendCancellationRequest, proceeding to POST request");
 
         try {
             const response = await fetch(`${BASE_API_URL}/subscription-cancellation`, {
@@ -64,6 +54,7 @@ export async function runSubscriptionCancellation(
             });
 
             if (response.ok) {
+                console.log("Backend response is OK in sendCancellationRequest, continuing...");
                 const jsonResponse = await response.json();
                 const item_category = jsonResponse.item_category;
                 const new_notifications = jsonResponse.new_notifications;
@@ -83,6 +74,8 @@ export async function runSubscriptionCancellation(
     }
 
     const executeCancellation = async (paymentId: string) => {
+
+        console.log("Looping over purchaseQueue, processing: ", paymentId, "... in executeCancellation.");
         const token = await getSecureToken();
         if (!token) {
             // Handle case where token is not found or retrieval failed
@@ -100,26 +93,7 @@ export async function runSubscriptionCancellation(
             notifications: new_notifications 
         };
 
-        if (item_category === 'premium') {
-            await ActivatePremiumToggle({
-              profile: updatedProfile, // Need to add a backend "if CANCELLED then return no notification and toggle as usual"
-              setProfile,
-              setMealPrograms,
-              myPrograms,
-              setMyPrograms,
-              trackingData,
-              setTrackingData,
-            });
-        } else if (item_category === 'gymSubscription') {
-            await ActivateGymSubscriptionToggle({
-                profile: updatedProfile, // Need to add a backend "if CANCELLED then return no notification and toggle as usual"
-                setProfile,
-                myPrograms,
-                setMyPrograms,
-                trackingData,
-                setTrackingData,
-            });
-        }
+        setProfile(updatedProfile);
     };
 
     const processTransactionQueueCancellations = async () => {
@@ -135,11 +109,6 @@ export async function runSubscriptionCancellation(
             continue; // Skip single gym plan payments
             }
 
-            if (!isTodayOrAfter(billingDate)) {
-            console.log(`Skipping ${paymentId} because billingDate is in the future.`)
-            continue; // Only poll if today === scheduled billingDate
-            }
-
             try {
                await executeCancellation(paymentId);
             } catch (error) {
@@ -149,7 +118,7 @@ export async function runSubscriptionCancellation(
         }
     }
 
-    await processTransactionQueueCancellations()
+    await processTransactionQueueCancellations();
 }
 
   

@@ -402,37 +402,38 @@ export default function MealScreen() {
             <View style={{flex: 1, flexDirection: 'row'}}>
 
               <View style={{flex: 0.8, flexDirection: 'column', justifyContent: 'center', paddingLeft: 12}}>
-                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}> / {profile.calorieCalculator.meals} </Text>
+                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}>{profile.calorieCalculator.meals}</Text>
               </View>
 
               <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center', paddingLeft: 20}}>
-                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}> / {profile.calorieCalculator.calories} </Text>
+                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}>{profile.calorieCalculator.calories}</Text>
               </View>
 
               <View style={{flex: 0.4, flexDirection: 'column', paddingLeft: 4}}>
                 <View style={{flex: 1, flexDirection: 'row',justifyContent: 'flex-start'}}>
                 <FontAwesome name="bolt" size={30} color="orange" style= {{textAlign: 'right', textAlignVertical: 'center'}}/>
-                <MaterialCommunityIcons name="numeric-9" size={20} color="orange" 
+                {/* <MaterialCommunityIcons name="numeric-9" size={20} color="orange" 
                   style= {{textAlign: 'left', textAlignVertical: 'center',
                   }}
-                  />
+                  /> */}
                   </View>
-                  {/* <MaterialCommunityIcons name="numeric-9" size={20} color="orange" 
+                  <MaterialCommunityIcons name="numeric-9" size={20} color="orange" 
                   style= {{textAlign: 'center', textAlignVertical: 'center',
                     position: "absolute",
                       left: 0,
                       right: 0,
+                      top: 20,
                       zIndex: 1000
                   }}
-                  /> */}
+                  />
               </View>
 
               <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center'}}>
-                <Text style={{color: 'grey', textAlign: 'left', fontSize: 18, paddingLeft: 0}}> / {profile.calorieCalculator.protein}g </Text>
+                <Text style={{color: 'grey', textAlign: 'left', fontSize: 18, paddingLeft: 0}}>{profile.calorieCalculator.protein}g</Text>
               </View>
 
               <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center'}}>
-                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}> / {profile.calorieCalculator.water}L </Text>
+                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}>{profile.calorieCalculator.water}L</Text>
               </View>
 
             </View>

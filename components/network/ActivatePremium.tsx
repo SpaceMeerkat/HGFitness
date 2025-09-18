@@ -15,6 +15,8 @@ interface ActivatePremiumProps {
 
 export async function ActivatePremiumToggle({profile, setProfile, setMealPrograms, myPrograms, setMyPrograms, trackingData, setTrackingData}: ActivatePremiumProps) {
 
+    console.log("TRIGGERED");
+
     const getSecureToken = async () => {
         try {
             const retrievedToken = await SecureStore.getItemAsync('jwtToken');
@@ -29,7 +31,7 @@ export async function ActivatePremiumToggle({profile, setProfile, setMealProgram
         }
     };
 
-    const sendPriumToggleRequest = async (token: string, currentPremiumState: boolean): Promise<any | null> => {
+    const sendPriumToggleRequest = async (token: string, currentPremiumState: any): Promise<any | null> => {
         try {
             const response = await fetch(`${BASE_API_URL}/togglePremium`, {
                 method: "POST",
@@ -77,6 +79,7 @@ export async function ActivatePremiumToggle({profile, setProfile, setMealProgram
 
         const {newPremiumState, newPurchaseQueue, newNotifications, newCalorieTrackingState, allMealPrograms, updatedMyPrograms, updatedGymTrackingData} = await sendPriumToggleRequest(token, profile.premium);
 
+        console.log("premium inside toggle is: ", profile.premium);
         // Step 3: Use the returned profile data
         if (newPremiumState != null) {
             //--------------------------------------------------------------------------

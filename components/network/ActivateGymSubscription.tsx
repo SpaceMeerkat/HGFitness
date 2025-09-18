@@ -39,7 +39,8 @@ export async function ActivateGymSubscriptionToggle({profile, setProfile, myProg
                     token: token,
                     currentSubscriptionState: currentSubscriptionState,
                     trackingData: trackingData,
-                    myPrograms: myPrograms
+                    myPrograms: myPrograms,
+                    transactionQueue: profile.purchaseQueue
                 }),
             });
 
