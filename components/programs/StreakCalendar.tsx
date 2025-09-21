@@ -5,16 +5,6 @@ import { StyleSheet, Text, View } from "react-native";
 // Days of the week header (Mon-Sun + Extra column)
 const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S", ""]; 
 
-// Hardcoded constant N
-const N = 2;
-
-// Mock list of "special days" (randomly picked between Aug-Oct for demo)
-const highlightedDays = Array.from({ length: 50 }, () => {
-  const month = 7 + Math.floor(Math.random() * 3); // Aug (7) to Oct (9)
-  const day = 1 + Math.floor(Math.random() * 31);
-  return `${month + 1}-${day}`; // Format "MM-DD"
-});
-
 // Helper to get all days in the month with spillover
 const getCalendarDays = (year: number, month: number) => {
   const firstDay = new Date(year, month, 1);
@@ -46,7 +36,12 @@ const getCalendarDays = (year: number, month: number) => {
   return [...prevMonthDays, ...thisMonthDays, ...nextMonthDays];
 };
 
-const Calendar: React.FC = () => {
+interface CalendarProps {
+  streakDates: string[]; // or Date[] depending on what you pass in
+  streakThreshold: number;
+}
+
+const Calendar: React.FC<CalendarProps> = ({ streakDates, streakThreshold }) => {
   const now = new Date();
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: "Africa/Johannesburg",
@@ -56,11 +51,11 @@ const Calendar: React.FC = () => {
 
   const parts = formatter.formatToParts(now);
   const year = parseInt(parts.find(p => p.type === "year")?.value || "0");
-  const month = now.getMonth();
+  const month = now.getMonth() + 1;
   const monthName = parts.find(p => p.type === "month")?.value.toUpperCase();
 
   const today = now.getDate();
-  const days = getCalendarDays(year, month);
+  const days = getCalendarDays(year, month - 1);
 
   // Split into weeks of 7 days, then add the extra column
   const weeks: { day: number; type: "prev" | "curr" | "next" }[][] = [];
@@ -95,57 +90,55 @@ const Calendar: React.FC = () => {
 
       {/* Weeks */}
       {weeks.map((week, wi) => {
-        // Count how many highlighted days in this week
-        const highlightCount = week.filter(
-          d =>
-            d.type === "curr" &&
-            highlightedDays.includes(`${month + 1}-${d.day}`)
-        ).length;
+      // Count how many streak days in this week
+      const highlightCount = week.reduce((count, d) => {
+        if (d.type !== "curr") return count;
+        const key = `${year}_${month}_${d.day}`;
+        return count + streakDates.filter(date => date === key).length;
+      }, 0);
 
-        return (
-          <View key={wi} style={styles.weekRow}>
-            {week.map((d, di) => {
-              const isToday = d.type === "curr" && d.day === today;
-              const isHighlighted =
-                d.type === "curr" &&
-                highlightedDays.includes(`${month + 1}-${d.day}`);
+      return (
+        <View key={wi} style={styles.weekRow}>
+          {week.map((d, di) => {
+            const isToday = d.type === "curr" && d.day === today;
+            const isHighlighted = streakDates.includes(`${year}_${month}_${d.day}`);
 
-              return (
-                <View key={di} style={styles.dayCell}>
-                  <View
+            return (
+              <View key={di} style={styles.dayCell}>
+                <View
+                  style={[
+                    styles.dayCircle,
+                    isToday && styles.todayCircle,
+                    isHighlighted && styles.highlightCircle,
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.dayCircle,
-                      isToday && styles.todayCircle,
-                      isHighlighted && styles.highlightCircle,
+                      styles.dayText,
+                      d.type !== "curr" && styles.spilloverText,
+                      isToday && styles.todayText,
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.dayText,
-                        d.type !== "curr" && styles.spilloverText,
-                        isToday && styles.todayText,
-                      ]}
-                    >
-                      {d.day}
-                    </Text>
-                  </View>
+                    {d.day}
+                  </Text>
                 </View>
-              );
-            })}
+              </View>
+            );
+          })}
 
-            {/* Extra column cell */}
-            <View style={styles.extraCell}>
-              {highlightCount >= N && (
-                <FontAwesome5
-                  name="check-circle"
-                  size={20}
-                  color="orange"
-                />
-              )}
-            </View>
+          {/* Extra column cell */}
+          <View style={styles.extraCell}>
+            {highlightCount >= streakThreshold && (
+              <FontAwesome5
+                name="check-circle"
+                size={20}
+                color="orange"
+              />
+            )}
           </View>
-        );
-      })}
+        </View>
+      );
+    })}
     </View>
   );
 };

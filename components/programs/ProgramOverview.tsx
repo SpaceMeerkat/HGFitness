@@ -29,18 +29,20 @@ type ProgramOverviewProps = {
   programDay: any;
   completedKeys: any;
   handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: any, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
+  streakDates: any;
 };
 
-export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage }: ProgramOverviewProps) {
+export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage, streakDates }: ProgramOverviewProps) {
   
   const renderCalendar = () => {
     // Renders the streak calendar if the user is showing the subscription page
     const calendarBoolean = programID.toLowerCase().includes("subscription");
+    const streakThreshold = programID.match(/Subscription(\d+)Day/)[1];
 
     if (calendarBoolean) {
     return (
       <View style={{flex: 1, paddingBottom: 16, paddingTop: 6}}>
-        <Calendar />
+        <Calendar streakDates={streakDates} streakThreshold={streakThreshold} />
       </View>
     )
   } else {

@@ -172,10 +172,13 @@ export default function MyPrograms() {
           const match = key.match(/week-(\d+)-day-(\d+)/);
           return match ? `${match[1]}_${match[2]}` : null;
         }).filter(Boolean);
+
+        
   
         if (programOverviewOpen && selectedProgram) {
           const selectedLevel = getProgramLevel(selectedProgramID);
-          return <ProgramOverview programLevel={selectedLevel} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
+          const streakDates = trackingData[selectedProgramID]?.streakDates;
+          return <ProgramOverview programLevel={selectedLevel} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} streakDates={streakDates}/>;
         }
   
         if (programTrackingOpen) {

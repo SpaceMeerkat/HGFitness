@@ -33,6 +33,7 @@ export const SubmitSession = async (
         if (response.ok) {
           const jsonResponse = await response.json();
           const completedStatus = jsonResponse.completed;
+          const streakDates = jsonResponse.streakDates;
           updatedTrackingData[programID] = { ...updatedTrackingData[programID] };
             updatedTrackingData[programID]['memoryData'] = { 
             ...updatedTrackingData[programID]['memoryData'], 
@@ -40,8 +41,10 @@ export const SubmitSession = async (
                 trackingData: trackingDictionary
             }
             };
-            // Update the completed status
+          // Update the completed status
           updatedTrackingData[programID]['completed'] = completedStatus;
+          // Update streakDates if subscription triggered a date appending
+          updatedTrackingData[programID]['streakDates'] = streakDates;
           await AsyncStorage.setItem('trackingData', JSON.stringify(updatedTrackingData));
           setTrackingData(updatedTrackingData);
         } else {
