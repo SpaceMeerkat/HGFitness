@@ -2,6 +2,7 @@ import { DefaultTabStyles, ProgramStyles, ShopStyles } from "@/components/HGStyl
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { S3_API_URL } from "@/components/network/apiConfig";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
@@ -81,8 +82,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
   const { setTrackingData, trackingData, masterGymProgramsDictionary } = useAppContext();
   // Handle the memory keys/data for tracker placeholders
-  let memoryKeys = trackingData[programID]["memoryKeys"];
-  let memoryData = trackingData[programID]["memoryData"];
+  const memoryKeys = trackingData[programID]["memoryKeys"];
+  const memoryData = trackingData[programID]["memoryData"];
   const completedDay = completedKeys.includes(`${programDay[0]}_${programDay[1]}`);
   const [placeholders, setPlaceHolders] = useState<Placeholders | null>(null);
   // Handle the dictionary of exercises and keys from reading in
@@ -107,7 +108,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [modalDescription, setModalDescription] = useState<string[]>([]);
   const [alternativeIsPressed, setAlternativeIsPressed] = useState(false);
   // State to hold the index of the exercise for which notes are being edited
-  const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(null);
+  const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(0);
 
   const showExerciseModal = (exercise: string) => {
     // For showing the exercise descriptions step by step guides
@@ -131,11 +132,10 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       }
     };
     fetchProfile(); 
-  });
+  }, []);
   
   const handleExerciseClick = (index: number) => {
     setCurrentExerciseIndexForNotes(index);
-    console.log("TRIGGERED ExerciseClick: ", index);
     setExerciseDictionary(prevState => {
       const newState = { ...prevState };
       Object.keys(newState).forEach(key => {
@@ -153,7 +153,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       } else if (type === 'reps') {
         newState[index].userInputReps[setIndex] = value;
       } else if (type === 'notes') {
-        console.log("triggered");
         if (value === '') {
           newState[index].userNotes = null;
         } else {
@@ -166,22 +165,32 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
   useEffect(() => {
     const result = FindPrecedingNumber(memoryKeys, programDay[0]);
+
+    let newPlaceholders: Placeholders | null = null;
+
     if (result !== 0 && !completedDay) {
-      setPlaceHolders(memoryData[`week-${result}-day-${programDay[1]}`]); // Set placeholders when the component mounts or dependencies change
+      newPlaceholders = memoryData[`week-${result}-day-${programDay[1]}`];
     } else if (completedDay) {
-      setPlaceHolders(memoryData[`week-${programDay[0]}-day-${programDay[1]}`]); // Set placeholders when the day is tracked already
-    } else {
-      setPlaceHolders(null);
+      newPlaceholders = memoryData[`week-${programDay[0]}-day-${programDay[1]}`];
     }
-  }, [memoryKeys, programDay, memoryData]); // Run the effect when memoryKeys, programDay, or memoryData changes   
+
+    // set placeholders (this is async)
+    setPlaceHolders(newPlaceholders);
+
+    // Force a shallow update of exerciseDictionary so components that depend on it re-render.
+    // This avoids any stale closures / mutated-object problems.
+    setExerciseDictionary(prev => {
+      if (!prev) return prev;
+      return { ...prev };
+    });
+
+  }, [memoryKeys, programDay, memoryData]);
 
   const renderExercises = () => {
 
     return Object.keys(exerciseDictionary).map(key => {
       const index = parseInt(key);
       const exerciseSet = exerciseDictionary[index];
-
-      // console.log(exerciseDictionary[index]);
 
       return (
         <View key={exerciseSet.uniqueSetKey} style={{ paddingBottom: 5 }}>
@@ -236,6 +245,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                 }
 
                 if (placeholders !== null) {
+                  console.log("PLACEHOLDERS are not null");
                   // Use the placeholders if they exist
                   try {
                     weightPlaceholder = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userInputWeights[setIndex] || '';
@@ -246,6 +256,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   }
                 } else {
                   // Define blank placeholders based on the length of subsetExercises
+                  console.log("defaulting placeholders!");
                   weightPlaceholder = ''; // Default to an empty string
                   repsPlaceholder = '';   // Default to an empty string
                 }
@@ -423,7 +434,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           memoryNotes = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userNotes;
                           if (memoryNotes !== null && memoryNotes !== '') { // Check for empty string too
                             notesIconColor = 'red';
-                            console.log("red memory note: ", exerciseSet.uniqueSetKey, ":", memoryNotes);
                           }
                         } catch (error) {
                           memoryNotes = exerciseSet.userNotes;
@@ -472,11 +482,34 @@ export function ProgramTracker({programLevel, programID, programData, programDay
               </View>
             </View>
           ) : (
-            <Pressable onPress={() => handleExerciseClick(index)}>
-              <View style={ProgramStyles.trackingInactive}>
-                <Text style={[DefaultTabStyles.defaultMediumText, {color: 'black'}]}>{exerciseSet.type}</Text>
-              </View>
-            </Pressable>
+            exerciseDictionary &&
+            exerciseDictionary[index] &&
+            exerciseDictionary[index].userInputReps &&
+            exerciseDictionary[index].userInputWeights &&
+            exerciseDictionary[index].subsetExercises &&
+            exerciseDictionary[index].userInputReps.length === exerciseDictionary[index].subsetExercises.length &&
+            exerciseDictionary[index].userInputWeights.length === exerciseDictionary[index].subsetExercises.length &&
+            exerciseDictionary[index].userInputReps.every((val: any) => val !== null) &&
+            exerciseDictionary[index].userInputWeights.every((val: any) => val !== null) ? 
+            (
+              <Pressable onPress={() => handleExerciseClick(index)} style={{borderColor: 'lime'}}>
+                <Ionicons 
+                  name="checkmark-circle" 
+                  size={24} 
+                  color="lime" 
+                  style={[ProgramStyles.completedTickIcon, { position: 'absolute', right: -10, top: -4, zIndex: 100 }]} 
+                />
+                <View style={[ProgramStyles.trackingInactive, {borderColor: 'lime'}]}>
+                      <Text style={[DefaultTabStyles.defaultMediumText, {color: 'black'}]}>{exerciseSet.type}</Text>
+                </View>
+              </Pressable>
+            ) : (
+              <Pressable onPress={() => handleExerciseClick(index)} style={{borderColor: 'lime'}}>
+                <View style={ProgramStyles.trackingInactive}>
+                      <Text style={[DefaultTabStyles.defaultMediumText, {color: 'black'}]}>{exerciseSet.type}</Text>
+                </View>
+              </Pressable>
+            )
           )}
         </View>
       );

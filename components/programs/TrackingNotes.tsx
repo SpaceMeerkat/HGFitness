@@ -16,18 +16,30 @@ interface NotesProps {
     const [note, setNote] = useState<string | ''>('');
     const [placeholder, setPlaceholder] = useState(String || "Enter your notes")
 
-    console.log("index: ", index, "memory: ", memoryNotes[index]?.userNotes, "dict: ", mutableExerciseDictionary[index]?.userNotes, "note: ", note);
+    // console.log("INSIDE: memoryNotes:",memoryNotes);
+    // console.log("INSIDE: mutableExerciseDictionary:",mutableExerciseDictionary);
+    // console.log("INSIDE: index:",index);
+
 
     useEffect(() => {
+      if (index === -1) {
+        setNote('');
+        setPlaceholder("Enter your notes");
+      }
+      if (mutableExerciseDictionary[index]?.userNotes) {
+        setNote(mutableExerciseDictionary[index]?.userNotes);
+      }
+      if (!memoryNotes) {
+        setNote('');
+        setPlaceholder("Enter your notes");
+        return;
+      }
       if (memoryNotes[index]?.userNotes) {
         setPlaceholder(memoryNotes[index]?.userNotes);
       }
       if (!memoryNotes[index]?.userNotes) {
         setNote('');
         setPlaceholder("Enter your notes");
-      }
-      if (mutableExerciseDictionary[index]?.userNotes) {
-        setNote(mutableExerciseDictionary[index]?.userNotes);
       }
     }, [index, mutableExerciseDictionary, memoryNotes]);
 
