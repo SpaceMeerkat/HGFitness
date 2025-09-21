@@ -1,7 +1,5 @@
 import { useAppContext } from "@/components/appContext";
 
-
-
 type ExerciseSet = {
     activeStatus: boolean;
     type: string;
@@ -14,7 +12,6 @@ type ExerciseSet = {
     userInputReps: (string | null)[];
     userNotes:(string | null);
   };
-
 
   type GymProgramEntry = [string, string, string, string];
 

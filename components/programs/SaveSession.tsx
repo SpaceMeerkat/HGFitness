@@ -47,6 +47,7 @@ interface SaveSessionProps {
 
     const handleSaveSession = () => {
         // Submit the session
+        console.log("exerciseDictionary on save: ", exerciseDictionary);
         SubmitSession(programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving);
       
         // Show the toast

@@ -3,24 +3,33 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, View } from 'react-native';
 
 interface NotesProps {
-    memoryNotes: string | null;
-    currentNotes: string | null;
+    memoryNotes: any;
+    mutableExerciseDictionary: any;
     handleInputChange: (index: number, type: 'weight' | 'reps' | 'notes', setIndex: number, value: string) => void;
     visible: boolean;
     onClose: () => void;
     index: number;  // Pass index for exercise
   }
 
-  export default function TrackingNotes({ memoryNotes, currentNotes, handleInputChange, visible, onClose, index }: NotesProps) {
-    
-    const [note, setNote] = useState(currentNotes || '');
-    const [placeholder, setPlaceholder] = useState(memoryNotes || "Enter your notes")
+  export default function TrackingNotes({ memoryNotes, mutableExerciseDictionary, handleInputChange, visible, onClose, index }: NotesProps) {
 
-    // Synchronize note state with memoryNotes and currentNotes prop
+    const [note, setNote] = useState<string | ''>('');
+    const [placeholder, setPlaceholder] = useState(String || "Enter your notes")
+
+    console.log("index: ", index, "memory: ", memoryNotes[index]?.userNotes, "dict: ", mutableExerciseDictionary[index]?.userNotes, "note: ", note);
+
     useEffect(() => {
-        setNote(currentNotes || '');
-        setPlaceholder(memoryNotes || "Enter your notes");
-    }, [memoryNotes]); // This will run whenever memoryNotes changes, but preserves the placeholder
+      if (memoryNotes[index]?.userNotes) {
+        setPlaceholder(memoryNotes[index]?.userNotes);
+      }
+      if (!memoryNotes[index]?.userNotes) {
+        setNote('');
+        setPlaceholder("Enter your notes");
+      }
+      if (mutableExerciseDictionary[index]?.userNotes) {
+        setNote(mutableExerciseDictionary[index]?.userNotes);
+      }
+    }, [index, mutableExerciseDictionary, memoryNotes]);
 
     const handleSaveNote = () => {
         // Use handleInputChange to update the notes in the dictionary
@@ -37,7 +46,7 @@ interface NotesProps {
       >
         <View style={TrackingNotesStyles.overlay}>
           <View style={TrackingNotesStyles.container}>
-            <Pressable style={TrackingNotesStyles.backButton} onPress={onClose}>
+            <Pressable style={TrackingNotesStyles.backButton} onPress={handleSaveNote}>
               <Text style={TrackingNotesStyles.backButtonText}>Back</Text>
             </Pressable>
             <Text style={TrackingNotesStyles.title}>Notes</Text>
@@ -49,9 +58,9 @@ interface NotesProps {
               placeholderTextColor="#999"
               multiline={true}
             />
-            <Pressable style={TrackingNotesStyles.saveButton} onPress={handleSaveNote}>
+            {/* <Pressable style={TrackingNotesStyles.saveButton} onPress={handleSaveNote}>
               <Text style={TrackingNotesStyles.saveButtonText}>Save Note</Text>
-            </Pressable>
+            </Pressable> */}
           </View>
         </View>
       </Modal>

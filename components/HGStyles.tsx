@@ -203,21 +203,22 @@ export const ShopStyles = StyleSheet.create({
         overflow: 'hidden'
       },
     shopHotRowContainer: {
-        flexDirection: 'row', gap: 4, paddingVertical: 2
+        flexDirection: 'row', gap: 0, paddingVertical: 2
     },
     shopHotSpacer: {
-        paddingLeft: 10, 
-        paddingRight: 10, paddingVertical: 0, 
+        paddingLeft: 0, 
+        paddingRight: 0, paddingVertical: 0, 
         justifyContent: 'center',
-        borderWidth: 2, borderRadius: 8,
-        backgroundColor: 'dimgrey',
-        opacity: 0.4
+        borderWidth: 1, borderRadius: 8, borderColor: 'black',
+        backgroundColor: 'black',
+        overflow: "hidden",
+        opacity: 1
     },
     shopHotButton: {
-        paddingLeft: 10, 
-        paddingRight: 10, paddingVertical: 0, 
+        paddingLeft: 0, 
+        paddingRight: 0, paddingVertical: 0, 
         justifyContent: 'center',
-        borderWidth: 2, borderRadius: 8, borderColor: 'grey',
+        borderWidth: 0, borderRadius: 8, borderColor: 'black',
         backgroundColor: 'black'
     },
     shopHotLeft: {

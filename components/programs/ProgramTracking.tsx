@@ -134,6 +134,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   });
   
   const handleExerciseClick = (index: number) => {
+    setCurrentExerciseIndexForNotes(index);
+    console.log("TRIGGERED ExerciseClick: ", index);
     setExerciseDictionary(prevState => {
       const newState = { ...prevState };
       Object.keys(newState).forEach(key => {
@@ -151,7 +153,12 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       } else if (type === 'reps') {
         newState[index].userInputReps[setIndex] = value;
       } else if (type === 'notes') {
-        newState[index].userNotes = value;
+        console.log("triggered");
+        if (value === '') {
+          newState[index].userNotes = null;
+        } else {
+          newState[index].userNotes = value;
+        }
       }
       return newState;
     });
@@ -173,6 +180,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     return Object.keys(exerciseDictionary).map(key => {
       const index = parseInt(key);
       const exerciseSet = exerciseDictionary[index];
+
+      // console.log(exerciseDictionary[index]);
 
       return (
         <View key={exerciseSet.uniqueSetKey} style={{ paddingBottom: 5 }}>
@@ -401,8 +410,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                 <View style={{flex:0.665, flexDirection: 'row', paddingTop: 15}}> 
                   <Pressable 
                     style={{flex: 0.3, flexDirection: "row"}} 
-                    onPress={() => {
-                      setCurrentExerciseIndexForNotes(index); // Set the index of the exercise whose notes are being edited
+                    onPress={() => { // Set the index of the exercise whose notes are being edited
                       setIsNotesVisible(true);
                     }}
                   >
@@ -415,6 +423,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           memoryNotes = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userNotes;
                           if (memoryNotes !== null && memoryNotes !== '') { // Check for empty string too
                             notesIconColor = 'red';
+                            console.log("red memory note: ", exerciseSet.uniqueSetKey, ":", memoryNotes);
                           }
                         } catch (error) {
                           memoryNotes = exerciseSet.userNotes;
@@ -493,10 +502,14 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       </ScrollView>
 
       {/* TrackingNotes modal moved outside ScrollView and ImageBackground */}
+
       {currentExerciseIndexForNotes !== null && (
         <TrackingNotes
-          memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || ''}
-          currentNotes = {exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || null}
+          // memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || 
+          //   placeholders?.trackingData[currentExerciseIndexForNotes]?.userNotes || 
+          //   ''}
+          memoryNotes = {placeholders?.trackingData}
+          mutableExerciseDictionary={exerciseDictionary} 
           handleInputChange={handleInputChange}
           visible={isNotesVisible}
           onClose={() => setIsNotesVisible(false)}
