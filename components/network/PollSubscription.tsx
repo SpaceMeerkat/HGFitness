@@ -22,6 +22,9 @@ const isTodayOrAfter = (dateString: string): boolean => {
   today.setHours(0, 0, 0, 0);
   billingDate.setHours(0, 0, 0, 0);
 
+  // const today_test = new Date("2026-10-22").getTime()
+  // return today_test >= billingDate.getTime();
+
   return today.getTime() >= billingDate.getTime();
 };
 
@@ -77,11 +80,9 @@ export async function runSubscriptionPolling(
 
     // For CANCELLATIONs, check which is active in profile and then toggle it and continue on in the transaction queue
     if (paymentId === 'CANCELLED' && isTodayOrAfter(billingDate)) {
-      console.log("tiggered CANCELLED state", profile.premium);
       // delete updatedQueue[paymentId];
       if (profile?.premium) {
         const updatedProfile = { ...profile, purchaseQueue: updatedQueue, premium: "CANCELLED" };
-        console.log("updated profile: ",updatedProfile);
         await ActivatePremiumToggle({profile:updatedProfile,setProfile,setMealPrograms,myPrograms,setMyPrograms,trackingData,setTrackingData});
         continue;
       } else if (profile?.gymSubscription) {
@@ -109,14 +110,6 @@ export async function runSubscriptionPolling(
         returned_billing_date,
         reccurence,
       } = await response.json();
-
-      console.log(
-        status,
-        item_name,
-        item_category,
-        returned_billing_date,
-        reccurence
-      );
 
       if (status === "COMPLETE" || status === "FAILED") {
         const token = await getSecureToken();
