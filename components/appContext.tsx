@@ -125,16 +125,23 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       const retrievedToken = await SecureStore.getItemAsync('jwtToken');
       // If there is mealTracking data, it needs to go with the daily POST request
       let storedMealData = null;
+      let storedCalorieCalculatorData = null;
 
-      if (storedTrackingData !== null) {
+      if (storedTrackingData !== null && storedProfile !== null) {
         const parsedData = JSON.parse(storedTrackingData);
         storedMealData = parsedData.meals;
+        const parsedProfile = JSON.parse(storedProfile);
+        const storedCalorieCalculatorData = parsedProfile.premium ? parsedProfile.calorieCalculator : null;
       }
 
       if (retrievedToken) {
         console.log("running full get request");
         // If token is present, make a POST request
-        const loginData = { token: retrievedToken, mealTrackingData: storedMealData };
+        const loginData = { 
+          token: retrievedToken, 
+          mealTrackingData: storedMealData,
+          calorieCalculatorData: storedCalorieCalculatorData 
+        };
 
         const response = await fetch(`${BASE_API_URL}/getContext`, {
           method: 'POST',

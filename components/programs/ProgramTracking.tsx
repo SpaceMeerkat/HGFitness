@@ -245,7 +245,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                 }
 
                 if (placeholders !== null) {
-                  console.log("PLACEHOLDERS are not null");
+                  // console.log("PLACEHOLDERS are not null");
                   // Use the placeholders if they exist
                   try {
                     weightPlaceholder = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userInputWeights[setIndex] || '';
@@ -256,7 +256,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   }
                 } else {
                   // Define blank placeholders based on the length of subsetExercises
-                  console.log("defaulting placeholders!");
+                  // console.log("defaulting placeholders!");
                   weightPlaceholder = ''; // Default to an empty string
                   repsPlaceholder = '';   // Default to an empty string
                 }

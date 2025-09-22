@@ -6,6 +6,7 @@ import { Alert } from "react-native";
 const LAST_UPDATE_KEY = "lastUpdate";
 
 interface UseLogoutProps {
+    profile: any,
     trackingData: any,
     setProfile: any,
     setMyPrograms: any,
@@ -15,7 +16,7 @@ interface UseLogoutProps {
     setMasterGymProgramsDictionary: any
 }
 
-export const useLogout = ({trackingData,setProfile,setMyPrograms,setTrackingData,setMealPrograms,setprofileImagePaths,setMasterGymProgramsDictionary}: UseLogoutProps) => {
+export const useLogout = ({profile,trackingData,setProfile,setMyPrograms,setTrackingData,setMealPrograms,setprofileImagePaths,setMasterGymProgramsDictionary}: UseLogoutProps) => {
 
   const clearStorage = async () => {
     try {
@@ -53,11 +54,13 @@ export const useLogout = ({trackingData,setProfile,setMyPrograms,setTrackingData
     if (retrievedToken && trackingDictionary) {
       try {
         const url = `${BASE_API_URL}/saveMealTracking`;
+        const calorieCalculator = profile.premium ? profile.calorieCalculator : null;
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             trackingData: trackingDictionary.meals,
+            calorieCalculatorData: calorieCalculator,
             token: retrievedToken,
           }),
         });

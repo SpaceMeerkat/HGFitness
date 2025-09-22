@@ -25,7 +25,7 @@ export default function MealScreen() {
   const image = require("@/assets/images/HGBackground.png");
   const premiumImage = require("@/assets/images/OfficialLogo.jpg");
 
-  const { profile, mealPrograms, trackingData, setTrackingData } = useAppContext(); 
+  const { profile, mealPrograms, trackingData, setProfile, setTrackingData } = useAppContext(); 
 
   const [loginSignupActive, setLoginSignupActive] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -50,10 +50,44 @@ export default function MealScreen() {
 
   const [calculatorVisible, setCalculatorVisible] = useState(false);
   const [calorieCalculatorClicked, setCalorieCalculatorClicked] = useState(false);
-  const [mealsHit, setMealsHit] = useState(false);
-  const [caloriesHit, setCaloriesHit] = useState(false);
-  const [proteinHit, setProteinHit] = useState(false);
-  const [waterHit, setWaterHit] = useState(false);
+
+  const updateCalorieCalculatorStreak = async (streakBool: boolean) => {
+    const updatedProfile = {
+        ...profile,
+        calorieCalculator: {
+          ...profile.calorieCalculator,
+          streak: streakBool
+        },
+      };
+    setProfile(updatedProfile); // Update context
+    // Update AsyncStorage
+    await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
+  };
+
+  useEffect(() => {
+    // Guard against empty dictionary as streak should be false by default
+    if (!dictionary) return;
+    // If all targets are met, update the streak boolean in profile to true
+    if (runningMealCount>=profile.calorieCalculator.meals &&
+      runningWater>=profile.calorieCalculator.water &&
+      runningCalories>=profile.calorieCalculator.calories &&
+      runningProtein>=profile.calorieCalculator.protein
+    ) {
+      updateCalorieCalculatorStreak(true)
+      };
+    // If any tracker child falls below the target, set the streak boolean to false
+    if (profile.calorieCalculator.streak) {
+      if (runningMealCount<profile.calorieCalculator.meals ||
+        runningWater<profile.calorieCalculator.water ||
+        runningCalories<profile.calorieCalculator.calories ||
+        runningProtein<profile.calorieCalculator.protein
+      ) {
+        updateCalorieCalculatorStreak(false)
+      } else {
+        return;
+      }
+    }
+  }, [runningMealCount, runningWater, runningCalories, runningProtein]);
 
 
   useEffect(() => {

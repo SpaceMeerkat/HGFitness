@@ -30,6 +30,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const transactionQueue = profile?.purchaseQueue
 
     const { logout } = useLogout({
+        profile,
         trackingData,
         setProfile,
         setMyPrograms,
