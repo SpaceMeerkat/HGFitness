@@ -54,7 +54,7 @@ export const useLogout = ({profile,trackingData,setProfile,setMyPrograms,setTrac
     if (retrievedToken && trackingDictionary) {
       try {
         const url = `${BASE_API_URL}/saveMealTracking`;
-        const calorieCalculator = profile.premium ? profile.calorieCalculator : null;
+        const calorieCalculator = profile.calorieCalculator;
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

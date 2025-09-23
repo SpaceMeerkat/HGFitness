@@ -68,19 +68,13 @@ export default function MealScreen() {
     // Guard against empty dictionary as streak should be false by default
     if (!dictionary) return;
     // If all targets are met, update the streak boolean in profile to true
-    if (runningMealCount>=profile.calorieCalculator.meals &&
-      runningWater>=profile.calorieCalculator.water &&
-      runningCalories>=profile.calorieCalculator.calories &&
-      runningProtein>=profile.calorieCalculator.protein
+    if (runningMealCount > 0 || runningWater > 0
     ) {
       updateCalorieCalculatorStreak(true)
       };
     // If any tracker child falls below the target, set the streak boolean to false
     if (profile.calorieCalculator.streak) {
-      if (runningMealCount<profile.calorieCalculator.meals ||
-        runningWater<profile.calorieCalculator.water ||
-        runningCalories<profile.calorieCalculator.calories ||
-        runningProtein<profile.calorieCalculator.protein
+      if (runningMealCount === 0 && runningWater === 0
       ) {
         updateCalorieCalculatorStreak(false)
       } else {
@@ -88,6 +82,8 @@ export default function MealScreen() {
       }
     }
   }, [runningMealCount, runningWater, runningCalories, runningProtein]);
+
+  // console.log(profile.calorieCalculator);
 
 
   useEffect(() => {
@@ -211,7 +207,7 @@ export default function MealScreen() {
               </>
             ) : (
             Object.values(mealProgramsState[activeMeal] || {}).map((item: any, index: number) => {
-              if (index > 3 && profile.premium === false) {
+              if (index > 15 && profile.premium === false) {
                 return (
                   <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
                     <View style={MealTrackingStyles.MealOptionLayoutContainer}>
@@ -233,8 +229,8 @@ export default function MealScreen() {
                 );
               }
 
-              // index === 3: render PremiumRibbon + simplified view
-              if (index === 3 && profile.premium === false) {
+              // index === 15: render PremiumRibbon + simplified view
+              if (index === 15 && profile.premium === false) {
                 return (
                   <React.Fragment key={index}>
                     <PremiumRibbon />
@@ -381,7 +377,9 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Meals</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white', fontSize: 22}}>{runningMealCount}</Text>
+                <Text style={{textAlign: 'center', 
+                  color: profile.calorieCalculator.active? runningMealCount === 0? 'grey': runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white': 'white', 
+                  fontSize: 22}}>{ profile.calorieCalculator.active? runningMealCount === 0? profile.calorieCalculator.meals : runningMealCount : runningMealCount}</Text>
               </View>
             </View>
             {/* {profile.calorieCalculator.active ? `/${profile.calorieCalculator.meals}` : ""} */}
@@ -395,7 +393,9 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Calories</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningCalories >= profile.calorieCalculator.calories? 'lime': 'white', fontSize: 24}}>{runningCalories.toFixed(0)}</Text>
+                <Text style={{textAlign: 'center', 
+                  color: profile.calorieCalculator.active? runningCalories === 0? 'grey': runningCalories >= profile.calorieCalculator.calories? 'lime': 'white': 'white', 
+                  fontSize: 22}}>{ profile.calorieCalculator.active? runningCalories === 0? profile.calorieCalculator.calories : runningCalories : runningCalories}</Text>
               </View>
             </View>
 
@@ -408,7 +408,9 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Protein</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningProtein >= profile.calorieCalculator.protein? 'lime': 'white', fontSize: 24}}>{runningProtein.toFixed(0)}g</Text>
+                <Text style={{textAlign: 'center', 
+                  color: profile.calorieCalculator.active? runningProtein === 0? 'grey': runningProtein >= profile.calorieCalculator.protein? 'lime': 'white': 'white', 
+                  fontSize: 22}}>{ profile.calorieCalculator.active? runningProtein === 0? profile.calorieCalculator.protein : runningProtein : runningProtein}g</Text>
               </View>
             </View>
 
@@ -421,60 +423,34 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Water</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: profile.calorieCalculator.active && runningWater >= profile.calorieCalculator.water? 'lime': 'white', fontSize: 24}}>{runningWater}L</Text>
+                <Text style={{textAlign: 'center', 
+                  color: profile.calorieCalculator.active? runningWater === 0? 'grey': runningWater >= profile.calorieCalculator.water? 'lime': 'white': 'white', 
+                  fontSize: 22}}>{ profile.calorieCalculator.active? runningWater === 0? profile.calorieCalculator.water : runningWater : runningWater}L</Text>
               </View>
             </View>
           </View>
 
           {/* Divider */}
-          <View style={{paddingVertical:8}}>
-            {profile.calorieCalculator.active ? `/${profile.calorieCalculator.meals}` : ""}
-            <View style={{height: 1, backgroundColor: 'white'}} />
-          </View>
-
-          {profile.calorieCalculator.active ? (
+          <View style={{paddingTop:8, paddingBottom: 24}}>
+            {/* Lightening bolt component for streaks */}
             <View style={{flex: 1, flexDirection: 'row'}}>
-
-              <View style={{flex: 0.8, flexDirection: 'column', justifyContent: 'center', paddingLeft: 12}}>
-                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}>{profile.calorieCalculator.meals}</Text>
+              <View style={{flex: 0.1, flexDirection: 'row', justifyContent: 'center',
+                position: "absolute",
+                        left: 0,
+                        right: 0,
+                        top: -24,
+                        zIndex: 1000,
+              }}>
+                <View style={{flexDirection: 'row', justifyContent: 'center', backgroundColor: 'black',
+                  borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 50, width: 50 
+                }}>
+                    <FontAwesome name="bolt" size={30} color="orange" style= {{textAlign: 'center', textAlignVertical: 'center'}}/>
+                    <Text style={{color: 'orange', fontSize: 12, textAlignVertical: 'center', paddingTop: 8}}>{profile.calorieCalculator.streakCounter}</Text>
+                </View>
               </View>
-
-              <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center', paddingLeft: 20}}>
-                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}>{profile.calorieCalculator.calories}</Text>
-              </View>
-
-              <View style={{flex: 0.4, flexDirection: 'column', paddingLeft: 4}}>
-                <View style={{flex: 1, flexDirection: 'row',justifyContent: 'flex-start'}}>
-                <FontAwesome name="bolt" size={30} color="orange" style= {{textAlign: 'right', textAlignVertical: 'center'}}/>
-                {/* <MaterialCommunityIcons name="numeric-9" size={20} color="orange" 
-                  style= {{textAlign: 'left', textAlignVertical: 'center',
-                  }}
-                  /> */}
-                  </View>
-                  <MaterialCommunityIcons name="numeric-9" size={20} color="orange" 
-                  style= {{textAlign: 'center', textAlignVertical: 'center',
-                    position: "absolute",
-                      left: 0,
-                      right: 0,
-                      top: 20,
-                      zIndex: 1000
-                  }}
-                  />
-              </View>
-
-              <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center'}}>
-                <Text style={{color: 'grey', textAlign: 'left', fontSize: 18, paddingLeft: 0}}>{profile.calorieCalculator.protein}g</Text>
-              </View>
-
-              <View style={{flex: 1, flexDirection: 'column',justifyContent: 'center'}}>
-                <Text style={{color: 'grey', textAlign: 'center', fontSize: 18}}>{profile.calorieCalculator.water}L</Text>
-              </View>
-
-            </View>
-          ) : null
-        }
-
-          
+            </View> 
+            <View style={{height: 1, backgroundColor: 'white'}} />
+          </View>    
 
           {removableIcons === true ? (
             <View style={{flex: 1, paddingHorizontal: 10, paddingTop: 10, justifyContent: 'center'}}>

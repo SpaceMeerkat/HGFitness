@@ -131,7 +131,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         const parsedData = JSON.parse(storedTrackingData);
         storedMealData = parsedData.meals;
         const parsedProfile = JSON.parse(storedProfile);
-        const storedCalorieCalculatorData = parsedProfile.premium ? parsedProfile.calorieCalculator : null;
+        storedCalorieCalculatorData = parsedProfile.calorieCalculator;
       }
 
       if (retrievedToken) {
@@ -140,7 +140,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         const loginData = { 
           token: retrievedToken, 
           mealTrackingData: storedMealData,
-          calorieCalculatorData: storedCalorieCalculatorData 
+          calorieCalculatorData: storedCalorieCalculatorData,
         };
 
         const response = await fetch(`${BASE_API_URL}/getContext`, {
