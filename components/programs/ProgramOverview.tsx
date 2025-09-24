@@ -33,13 +33,20 @@ type ProgramOverviewProps = {
 };
 
 export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage, streakDates }: ProgramOverviewProps) {
+
+  const calendarBoolean = programID.toLowerCase().includes("subscription");
+  let streakThreshold = 0;
+  if (calendarBoolean) {
+    streakThreshold = programID.match(/Subscription(\d+)Day/)[1];
+  } else {
+    streakThreshold = 0
+  }
   
   const renderCalendar = () => {
     // Renders the streak calendar if the user is showing the subscription page
-    const calendarBoolean = programID.toLowerCase().includes("subscription");
-    const streakThreshold = programID.match(/Subscription(\d+)Day/)[1];
 
-    if (calendarBoolean) {
+    if (calendarBoolean && streakThreshold) {
+      console.log("calendarBoolean inside if: ", calendarBoolean)
     return (
       <View style={{flex: 1, paddingBottom: 16, paddingTop: 6}}>
         <Calendar streakDates={streakDates} streakThreshold={streakThreshold} />
@@ -105,7 +112,7 @@ export function ProgramOverview({ programLevel, programData, programDay, program
         </Pressable>
         <View>
           {renderCalendar()}
-          {renderWeeks(programData, completedKeys)}
+          {renderWeeks(programData, completedKeys)} 
         </View>
       </ScrollView>
   );

@@ -1,9 +1,8 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
 import { BASE_API_URL } from "@/components/network/apiConfig";
-// import { MealChart, NoMealsChart } from "@/components/profile/MealChart";
+import { MealChart, NoMealsChart } from "@/components/profile/MealChart";
 import { PremiumButton } from "@/components/profile/PremiumButton";
-import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
@@ -34,7 +33,7 @@ export function ProfileOverview() {
   }, [profile]);
 
   useEffect(() => {
-    if (trackingData) { 
+    if (trackingData?.profileStats) { 
       setDictionary(trackingData?.profileStats || undefined);
       const completedProgramsCount = getTotalPrograms(trackingData);
       const completedSessionsCount = getTotalSessions(trackingData);
@@ -141,15 +140,16 @@ export function ProfileOverview() {
           {...(premium
             ? {
                 source: require("@/assets/images/profileBackground.jpg"),
-                contentFit: "cover",
+                contentFit: "fill",
               }
             : {})}
           style={{
             flex: 0.25,
-            borderWidth: 2,
+            borderWidth: 1,
             borderRadius: 4,
             borderColor: "grey",
-            backgroundColor: 'black'
+            backgroundColor: 'black',
+            overflow: 'hidden'
           }}
         >
         {/* Main header component */}
@@ -205,7 +205,7 @@ export function ProfileOverview() {
         </View>
 
         {/* Row for displaying badges */}
-        <View style={{ flex: 1, flexDirection: "row", paddingHorizontal: 12, paddingVertical: 12}}>
+        {/* <View style={{ flex: 1, flexDirection: "row", paddingHorizontal: 12, paddingVertical: 12}}>
           <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'center'}}>
             <Text style={{color: 'white', fontWeight: 'bold', fontSize: 20, textAlign: 'center'}}>
               Medals:
@@ -225,7 +225,7 @@ export function ProfileOverview() {
               <Ionicons name="repeat-outline" size={30} color="white" />
             </View>
           </View>
-        </View>
+        </View> */}
 
         </Wrapper>
 
@@ -256,12 +256,15 @@ export function ProfileOverview() {
             ))}
           </View>
           {/* Meal chart if dictionary exists, or else an empty warning box to get tracking */}
-          {/* {dictionary && Object.keys(dictionary).length > 0 ? <MealChart dictionary={dictionary} 
-          mealType={`running${buttons[selected].label}`} 
-          color={buttons[selected].color} 
-          prefix={buttons[selected].prefix} 
-          decimal = {buttons[selected].decimal} />: <NoMealsChart/>} */}
-          <Text style={{color: 'cyan'}}>Meal charts go here</Text>
+          {dictionary && Object.keys(dictionary).length > 0 ? 
+          <MealChart dictionary={dictionary} 
+            mealType={`running${buttons[selected].label}`} 
+            color={buttons[selected].color} 
+            prefix={buttons[selected].prefix} 
+            decimal = {buttons[selected].decimal} 
+          /> 
+          : <NoMealsChart/>}
+          {/* <Text style={{color: 'cyan'}}>Meal charts go here</Text> */}
         </View>        
 
       </ScrollView>

@@ -26,15 +26,33 @@ const MealPrograms = ({handleBackButton}: MealProgramProps) => {
             <View style={MealsMadeEasyStyles.leftTextCol}>
               <View style={MealsMadeEasyStyles.textHalf}>
                 <Text style={MealsMadeEasyStyles.featureItem}>
-                  <Text style={MealsMadeEasyStyles.featureTitle}>Simple Choices</Text> – Select meals from a curated list designed for real results. No endless searching or typing every ingredient.
+                  <Text style={MealsMadeEasyStyles.featureTitle}>Simple Choices</Text> 
+                  No more food FOMO or scrolling forever. Just pick from meals that actually work for your goals — tasty, simple, and stress-free.
                 </Text>
               </View>
               <View style={MealsMadeEasyStyles.textHalf}>
                 <Text style={MealsMadeEasyStyles.featureItem}>
-                  <Text style={MealsMadeEasyStyles.featureTitle}>Flexible Options</Text> – Want a little extra fuel? Just tap the up arrow to “upsize” your meal for more nutrition without breaking your plan.
+                  <Text style={MealsMadeEasyStyles.featureTitle}>Easy Cooking Instructions</Text> 
+                  Zero chef skills required. We’ll tell you what to buy and exactly how to cook it (no MasterChef apron needed).
                 </Text>
               </View>
             </View>
+            <View style={MealsMadeEasyStyles.rightTextCol}>
+              <View style={MealsMadeEasyStyles.textHalf}>
+                  <Text style={MealsMadeEasyStyles.featureItem}>
+                    <Text style={MealsMadeEasyStyles.featureTitle}>Meal Variety</Text> 
+                    Hundreds of options so you never get bored. Mix it up, try new recipes, and finally stop eating chicken and rice every… single… day.
+                  </Text>
+                </View>
+                <View style={MealsMadeEasyStyles.textHalf}>
+                  <Text style={MealsMadeEasyStyles.featureItem}>
+                    <Text style={MealsMadeEasyStyles.featureTitle}>Flexible Portion Sizes</Text> 
+                    Want to bulk up or slim down? Just hit the “upsize” button and boom — your calories adjust instantly.
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View style={MealsMadeEasyStyles.rightTextCol}>
             {/* Right image (0.4 width, spans full height) */}
             <View style={MealsMadeEasyStyles.rightImageCol}>
               <Image
@@ -47,7 +65,8 @@ const MealPrograms = ({handleBackButton}: MealProgramProps) => {
           {/* Bottom text (0.2 height, full width) */}
           <View style={MealsMadeEasyStyles.bottomText}>
             <Text style={MealsMadeEasyStyles.featureItem}>
-              <Text style={MealsMadeEasyStyles.featureTitle}>Smarter Tracking</Text> – See your calories, protein, water intake, and meals update instantly at the top of the page. Stay on target without the stress.
+              <Text style={MealsMadeEasyStyles.featureTitle}>Smarter Tracking</Text> 
+              Log your meals and let the app do the math. Calories, protein, water — tracked automatically. You just eat, we crunch the numbers.
             </Text>
           </View>
         </View>
@@ -68,21 +87,17 @@ const MealPrograms = ({handleBackButton}: MealProgramProps) => {
             <View style={MealsMadeEasyStyles.rightTextCol}>
               <View style={MealsMadeEasyStyles.textHalf}>
                 <Text style={MealsMadeEasyStyles.featureItem}>
-                  <Text style={MealsMadeEasyStyles.featureTitle}>Calorie Calculator</Text> – Personalized daily targets based on your age, weight, height, training intensity, and goals.
+                  <Text style={MealsMadeEasyStyles.featureTitle}>Calorie Calculator</Text> 
+                  Your daily targets, customized for you — age, weight, training, goals. It's like a personal trainer for your plate.
                 </Text>
               </View>
               <View style={MealsMadeEasyStyles.textHalf}>
                 <Text style={MealsMadeEasyStyles.featureItem}>
-                  <Text style={MealsMadeEasyStyles.featureTitle}>Daily Streaks</Text> – Hit your targets consistently and stay motivated with streak rewards.
+                  <Text style={MealsMadeEasyStyles.featureTitle}>Daily Streaks</Text> 
+                  Stay consistent and rack up streaks. Because let's be honest, seeing that little lightning bolt icon light up makes you feel unstoppable.
                 </Text>
               </View>
             </View>
-          </View>
-          {/* Bottom text (0.2 height, full width) */}
-          <View style={MealsMadeEasyStyles.bottomText}>
-            <Text style={MealsMadeEasyStyles.featureItem}>
-              <Text style={MealsMadeEasyStyles.featureTitle}>More Meal Variety</Text> – Extra meal options to keep your nutrition fun and flexible.
-            </Text>
           </View>
         </View>
 

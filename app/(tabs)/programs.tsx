@@ -43,6 +43,8 @@ export default function MyPrograms() {
   const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms, setProfile, setMyPrograms, setTrackingData, setMealPrograms } =
     useAppContext();
 
+  // console.log(trackingData);
+
   useFocusEffect(
     useCallback(() => {
       if (!profile?.purchaseQueue || Object.keys(profile.purchaseQueue).length === 0) return;

@@ -134,7 +134,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         storedCalorieCalculatorData = parsedProfile.calorieCalculator;
       }
 
-      if (retrievedToken) {
+      if (retrievedToken && storedMealData && storedCalorieCalculatorData) {
         console.log("running full get request");
         // If token is present, make a POST request
         const loginData = { 

@@ -64,6 +64,8 @@ export default function MealScreen() {
     await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
   };
 
+  // console.log(profile.calorieCalculator);
+
   useEffect(() => {
     // Guard against empty dictionary as streak should be false by default
     if (!dictionary) return;
