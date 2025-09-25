@@ -1,7 +1,7 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
 import { BASE_API_URL } from "@/components/network/apiConfig";
-import { MealChart, NoMealsChart } from "@/components/profile/MealChart";
+import { MealChart } from "@/components/profile/MealChart";
 import { PremiumButton } from "@/components/profile/PremiumButton";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
@@ -21,6 +21,8 @@ export function ProfileOverview() {
   const [premium, setPremium] = useState(false);
   const [accountLevel, setAccountLevel] = useState('free tier');
   const [achievements, setAchievements] = useState<number[]>([0,0,0]);
+
+  console.log("dictionary: ", dictionary);
 
   useEffect(() => {
     if (profile?.premium) {
@@ -263,8 +265,11 @@ export function ProfileOverview() {
             prefix={buttons[selected].prefix} 
             decimal = {buttons[selected].decimal} 
           /> 
-          : <NoMealsChart/>}
-          {/* <Text style={{color: 'cyan'}}>Meal charts go here</Text> */}
+          : 
+          <View style={{flex: 0.25,flexDirection: 'column',backgroundColor: 'black',justifyContent: 'center',alignContent: 'center',
+            paddingVertical: 50,borderRadius: 4,borderColor: 'grey',borderWidth: 2,}}>
+            <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
+          </View>}
         </View>        
 
       </ScrollView>

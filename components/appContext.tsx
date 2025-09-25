@@ -89,7 +89,6 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
 
     try {
       // Check if data is present in AsyncStorage
-      // const storedProfile = null;
       const storedProfile = await AsyncStorage.getItem('profile');
       const storedMasterGymProgramsDictionary = await AsyncStorage.getItem('masterGymProgramsDictionary');
       const storedMealPrograms = await AsyncStorage.getItem('mealPrograms');
@@ -98,10 +97,18 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       const storedIntermediatePrograms = await AsyncStorage.getItem('intermediatePrograms');
       const storedAdvancedPrograms = await AsyncStorage.getItem('advancedPrograms');
       const storedTrackingData = await AsyncStorage.getItem('trackingData');
-      // const storedSubscriptionTrackingData = await AsyncStorage.getItem('subscriptionTrackingData');
       const storedProfileImagePaths = await AsyncStorage.getItem('profileImagePaths');
       const bestSellers = await AsyncStorage.getItem('bestSellers');
       const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
+
+      // console.log("storedProfile ", storedProfile);
+      // console.log("storedMasterGymProgramsDictionary ", storedMasterGymProgramsDictionary);
+      // console.log("storedMealPrograms ", storedMealPrograms);
+      // console.log("storedMyPrograms ", storedMyPrograms);
+      // console.log("storedTrackingData ", storedTrackingData);
+      // console.log("storedProfileImagePaths ", storedProfileImagePaths);
+      // console.log("bestSellers ", bestSellers);
+      // console.log("lastUpdateDate ", lastUpdateDate);
 
       if (storedMasterGymProgramsDictionary && storedMealPrograms && bestSellers && storedProfileImagePaths && storedProfile && storedMyPrograms && storedBeginnerPrograms && storedIntermediatePrograms && storedAdvancedPrograms && storedTrackingData && lastUpdateDate && isToday(lastUpdateDate)) {
         // If the data is present and is from today, load it from AsyncStorage
@@ -113,7 +120,6 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         setIntermediatePrograms(JSON.parse(storedIntermediatePrograms));
         setAdvancedPrograms(JSON.parse(storedAdvancedPrograms));
         setTrackingData(JSON.parse(storedTrackingData));
-        // setSubscriptionTrackingData(JSON.parse(storedSubscriptionTrackingData));
         setprofileImagePaths(JSON.parse(storedProfileImagePaths));
         setBestSellers(JSON.parse(bestSellers));
         console.log('all data already present in async storage, leaving...');
@@ -163,7 +169,6 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
         await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));  // Save myPrograms to AsyncStorage
         await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
-        // await AsyncStorage.setItem('subscriptionTrackingData', JSON.stringify(jsonResponse.subscriptionTrackingData));
         await AsyncStorage.setItem('beginnerPrograms', JSON.stringify(jsonResponse.beginner));
         await AsyncStorage.setItem('intermediatePrograms', JSON.stringify(jsonResponse.intermediate));
         await AsyncStorage.setItem('advancedPrograms', JSON.stringify(jsonResponse.advanced));
@@ -179,7 +184,6 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         setIntermediatePrograms(jsonResponse.intermediate);
         setAdvancedPrograms(jsonResponse.advanced);
         setTrackingData(jsonResponse.trackingData);
-        // setSubscriptionTrackingData(jsonResponse.subscriptionTrackingData);
         setprofileImagePaths(jsonResponse.profileImagePaths);
         setBestSellers(jsonResponse.bestSellers);
 
@@ -228,7 +232,6 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       setIntermediatePrograms(null);
       setAdvancedPrograms(null);
       setTrackingData(null);
-      // setSubscriptionTrackingData(null);
       setprofileImagePaths(null);
       setBestSellers(null);
       setLoading(false);

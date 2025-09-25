@@ -1,8 +1,8 @@
-import { View, Dimensions, Text } from "react-native";
 import { useState } from "react";
+import { Dimensions, View } from "react-native";
 import {
-    LineChart,
-  } from "react-native-chart-kit";
+  LineChart,
+} from "react-native-chart-kit";
 
   export function MealChart({ dictionary, mealType, color, prefix, decimal }: { dictionary: any, mealType: string, color: [string, string, string], prefix: string, decimal: number }) {
     const [chartWidth, setChartWidth] = useState(Dimensions.get("window").width);
@@ -50,7 +50,7 @@ import {
               borderRadius: 16,
             },
           }}
-          bezier
+          // bezier
           style={{
             borderRadius: 4,
             borderColor: 'black',
@@ -63,22 +63,4 @@ import {
     );
   }
 
-  export const NoMealsChart = () => {
-    return (
-      <View style={{
-        flex: 0.25,
-        flexDirection: 'column',
-        backgroundColor: 'black',
-        justifyContent: 'center',
-        alignContent: 'center',
-        paddingVertical: 50,
-        borderRadius: 4,
-        borderColor: 'grey',
-        borderWidth: 2,
-      }}>
-        <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
-      </View>
-    );
-  }
-  
   

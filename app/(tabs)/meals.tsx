@@ -536,7 +536,7 @@ export default function MealScreen() {
           </View>
         </Pressable>
 
-        <Pressable onPress={() => setCalculatorVisible(true)} 
+        <Pressable onPress={() => profile.premium? setCalculatorVisible(true) : null} 
           onPressIn={()=>setCalorieCalculatorClicked(true)} 
           onPressOut={()=>setCalorieCalculatorClicked(false)}
           style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>

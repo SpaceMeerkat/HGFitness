@@ -22,14 +22,60 @@ export function SignupWindow({ handleChildPage }: SignupWindowProps) {
   const [loginIsPressed, setLoginIsPressed] = useState(false);
   const [signupIsPressed, setSignupIsPressed] = useState(false);
 
+  const [invalidEmail, setInvalidEmail] = useState(false);
+  const [invalidUsername, setInvalidUsername] = useState(false);
+  const [invalidPassword, setInvalidPassword] = useState(false);
+  const [emailInUse, setEmailInUse] = useState(false);
+  
+
   const handleSubmit = () => {
     const SignupData = {
       username: username,
       password: password,
       email: email,
     };
-    // Send this loginData in a fetch request to the backend
-    sendSignupRequest(SignupData);
+
+    const emailValidity = isValidEmail(email);
+    const passwordValidity = isValidPassword(password);
+    const usernameValidity = isValidUsername(username);
+    if (passwordValidity && usernameValidity && !emailInUse && emailValidity) {
+      // Send this loginData in a fetch request to the backend
+      sendSignupRequest(SignupData);
+    } else {
+      if (!passwordValidity) {
+        setInvalidPassword(true);
+      }
+      if (!usernameValidity) {
+        setInvalidUsername(true);
+      }
+      if (!emailValidity) {
+        setInvalidEmail(true);
+      }
+    }
+  };
+
+  const isValidEmail = (email: string): boolean => {
+    // Very basic regex for email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidUsername = (input: string): boolean => {
+    // Check for at least 8 characters
+    if (input.length < 3) {
+      return false;
+    }
+    return true;
+  };
+
+  const isValidPassword = (input: string): boolean => {
+    // Check for at least 8 characters
+    if (input.length < 8) {
+      return false;
+    }
+    // Check for at least one digit
+    const hasNumber = /\d/.test(input);
+    return hasNumber;
   };
 
   const [submitting, setSubmitting] = useState(false);
@@ -47,11 +93,25 @@ export function SignupWindow({ handleChildPage }: SignupWindowProps) {
   
       if (response.ok) {
         const data = await response.json();
-        const token = data.token;  // Assuming the JWT is returned as 'token' in the response body     
-        // Store the JWT (using AsyncStorage or any state management you prefer)
-        await SecureStore.setItemAsync('jwtToken', token);
-        setSubmitting(false)
-        handleChildPage(false, false, true, false); // Moves the user to the login page having successfully signed up
+        const token = data.token;  // Assuming the JWT is returned as 'token' in the response body   
+        const message = data.message; 
+        if (message !== "success") {
+          // Catch the duplicate email response message here
+          if (message === "duplicate_email") {
+            setEmailInUse(true);
+            setSubmitting(false);
+          } else {
+            console.log("unknown signup response");
+            setSubmitting(false);
+          }
+        }
+        if (message === "success") {
+          // Message OK is the default success response message from signup API
+          // Store the JWT (using AsyncStorage or any state management you prefer)
+          await SecureStore.setItemAsync('jwtToken', token);
+          setSubmitting(false)
+          handleChildPage(false, false, true, false); // Moves the user to the login page having successfully signed up
+        }
       } else {
         setSubmitting(false)
         console.error("Signup failed with status:", response.status);
@@ -85,19 +145,36 @@ export function SignupWindow({ handleChildPage }: SignupWindowProps) {
                 </View>
 
                 <View style={LoginStyles.TextInputParentContainer}>
-                  <View style={[LoginStyles.TextInputContainer, {borderColor: emailIsFocused ? 'black' : 'grey'}]}>
+                  <View style={[LoginStyles.TextInputContainer, {borderColor:  invalidEmail || emailInUse? "red" : emailIsFocused? 'black' : 'grey'}]}>
                     <TextInput
                                 cursorColor={'white'}
                                 textAlign={'left'}
                                 style={LoginStyles.TextInputBox}
                                 value={email}
-                                onChangeText={setEmail}
+                                onChangeText={(text) => {setEmail(text); setEmailInUse(false); setInvalidEmail(false);}}
                                 placeholderTextColor="grey"
                                 onFocus={() => setEmailIsFocused(true)}
                                 onBlur={() => setEmailIsFocused(false)}
                               />
                   </View>
                 </View>
+
+                {emailInUse? (
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: 'red'}]}>
+                    * email address already in use
+                  </Text>
+                </View>
+                ) : (null)}
+
+                {invalidEmail? (
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: 'red'}]}>
+                    * invalid email address
+                  </Text>
+                </View>
+                ) : (null)}
+
               </View>
             </View>
             {/* Username block */}
@@ -108,19 +185,28 @@ export function SignupWindow({ handleChildPage }: SignupWindowProps) {
                 </View>
 
                 <View style={LoginStyles.TextInputParentContainer}>
-                  <View style={[LoginStyles.TextInputContainer, {borderColor: usernameIsFocused ? 'black' : 'grey'}]}>
+                  <View style={[LoginStyles.TextInputContainer, {borderColor:  invalidUsername? "red" : usernameIsFocused? 'black' : 'grey'}]}>
                     <TextInput
                                 cursorColor={'white'}
                                 textAlign={'left'}
                                 style={LoginStyles.TextInputBox}
                                 value={username}
-                                onChangeText={setUsername}
+                                onChangeText={(text) => {setUsername(text); setInvalidUsername(false);}}
                                 placeholderTextColor="grey"
                                 onFocus={() => setUsernameIsFocused(true)}
                                 onBlur={() => setUsernameIsFocused(false)}
                               />
                   </View>
                 </View>
+
+                {invalidUsername? (
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: 'red'}]}>
+                    * username must contain 3 or more characters
+                  </Text>
+                </View>
+                ) : (null)}
+
               </View>
             </View>
             {/* Password block */}
@@ -131,18 +217,24 @@ export function SignupWindow({ handleChildPage }: SignupWindowProps) {
                 </View>
 
                 <View style={LoginStyles.TextInputParentContainer}>
-                  <View style={[LoginStyles.TextInputContainer, {borderColor: passwordIsFocused ? 'black' : 'grey'}]}>
+                  <View style={[LoginStyles.TextInputContainer, {borderColor:  invalidPassword? "red" : passwordIsFocused? 'black' : 'grey'}]}>
                     <TextInput
                                 cursorColor={'white'}
                                 textAlign={'left'}
                                 style={LoginStyles.TextInputBox}
                                 value={password}
-                                onChangeText={setPassword}
+                                onChangeText={(text) => {setPassword(text); setInvalidPassword(false);}}
                                 placeholderTextColor="grey"
                                 onFocus={() => setPasswordIsFocused(true)}
                                 onBlur={() => setPasswordIsFocused(false)}
                               />
                   </View>
+                </View>
+
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: invalidPassword? 'red' : 'grey'}]}>
+                    * must contain: a minimum of 8 characters and 1 number 
+                  </Text>
                 </View>
               </View>
             </View>

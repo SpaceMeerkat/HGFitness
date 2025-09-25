@@ -2,6 +2,7 @@ import { useAppContext } from "@/components/appContext";
 import { BASE_API_URL } from "@/components/network/apiConfig";
 import LoadingModal from "@/components/users/LoadingModal";
 import { LoginStyles } from "@/components/users/LoginStyles";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
 import { ImageBackground, Pressable, Text, TextInput, View } from "react-native";
@@ -23,6 +24,12 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
   const [email, setEmail] = useState("");  // Track username
   const [password, setPassword] = useState("");  // Track password
 
+  const [invalidEmail, setInvalidEmail] = useState(false);
+  const [invalidPassword, setInvalidPassword] = useState(false);
+  const [unknownEmail, setUnknownEmail] = useState(false);
+  const [invalidAuthentication, setInvalidAuthentication] = useState(false);
+
+
   const handleSubmit = async () => {
     // const retrievedToken = await SecureStore.getItemAsync('jwtToken');
     const loginData = {
@@ -30,11 +37,40 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
       email: email,
       password: password,
     };
+
+    const emailValidity = isValidEmail(email);
+    const passwordValidity = isValidPassword(password);
+
+    if (passwordValidity && emailValidity) {
     // Send this loginData in a fetch request to the backend
-    sendLoginRequest(loginData);
+      sendLoginRequest(loginData);
+    } else {
+      if (!passwordValidity) {
+        setInvalidPassword(true);
+      }
+      if (!emailValidity) {
+        setInvalidEmail(true);
+      }
+    }
   };
 
   const [submitting, setSubmitting] = useState(false);
+
+  const isValidEmail = (email: string): boolean => {
+    // Very basic regex for email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidPassword = (input: string): boolean => {
+    // Check for at least 8 characters
+    if (input.length < 8) {
+      return false;
+    }
+    // Check for at least one digit
+    const hasNumber = /\d/.test(input);
+    return hasNumber;
+  };
 
   const sendLoginRequest = async (loginData: { email: string; password: string }) => {
     try {
@@ -49,17 +85,36 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
   
       if (response.ok) {
         const jsonResponse = await response.json();
-        // Store the JWT (using AsyncStorage or any state management you prefer)
-        await SecureStore.setItemAsync('jwtToken', jsonResponse.token);
-        setProfile(jsonResponse.profile);
-        setMyPrograms(jsonResponse.myPrograms);
-        setTrackingData(jsonResponse.trackingData);
-        setMasterGymProgramsDictionary(jsonResponse.gymMasterDictionary);
-        setBestSellers(jsonResponse.bestSellers);
-        setMealPrograms(jsonResponse.mealPrograms);
-        setprofileImagePaths(jsonResponse.profileImagePaths);
-        setSubmitting(false);
-        handleChildPage(true, false, false, false);
+        const responseMessage = jsonResponse.message;
+        if (responseMessage === "not_found") {
+          setUnknownEmail(true);
+          setSubmitting(false);
+        };
+        if (responseMessage === "invalid_password") {
+          setInvalidAuthentication(true);
+          setSubmitting(false);
+        };
+        if (responseMessage === "success") {
+          // Store the JWT (using AsyncStorage or any state management you prefer)
+          await SecureStore.setItemAsync('jwtToken', jsonResponse.token);
+          await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
+          await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));
+          await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
+          await AsyncStorage.setItem('masterGymProgramsDictionary', JSON.stringify(jsonResponse.gymMasterDictionary));
+          await AsyncStorage.setItem('bestSellers', JSON.stringify(jsonResponse.bestSellers));
+          await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
+          await AsyncStorage.setItem('profileImagePaths', JSON.stringify(jsonResponse.profileImagePaths));
+          await AsyncStorage.setItem('lastUpdateDate', new Date().toISOString());
+          setProfile(jsonResponse.profile);
+          setMyPrograms(jsonResponse.myPrograms);
+          setTrackingData(jsonResponse.trackingData);
+          setMasterGymProgramsDictionary(jsonResponse.gymMasterDictionary);
+          setBestSellers(jsonResponse.bestSellers);
+          setMealPrograms(jsonResponse.mealPrograms);
+          setprofileImagePaths(jsonResponse.profileImagePaths);
+          setSubmitting(false);
+          handleChildPage(true, false, false, false);
+        };
       } else {
         setSubmitting(false)
         console.error("Login failed with status A:", response.status);
@@ -93,19 +148,36 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
                 </View>
 
                 <View style={LoginStyles.TextInputParentContainer}>
-                  <View style={[LoginStyles.TextInputContainer, {borderColor: emailIsFocused ? 'black' : 'grey'}]}>
+                  <View style={[LoginStyles.TextInputContainer, {borderColor:  invalidEmail || invalidAuthentication || unknownEmail? "red" : emailIsFocused? 'black' : 'grey'}]}>
                     <TextInput
                                 cursorColor={'white'}
                                 textAlign={'left'}
                                 style={LoginStyles.TextInputBox}
                                 value={email}
-                                onChangeText={setEmail}
+                                onChangeText={(text) => {setEmail(text); setUnknownEmail(false); setInvalidAuthentication(false); setInvalidEmail(false);}}
                                 placeholderTextColor="grey"
                                 onFocus={() => setEmailIsFocused(true)}
                                 onBlur={() => setEmailIsFocused(false)}
                               />
                   </View>
                 </View>
+
+                {invalidEmail? (
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: 'red'}]}>
+                    * invalid email address
+                  </Text>
+                </View>
+                ) : (null)}
+
+                {unknownEmail? (
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: 'red'}]}>
+                    * email address not found on record
+                  </Text>
+                </View>
+                ) : (null)}
+
               </View>
             </View>
 
@@ -117,19 +189,36 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
                 </View>
 
                 <View style={LoginStyles.TextInputParentContainer}>
-                  <View style={[LoginStyles.TextInputContainer, {borderColor: passwordIsFocused ? 'black' : 'grey'}]}>
+                  <View style={[LoginStyles.TextInputContainer, {borderColor:  invalidPassword || invalidAuthentication? "red" : passwordIsFocused? 'black' : 'grey'}]}>
                     <TextInput
                                 cursorColor={'white'}
                                 textAlign={'left'}
                                 style={LoginStyles.TextInputBox}
                                 value={password}
-                                onChangeText={setPassword}
+                                onChangeText={(text) => {setPassword(text); setInvalidAuthentication(false); setInvalidPassword(false);}}
                                 placeholderTextColor="grey"
                                 onFocus={() => setPasswordIsFocused(true)}
                                 onBlur={() => setPasswordIsFocused(false)}
                               />
                   </View>
                 </View>
+
+                {invalidPassword? (
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: 'red'}]}>
+                    * invalid password
+                  </Text>
+                </View>
+                ) : (null)}
+
+                {invalidAuthentication? (
+                <View style={LoginStyles.InputTextTitle}>
+                  <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: 'red'}]}>
+                    * invalid email and password combination
+                  </Text>
+                </View>
+                ) : (null)}
+
               </View>
             </View>
 

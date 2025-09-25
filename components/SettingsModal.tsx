@@ -1,4 +1,5 @@
 import { useAppContext } from "@/components/appContext";
+import { BASE_API_URL } from "@/components/network/apiConfig";
 import { PricingStyles } from '@/components/premium/PricingStyles';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -50,6 +51,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         }
     }, [profile]); 
 
+    const sendEmail = async () => {
+      console.log("sending email request...");
+      const response = await fetch(`${BASE_API_URL}/send_email`, {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+      return null;
+    };
+
     const renderModal = () => {
     return (
         <View style={styles.modalContent}>
@@ -65,7 +78,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Text style={[styles.title, !profile? {opacity: 0.3} : {}]}>Change email</Text>
             </Pressable>
 
-            <Pressable onPress={() => console.log("pressed!")} style={[styles.row]}>
+            <Pressable onPress={() => sendEmail()} style={[styles.row]}>
                 <Text style={[styles.title, !profile? {opacity: 0.3} : {}]}>Change password</Text>
             </Pressable>
 

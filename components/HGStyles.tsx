@@ -6,7 +6,7 @@ export const ProfileStyles = StyleSheet.create({
         flex: 0.25, 
         paddingTop: 10,
         borderColor: 'grey',
-        borderWidth: 2,
+        borderWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 2,
         paddingBottom: 2,

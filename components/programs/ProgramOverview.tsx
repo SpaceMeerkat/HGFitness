@@ -46,7 +46,6 @@ export function ProgramOverview({ programLevel, programData, programDay, program
     // Renders the streak calendar if the user is showing the subscription page
 
     if (calendarBoolean && streakThreshold) {
-      console.log("calendarBoolean inside if: ", calendarBoolean)
     return (
       <View style={{flex: 1, paddingBottom: 16, paddingTop: 6}}>
         <Calendar streakDates={streakDates} streakThreshold={streakThreshold} />
