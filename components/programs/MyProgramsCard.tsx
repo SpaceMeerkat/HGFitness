@@ -364,8 +364,9 @@ const styles = StyleSheet.create({
 interface FreeSessionsProps {
     cardTitle: string;
     cardInfo: string;
+    modalPress: React.Dispatch<React.SetStateAction<boolean>>;
   }
-export function FreeSessionsCard({ cardTitle, cardInfo }: FreeSessionsProps) {
+export function FreeSessionsCard({ cardTitle, cardInfo, modalPress }: FreeSessionsProps) {
 
     return (
         <View style={styles.container}>
@@ -378,7 +379,7 @@ export function FreeSessionsCard({ cardTitle, cardInfo }: FreeSessionsProps) {
                     <Image source={require("@/assets/images/cards/FreeCard.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
                 </View>
             </View>
-            <Pressable onPress={() => console.log("cool!!!")} style={styles.pressableCover} />
+            <Pressable onPress={() =>modalPress(true)} style={styles.pressableCover} />
         </View>
     );
 }

@@ -4,6 +4,8 @@ import { PricingStyles } from '@/components/premium/PricingStyles';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { runSubscriptionCancellation } from "./network/CancelSubscription";
+import PasswordChangeModal from "./users/ChangePasswordModal";
+import LoadingModal from "./users/LoadingModal";
 import { useLogout } from "./users/LogoutUser";
 
 type SettingsModalProps = {
@@ -16,6 +18,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   visible,
   onClose,
 }) => {
+
+    const [open, setOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const { profile,
             myPrograms,
@@ -66,6 +71,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const renderModal = () => {
     return (
         <View style={styles.modalContent}>
+
+            <LoadingModal visible={submitting} />
+
+            <PasswordChangeModal
+              visible={open}
+              onClose={() => setOpen(false)}
+              submitting={submitting}
+              setSubmitting={setSubmitting}
+            />
+
             <Text style={styles.modalTitle}>
                 Settings
             </Text>
@@ -78,7 +93,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Text style={[styles.title, !profile? {opacity: 0.3} : {}]}>Change email</Text>
             </Pressable>
 
-            <Pressable onPress={() => sendEmail()} style={[styles.row]}>
+            <Pressable onPress={() => setOpen(true)} style={[styles.row]}>
                 <Text style={[styles.title, !profile? {opacity: 0.3} : {}]}>Change password</Text>
             </Pressable>
 

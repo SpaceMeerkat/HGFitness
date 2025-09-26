@@ -4,6 +4,7 @@ import { CompletedGymCard, FreeSessionsCard, MyProgramCard, SubscriptionProgramC
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { S3_API_URL } from "../network/apiConfig";
+import SingleSessionsModal from "./SingleSessionsModal";
 
 type PageType = 'programs' | 'programOverview' | 'programTracking';
  
@@ -14,6 +15,8 @@ type MyProgramsLandingProps = {
 export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
 
   const { myPrograms, trackingData } = useAppContext(); 
+  const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
+
 
   const image = require("@/assets/images/HGBackground.png");
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
@@ -28,6 +31,8 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
 
   return (
       <ScrollView style={[ShopStyles.shopScrollContainer, {flex: 1, paddingTop: 8, paddingBottom: 20}]}>
+
+        <SingleSessionsModal visible={singleSessionsVisible} onClose={() => setSingleSessionsVisible(false)}/>
 
         {/* Subscription card */}
         <SubscriptionProgramCard
@@ -60,6 +65,7 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
           key={'FreeSessions'}
           cardTitle={"Free Sessions"}  // Display the program name
           cardInfo={`Single day 1-shots`}  // Display number of days per week
+          modalPress = {setSingleSessionsVisible}
         />
 
         {/* Section Header Purchased Programs */}

@@ -40,7 +40,7 @@ export const LoginStyles = StyleSheet.create({
         color: "grey", fontSize: 14, textAlign: 'center', textAlignVertical: 'center'
     },
     ButtonParentContainer: {
-        flex: 0.075, flexDirection: "row", justifyContent: 'center', paddingVertical: 10
+        flex: 0.075, flexDirection: "row", justifyContent: 'center', paddingVertical:10
     },
     ButtonPressable: {
         flex: 0.8, flexDirection: "column", borderRadius: 100, borderWidth: 1, justifyContent: 'center'

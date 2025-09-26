@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
 import { ImageBackground, Pressable, Text, TextInput, View } from "react-native";
+import PasswordResetModal from "./ForgottenPasswordModal";
 
 type LoginWindowProps = {
     handleChildPage: (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => void;
@@ -23,12 +24,12 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
   const [signupIsPressed, setSignupIsPressed] = useState(false);
   const [email, setEmail] = useState("");  // Track username
   const [password, setPassword] = useState("");  // Track password
+  const [open, setOpen] = useState(false);
 
   const [invalidEmail, setInvalidEmail] = useState(false);
   const [invalidPassword, setInvalidPassword] = useState(false);
   const [unknownEmail, setUnknownEmail] = useState(false);
   const [invalidAuthentication, setInvalidAuthentication] = useState(false);
-
 
   const handleSubmit = async () => {
     // const retrievedToken = await SecureStore.getItemAsync('jwtToken');
@@ -128,6 +129,12 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
 
     return (
       <View style={LoginStyles.ParentContainer}>
+        <PasswordResetModal
+          visible={open}
+          onClose={() => setOpen(false)}
+          submitting={submitting}
+          setSubmitting={setSubmitting}
+        />
         <LoadingModal visible={submitting} />
         <View style={LoginStyles.ChildContainer}>
             <View style={LoginStyles.ImageParentContainer}>
@@ -250,6 +257,15 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
                     <Text style={[LoginStyles.ButtonText, {color: signupIsPressed ? 'white' : 'black'}]}>Sign Up</Text>
                 </Pressable>
             </View>
+
+            <Pressable onPress={() => setOpen(true)} style={[LoginStyles.ButtonParentContainer, {flex: 0.01}]}>
+              <View style={LoginStyles.InputTextTitle}>
+                <Text style={[LoginStyles.InputTextTitleText, {fontSize: 10, textAlign: 'center', color: 'blue'}]}>
+                  Forgot password?
+                </Text>
+              </View>
+            </Pressable>
+
 
           </View>
       </View>

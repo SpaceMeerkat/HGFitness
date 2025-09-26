@@ -68,7 +68,7 @@ export function GymPrograms({ handleChildPage, handleBackButton }: GymProgramPro
                   <Image source={require("@/assets/images/cards/FreeCard.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
               </View>
               <View style={{flex:0.6, paddingLeft: 30}}>
-                <Text style={[DefaultTabStyles.defaultBoldText, {color:'white'}]}>Free programs</Text>
+                <Text style={[DefaultTabStyles.defaultBoldText, {color:'white'}]}>Padel programs</Text>
                 <Text style={DefaultTabStyles.defaultBodyText}>Cheap skate...</Text>
               </View>
             </View>

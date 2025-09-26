@@ -70,10 +70,11 @@ export default function MealScreen() {
     // Guard against empty dictionary as streak should be false by default
     if (!dictionary) return;
     // If all targets are met, update the streak boolean in profile to true
-    if (runningMealCount > 0 || runningWater > 0
-    ) {
+    if (runningMealCount > 0 || runningWater > 0) {
       updateCalorieCalculatorStreak(true)
-      };
+    } else {
+        updateCalorieCalculatorStreak(false);
+    }
     // If any tracker child falls below the target, set the streak boolean to false
     if (profile.calorieCalculator.streak) {
       if (runningMealCount === 0 && runningWater === 0
@@ -447,7 +448,7 @@ export default function MealScreen() {
                   borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 50, width: 50 
                 }}>
                     <FontAwesome name="bolt" size={30} color="orange" style= {{textAlign: 'center', textAlignVertical: 'center'}}/>
-                    <Text style={{color: 'orange', fontSize: 12, textAlignVertical: 'center', paddingTop: 8}}>{profile.calorieCalculator.streakCounter}</Text>
+                    <Text style={{color: 'orange', fontSize: 12, textAlignVertical: 'center', paddingTop: 8}}>{profile.calorieCalculator.streak? profile.calorieCalculator.streakCounter + 1 : profile.calorieCalculator.streakCounter}</Text>
                 </View>
               </View>
             </View> 
