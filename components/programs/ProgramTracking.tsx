@@ -84,6 +84,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   // Handle the memory keys/data for tracker placeholders
   const memoryKeys = trackingData[programID]["memoryKeys"];
   const memoryData = trackingData[programID]["memoryData"];
+  const oneShot = programID.toLowerCase().includes("singlesession");
+  console.log("oneShot status: ", oneShot);
   const completedDay = completedKeys.includes(`${programDay[0]}_${programDay[1]}`);
   const [placeholders, setPlaceHolders] = useState<Placeholders | null>(null);
   // Handle the dictionary of exercises and keys from reading in
@@ -284,7 +286,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={weightPlaceholder}
                           value={exerciseSet.userInputWeights[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
-                          editable={!completedDay}
+                          editable={!completedDay || oneShot}
                         />
                       </View>
                     </View>
@@ -299,7 +301,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={repsPlaceholder}
                           value={exerciseSet.userInputReps[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
-                          editable={!completedDay}
+                          editable={!completedDay || oneShot}
                         />
                       </View>
                     </View>
@@ -516,7 +518,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     }); 
   };
 
-  const saveOpacity = completedDay ? 0.5 : 1;
+  const saveOpacity = completedDay && !oneShot ? 0.5 : 1;
 
   return (
     <>
@@ -525,9 +527,9 @@ export function ProgramTracker({programLevel, programID, programData, programDay
           {renderExercises()}
           <Pressable 
           style={[ProgramStyles.trackingSaveButton, {opacity: saveOpacity, backgroundColor: saveIsPressed? 'grey': 'black'}]}
-          onPressIn={completedDay ? undefined : () => { setSaveIsPressed(true) }}
-          onPressOut={completedDay ? undefined : () => { setSaveIsPressed(false) }}
-          onPress={completedDay ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
+          onPressIn={completedDay && !oneShot ? undefined : () => { setSaveIsPressed(true) }}
+          onPressOut={completedDay && !oneShot ? undefined : () => { setSaveIsPressed(false) }}
+          onPress={completedDay && !oneShot ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
           >
             <Text style={{color: "white"}}>Save session</Text>
           </Pressable>

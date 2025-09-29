@@ -9,7 +9,12 @@ import SingleSessionsModal from "./SingleSessionsModal";
 type PageType = 'programs' | 'programOverview' | 'programTracking';
  
 type MyProgramsLandingProps = {
-  handleChildPage: (page: PageType) => void;
+  handleChildPage: (
+    page: PageType, 
+    programId?: string,
+    programData?: any,
+    programDay?: any
+  ) => void;
 };
 
 export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
@@ -17,22 +22,52 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
   const { myPrograms, trackingData } = useAppContext(); 
   const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
-
   const image = require("@/assets/images/HGBackground.png");
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
   const [trackingDataSoft, setTrackingDataSoft] = useState<any>({}); // Store API response as an object
+  const [singlePrograms, setSinglePrograms] = useState<any>({});
 
   useEffect(() => {
     if (trackingData !== null && myPrograms !== null) {
-      setTrackingDataSoft(trackingData); // Set purchased programs to myPrograms if it exists
+      setTrackingDataSoft(trackingData);
       setPurchasedPrograms(myPrograms);
+      // Step 1: Filter programs containing "singlesession"
+      const singles: any = {};
+      Object.keys(myPrograms).forEach((programName) => {
+        if (programName.toLowerCase().includes("singlesession")) {
+          // Step 2: Parse according to convention
+          // Format: SingleSession-level-name-1-sex
+          const parts = programName.split("-");
+          if (parts.length >= 4) {
+            const level = parts[1].toLowerCase(); // e.g., beginner, intermediate, advanced
+            const name = parts[2]; // e.g., Arm Blaster
+            const type = parts[3]; // e.g., chest, back, etc.
+            const sex = parts[parts.length - 1]; // Men or Women (last element)
+
+            singles[programName] = {
+              name,
+              type,
+              level,
+              sex,
+            };
+          }
+        } 
+      });
+      // Step 3: Set state with parsed singles
+      setSinglePrograms(singles);
+    } else {
+      setTrackingDataSoft({});
+      setSinglePrograms({});
+      setPurchasedPrograms({});
     }
-  }, [trackingData]);
+  }, []);
 
   return (
       <ScrollView style={[ShopStyles.shopScrollContainer, {flex: 1, paddingTop: 8, paddingBottom: 20}]}>
 
-        <SingleSessionsModal visible={singleSessionsVisible} onClose={() => setSingleSessionsVisible(false)}/>
+        {Object.keys(singlePrograms).length > 0 && Object.keys(trackingDataSoft).length > 0 && (
+          <SingleSessionsModal programsInfo={singlePrograms} trackingData={trackingDataSoft} handleChildPage={handleChildPage} visible={singleSessionsVisible} onClose={() => setSingleSessionsVisible(false)}/>
+        )}
 
         {/* Subscription card */}
         <SubscriptionProgramCard
@@ -82,6 +117,8 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
           Object.keys(purchasedPrograms).map((programName: string, index: number) => {
             if (programName.toLowerCase().includes('subscription')) {
               return null;
+            } if (programName.toLowerCase().includes('singlesession')) {
+              return null;
             } if (!trackingDataSoft[programName]['completed']) {
             const programDetails = purchasedPrograms[programName]; // Get the details for each program
             const reRunNumber = trackingDataSoft[programName]['rerunNumber'];
@@ -115,6 +152,8 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
         {Object.keys(purchasedPrograms).length > 0 ? (
           Object.keys(purchasedPrograms).map((programName: string, index: number) => {
             if (programName.toLowerCase().includes('subscription')) {
+              return null;
+            } if (programName.toLowerCase().includes('singlesession')) {
               return null;
             } if (trackingDataSoft[programName]['completed']) {
             const programDetails = purchasedPrograms[programName]; // Get the details for each program

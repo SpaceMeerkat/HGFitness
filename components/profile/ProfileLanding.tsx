@@ -1,7 +1,6 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
 import { BASE_API_URL } from "@/components/network/apiConfig";
-import { MealChart } from "@/components/profile/MealChart";
 import { PremiumButton } from "@/components/profile/PremiumButton";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
@@ -258,18 +257,18 @@ export function ProfileOverview() {
             ))}
           </View>
           {/* Meal chart if dictionary exists, or else an empty warning box to get tracking */}
-          {dictionary && Object.keys(dictionary).length > 0 ? 
+          {/* {dictionary && Object.keys(dictionary).length > 0 ? 
           <MealChart dictionary={dictionary} 
             mealType={`running${buttons[selected].label}`} 
             color={buttons[selected].color} 
             prefix={buttons[selected].prefix} 
             decimal = {buttons[selected].decimal} 
           /> 
-          : 
+          :  */}
           <View style={{flex: 0.25,flexDirection: 'column',backgroundColor: 'black',justifyContent: 'center',alignContent: 'center',
             paddingVertical: 50,borderRadius: 4,borderColor: 'grey',borderWidth: 2,}}>
             <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
-          </View>}
+          </View>
         </View>        
 
       </ScrollView>

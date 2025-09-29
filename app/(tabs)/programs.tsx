@@ -120,7 +120,8 @@ export default function MyPrograms() {
     }
   };
 
-  const handleChildPage = (page: PageType, 
+  const handleChildPage = (
+    page: PageType, 
     programID: any = null, 
     programData: any = null, 
     programDay: any = null,
@@ -182,7 +183,9 @@ export default function MyPrograms() {
         }
   
         if (programTrackingOpen) {
+          console.log("here");
           const selectedLevel = getProgramLevel(selectedProgramID);
+          
           return <ProgramTracker programLevel={selectedLevel || 'beginner'} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
         }
       }
