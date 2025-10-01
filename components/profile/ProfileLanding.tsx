@@ -21,8 +21,6 @@ export function ProfileOverview() {
   const [accountLevel, setAccountLevel] = useState('free tier');
   const [achievements, setAchievements] = useState<number[]>([0,0,0]);
 
-  console.log("dictionary: ", dictionary);
-
   useEffect(() => {
     if (profile?.premium) {
       setPremium(true);

@@ -26,6 +26,7 @@ type ProgramTrackerProps = {
   completedKeys: any;
   handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: string, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
   trackingMode: any;
+  setSingleSessionsVisible: any;
 };
 
 type ProgramLevel = 'advanced' | 'intermediate' | 'beginner';
@@ -79,7 +80,7 @@ export const getAlternativeByExerciseName = (
   return alternativeMatch ? alternativeMatch[1] : '';
 };
 
-export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage, trackingMode }: ProgramTrackerProps) {
+export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage, trackingMode, setSingleSessionsVisible }: ProgramTrackerProps) {
 
   const { setTrackingData, trackingData, masterGymProgramsDictionary } = useAppContext();
   // Handle the memory keys/data for tracker placeholders
@@ -520,11 +521,17 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
   const saveOpacity = completedDay && !oneShot || !trackingMode ? 0.5 : 1;
 
+  console.log(completedDay, oneShot, !trackingMode); 
+
   return (
     <>
       <ScrollView style={ShopStyles.shopScrollContainer}>
-        {!trackingMode && (
-          <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} onPress={() => handleChildPage('programOverview')}>
+        { (((completedDay && !oneShot) && !trackingMode) || 
+        ((!completedDay && !oneShot) && !trackingMode) || 
+        ((completedDay && !oneShot) && trackingMode) ||
+        (oneShot && !trackingMode)) && (
+          <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} 
+          onPress={() => oneShot ? [setSingleSessionsVisible(true), handleChildPage('programs')] : handleChildPage('programOverview')}>
             <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
           </Pressable>
         )}
@@ -570,6 +577,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
         setTrackingData = {setTrackingData}
         setSaving = {setSaving}
         handleChildPage={handleChildPage}
+        setSingleSessionsVisible={setSingleSessionsVisible}
       />
       </>
   );

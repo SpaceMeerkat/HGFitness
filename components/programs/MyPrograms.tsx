@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { S3_API_URL } from "../network/apiConfig";
 import SingleSessionsModal from "./SingleSessionsModal";
+import ViewModeModal from "./ViewModeModal";
 
 type PageType = 'programs' | 'programOverview' | 'programTracking';
  
@@ -15,17 +16,32 @@ type MyProgramsLandingProps = {
     programData?: any,
     programDay?: any
   ) => void;
+  setTrackingMode: any; 
+  singleSessionsVisible: any;
+  setSingleSessionsVisible: any;
 };
 
-export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
+export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSessionsVisible, setSingleSessionsVisible}: MyProgramsLandingProps) {
 
   const { myPrograms, trackingData } = useAppContext(); 
-  const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
+  // const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
   const image = require("@/assets/images/HGBackground.png");
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
   const [trackingDataSoft, setTrackingDataSoft] = useState<any>({}); // Store API response as an object
   const [singlePrograms, setSinglePrograms] = useState<any>({});
+
+  const [viewModeVisible, setViewModeVisible] = useState(false);
+  const [fullName, setFullName] = useState<string | null>(null);
+  const [selectedData, setSelectedData] = useState<any>(null);
+  const [triggerRedirect, setTriggerRedirect] = useState(false);
+
+  useEffect (() => {
+    if (fullName && selectedData) {
+      setViewModeVisible(false);
+      handleChildPage('programTracking', fullName, selectedData, ["1", "1"]);
+    }
+  }, [triggerRedirect])
 
   useEffect(() => {
     if (trackingData !== null && myPrograms !== null) {
@@ -65,8 +81,12 @@ export function MyProgramsLanding({ handleChildPage }: MyProgramsLandingProps) {
   return (
       <ScrollView style={[ShopStyles.shopScrollContainer, {flex: 1, paddingTop: 8, paddingBottom: 20}]}>
 
+        <ViewModeModal setTrackingMode={setTrackingMode} setTriggerRedirect={setTriggerRedirect} visible={viewModeVisible} onClose={() => setViewModeVisible(false)}/>
+
         {Object.keys(singlePrograms).length > 0 && Object.keys(trackingDataSoft).length > 0 && (
-          <SingleSessionsModal programsInfo={singlePrograms} trackingData={trackingDataSoft} handleChildPage={handleChildPage} visible={singleSessionsVisible} onClose={() => setSingleSessionsVisible(false)}/>
+          <SingleSessionsModal programsInfo={singlePrograms} trackingData={trackingDataSoft} handleChildPage={handleChildPage} 
+          visible={singleSessionsVisible} onClose={() => setSingleSessionsVisible(false)} setFullName={setFullName} setSelectedData={setSelectedData}
+          setViewModeVisible={setViewModeVisible}/>
         )}
 
         {/* Subscription card */}

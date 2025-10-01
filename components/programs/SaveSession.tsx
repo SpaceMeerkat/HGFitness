@@ -18,9 +18,10 @@ interface SaveSessionProps {
     setTrackingData: (data: any) => void,
     setSaving: (saving: boolean) => void,
     handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking') => void;
+    setSingleSessionsVisible: any;
   }
 
-  export default function SaveSession({ visible, onClose, programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving, handleChildPage}: SaveSessionProps) {
+  export default function SaveSession({ visible, onClose, programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving, handleChildPage, setSingleSessionsVisible}: SaveSessionProps) {
 
     const { profile } = useAppContext();
 
@@ -41,13 +42,13 @@ interface SaveSessionProps {
     const handlePageChange = () => {
         // Use handleInputChange to update the notes in the dictionary
         // console.log("pressed child handler");
+        setSingleSessionsVisible(false);
         handleChildPage("programs"); 
         // Close the modal and redirect
     };
 
     const handleSaveSession = () => {
         // Submit the session
-        console.log("exerciseDictionary on save: ", exerciseDictionary);
         SubmitSession(programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving);
       
         // Show the toast

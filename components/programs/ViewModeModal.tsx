@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "94%",
-    height: "90%",
+    height: "80%",
     padding: 16,
     backgroundColor: "black",
     borderRadius: 12,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   flexBtn: {
     flex: 1,
     marginHorizontal: 6,
-    backgroundColor: "#eee",
+    backgroundColor: "#ffffffff",
   },
   closeRow: {
     alignItems: "center",
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   btnText: {
-    color: "#333",
+    color: "#000000ff",
     fontSize: 16,
     textAlign: "center",
     fontWeight: "500",

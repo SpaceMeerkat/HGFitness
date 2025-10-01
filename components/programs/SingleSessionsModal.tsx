@@ -1,4 +1,5 @@
 import React from "react";
+
 import {
   KeyboardAvoidingView,
   Modal,
@@ -17,6 +18,9 @@ type SingleSessionsModalProps = {
   handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: any, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
   visible: boolean;
   onClose: () => void;
+  setFullName: any;
+  setSelectedData: any;
+  setViewModeVisible: any;
 };
 
 export default function SingleSessionsModal({
@@ -25,6 +29,9 @@ export default function SingleSessionsModal({
   handleChildPage,
   visible,
   onClose,
+  setFullName,
+  setSelectedData,
+  setViewModeVisible,
 }: SingleSessionsModalProps) {
 
   // Map level to border colors
@@ -53,7 +60,10 @@ export default function SingleSessionsModal({
             {Object.entries(programsInfo).map(([fullName, info]) => (
               <Pressable
                 onPress={() => {
-                  handleChildPage('programTracking', fullName, trackingData[fullName].data, ["1", "1"]);
+                  setFullName(fullName);
+                  setSelectedData(trackingData[fullName].data)
+                  setViewModeVisible(true);
+                  // handleChildPage('programTracking', fullName, trackingData[fullName].data, ["1", "1"]);
                 }}
                 key={fullName}
                 style={[

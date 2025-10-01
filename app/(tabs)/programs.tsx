@@ -39,6 +39,7 @@ export default function MyPrograms() {
   const [selectedDay, setSelectedDay] = useState(null);
 
   const [trackingMode, setTrackingMode] = useState(false);
+  const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
 
   const scrollViewRef = useRef<ScrollView>(null); // Add reference
@@ -168,7 +169,8 @@ export default function MyPrograms() {
       return renderSignup();
     } else if (loggedIn && userProfile) {
       if (myProgramsOpen) {
-        return <MyProgramsLanding handleChildPage={handleChildPage} />;
+        return <MyProgramsLanding handleChildPage={handleChildPage} setTrackingMode={setTrackingMode}
+                singleSessionsVisible={singleSessionsVisible} setSingleSessionsVisible={setSingleSessionsVisible}/>;
       }
       if (selectedProgramID) {
         // Find the Week_Day IDs to keep track of tracked sets 
@@ -189,7 +191,8 @@ export default function MyPrograms() {
   
         if (programTrackingOpen) {
           const selectedLevel = getProgramLevel(selectedProgramID);
-          return <ProgramTracker programLevel={selectedLevel || 'beginner'} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} trackingMode={trackingMode}/>;
+          return <ProgramTracker programLevel={selectedLevel || 'beginner'} programID={selectedProgramID} programData={selectedProgram} 
+          programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} trackingMode={trackingMode} setSingleSessionsVisible={setSingleSessionsVisible}/>;
         }
       }
     }
