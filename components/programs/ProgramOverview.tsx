@@ -1,7 +1,9 @@
 import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import Calendar from "./StreakCalendar";
+import ViewModeModal from "./ViewModeModal";
 
 type Exercise = any; // Define the type of exercises if you have more details
 
@@ -30,9 +32,15 @@ type ProgramOverviewProps = {
   completedKeys: any;
   handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: any, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
   streakDates: any;
+  setTrackingMode: any; 
 };
 
-export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage, streakDates }: ProgramOverviewProps) {
+export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage, streakDates, setTrackingMode}: ProgramOverviewProps) {
+
+  const [viewModeVisible, setViewModeVisible] = useState(false);
+  const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [triggerRedirect, setTriggerRedirect] = useState(false);
 
   const calendarBoolean = programID.toLowerCase().includes("subscription");
   let streakThreshold = 0;
@@ -57,6 +65,19 @@ export function ProgramOverview({ programLevel, programData, programDay, program
     )
   }}
 
+  const setViewModeTrue = (week: string, day: string) => {
+    setViewModeVisible(true);
+    setSelectedWeek(week);
+    setSelectedDay(day);
+  }
+
+  useEffect (() => {
+    if (selectedWeek && selectedDay) {
+      setViewModeVisible(false);
+      handleChildPage('programTracking', programID, programData, [selectedWeek, selectedDay]);
+    }
+  }, [triggerRedirect])
+
   const renderDays = (weekData: Week, weekNumber: string, completedKeys?: any) => {
     return Object.keys(weekData).map(day => {
       const key = `${weekNumber}_${day}`;
@@ -67,7 +88,8 @@ export function ProgramOverview({ programLevel, programData, programDay, program
       return (
         <View key={key} style={{ position: "relative" }}>
           <Pressable 
-            onPress={() => handleChildPage('programTracking', programID, programData, [weekNumber, day])}
+            onPress={() => setViewModeTrue(weekNumber, day)}
+            // onPress={() => handleChildPage('programTracking', programID, programData, [weekNumber, day])}
           >
             <View style={[ProgramStyles.programOverviewDay, { height: 50, opacity }]}>
               <Text style={[DefaultTabStyles.defaultMediumText, ProgramStyles.programText]}>
@@ -106,6 +128,7 @@ export function ProgramOverview({ programLevel, programData, programDay, program
 
   return (
       <ScrollView contentContainerStyle={{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 16 }}>
+        <ViewModeModal setTrackingMode={setTrackingMode} setTriggerRedirect={setTriggerRedirect} visible={viewModeVisible} onClose={() => setViewModeVisible(false)}/>
         <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} onPress={() => handleChildPage('programs')}>
             <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
         </Pressable>

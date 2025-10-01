@@ -38,6 +38,9 @@ export default function MyPrograms() {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
 
+  const [trackingMode, setTrackingMode] = useState(false);
+
+
   const scrollViewRef = useRef<ScrollView>(null); // Add reference
 
   const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms, setProfile, setMyPrograms, setTrackingData, setMealPrograms } =
@@ -179,14 +182,14 @@ export default function MyPrograms() {
         if (programOverviewOpen && selectedProgram) {
           const selectedLevel = getProgramLevel(selectedProgramID);
           const streakDates = trackingData[selectedProgramID]?.streakDates;
-          return <ProgramOverview programLevel={selectedLevel} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} streakDates={streakDates}/>;
+          return <ProgramOverview programLevel={selectedLevel} programID={selectedProgramID} programData={selectedProgram} 
+            programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} streakDates={streakDates}
+            setTrackingMode={setTrackingMode}/>
         }
   
         if (programTrackingOpen) {
-          console.log("here");
           const selectedLevel = getProgramLevel(selectedProgramID);
-          
-          return <ProgramTracker programLevel={selectedLevel || 'beginner'} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
+          return <ProgramTracker programLevel={selectedLevel || 'beginner'} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} trackingMode={trackingMode}/>;
         }
       }
     }

@@ -1,4 +1,4 @@
-import { DefaultTabStyles, ProgramStyles, ShopStyles } from "@/components/HGStyles";
+import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { S3_API_URL } from "@/components/network/apiConfig";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -25,6 +25,7 @@ type ProgramTrackerProps = {
   programDay: any;
   completedKeys: any;
   handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: string, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
+  trackingMode: any;
 };
 
 type ProgramLevel = 'advanced' | 'intermediate' | 'beginner';
@@ -78,14 +79,13 @@ export const getAlternativeByExerciseName = (
   return alternativeMatch ? alternativeMatch[1] : '';
 };
 
-export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
+export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage, trackingMode }: ProgramTrackerProps) {
 
   const { setTrackingData, trackingData, masterGymProgramsDictionary } = useAppContext();
   // Handle the memory keys/data for tracker placeholders
   const memoryKeys = trackingData[programID]["memoryKeys"];
   const memoryData = trackingData[programID]["memoryData"];
   const oneShot = programID.toLowerCase().includes("singlesession");
-  console.log("oneShot status: ", oneShot);
   const completedDay = completedKeys.includes(`${programDay[0]}_${programDay[1]}`);
   const [placeholders, setPlaceHolders] = useState<Placeholders | null>(null);
   // Handle the dictionary of exercises and keys from reading in
@@ -286,7 +286,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={weightPlaceholder}
                           value={exerciseSet.userInputWeights[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
-                          editable={!completedDay || oneShot}
+                          editable={!completedDay && trackingMode || oneShot}
                         />
                       </View>
                     </View>
@@ -301,7 +301,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={repsPlaceholder}
                           value={exerciseSet.userInputReps[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
-                          editable={!completedDay || oneShot}
+                          editable={!completedDay && trackingMode || oneShot}
                         />
                       </View>
                     </View>
@@ -518,18 +518,24 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     }); 
   };
 
-  const saveOpacity = completedDay && !oneShot ? 0.5 : 1;
+  const saveOpacity = completedDay && !oneShot || !trackingMode ? 0.5 : 1;
 
   return (
     <>
       <ScrollView style={ShopStyles.shopScrollContainer}>
+        {!trackingMode && (
+          <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} onPress={() => handleChildPage('programOverview')}>
+            <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+          </Pressable>
+        )}
+        
         <View>
           {renderExercises()}
           <Pressable 
           style={[ProgramStyles.trackingSaveButton, {opacity: saveOpacity, backgroundColor: saveIsPressed? 'grey': 'black'}]}
-          onPressIn={completedDay && !oneShot ? undefined : () => { setSaveIsPressed(true) }}
-          onPressOut={completedDay && !oneShot ? undefined : () => { setSaveIsPressed(false) }}
-          onPress={completedDay && !oneShot ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
+          onPressIn={completedDay && !oneShot || !trackingMode ? undefined : () => { setSaveIsPressed(true) }}
+          onPressOut={completedDay && !oneShot || !trackingMode ? undefined : () => { setSaveIsPressed(false) }}
+          onPress={completedDay && !oneShot || !trackingMode ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
           >
             <Text style={{color: "white"}}>Save session</Text>
           </Pressable>
