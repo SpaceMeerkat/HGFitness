@@ -65,17 +65,20 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
 
         <Pressable onPress={() => handleChildPage('coaching')}>
         <View style={ShopStyles.shopMealsContainer}>
-          <ImageBackground source={require("@/assets/images/onlineCoaching.jpg")} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%', borderRadius: 8, borderWidth: 0}}>
+          <ImageBackground source={require("@/assets/images/onlineCoachingBackground.jpg")} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%', borderRadius: 8, borderWidth: 0}}>
             <View style={{flex:1, justifyContent:"flex-start", alignItems:"flex-start", paddingTop:10, paddingLeft:6}}>
-              <View style={{flex:0.8, flexDirection: "row", justifyContent:"center", alignItems:"center"}}>
+              <View style={{flex:1, flexDirection: "row", justifyContent:"center", alignItems:"center"}}>
                 <View style={{flex:0.5, flexDirection: "column", justifyContent:"center", alignItems:"center"}}>
-              <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 0, fontSize: 20}]}>For</Text>
-              <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 0, fontFamily: 'Edo', fontSize: 24}]}>personalised</Text>
-              <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 0, fontFamily: 'Edo', fontSize: 24}]}>help</Text>
-              <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 8, fontSize: 18}]}>click here</Text>
+                  <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 0, fontSize: 20}]}>For</Text>
+                  <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 0, fontFamily: 'Edo', fontSize: 24}]}>personalised</Text>
+                  <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 0, fontFamily: 'Edo', fontSize: 24}]}>help</Text>
+                  <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 8, fontSize: 18}]}>click here</Text>
+                </View>
+                <View style={{flex:0.5, flexDirection: "column"}}>
+                  <ImageBackground source={require("@/assets/images/personalisedHelp.png")} resizeMode="cover" 
+                  style={{flex:1, flexDirection: "column", width: '100%', height: '100%'}}/>
+                </View>
               </View>
-            </View>
-              
             </View>
           </ImageBackground>
           </View>

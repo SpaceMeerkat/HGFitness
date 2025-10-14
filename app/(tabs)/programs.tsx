@@ -49,7 +49,7 @@ export default function MyPrograms() {
 
   useFocusEffect(
     useCallback(() => {
-      if (!profile?.purchaseQueue || Object.keys(profile.purchaseQueue).length === 0) return;
+      if (!profile?.purchaseQueue || Object.keys(profile?.purchaseQueue).length === 0) return;
 
       const processQueue = async () => {
         await runPaymentStatus(profile.purchaseQueue, {

@@ -295,8 +295,19 @@ interface SubscriptionCardProps {
 
 export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handleChildPage }: SubscriptionCardProps) {
 
-    const { trackingData, profile } = useAppContext(); 
-    const shortCardTitle = "Subscription";  
+    const { trackingData } = useAppContext(); 
+
+    let shortCardTitle = "None";
+    let noImage = false;
+
+    if (cardTitle === "NotPremium") {
+        shortCardTitle = "Get New Programs Every Month";
+        noImage = true;
+    } else {
+        shortCardTitle = "Days a week";
+        noImage = false;
+    }
+      
 
     const images: Record<string, any> = {
     "4": require("@/assets/images/4Days.png"),
@@ -316,17 +327,24 @@ export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handle
 
     return (
         <View style={styles.container}>
-            <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', borderColor: 'grey', backgroundColor: 'transparent'}]}>
+            <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, 
+                {overflow: 'hidden', borderColor: 'grey', backgroundColor: 'transparent', 
+                height: cardTitle != "NotPremium" ? 70 : 70, paddingBottom: cardTitle != "NotPremium" ? 8 : 5}]
+                }>
                 {content}
-                <View style={{ flex: 0.3, paddingRight: 0 }}>
-                    <Image source={images[cardInfo]} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
+                {cardTitle != "NotPremium" && (
+                    <View style={{ flex: 0.25 }}>
+                        <Image source={images[cardInfo]} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
+                    </View>
+                )}
+                <View style={{ flex: 1, paddingLeft: cardTitle != "NotPremium"? 16 : 4}}>
+                    <Text style={{ fontFamily: 'Edo', color: 'white', fontSize: cardTitle != "NotPremium"? 26 :20 }}>{shortCardTitle}</Text>
                 </View>
-                <View style={{ flex: 0.7, paddingLeft: 8}}>
-                    <Text style={[DefaultTabStyles.defaultBoldText, { color: 'white' }]}>{shortCardTitle}</Text>
-                </View>
-                <View style={{ flex: 0.3, paddingRight: 10 }}>
-                    <Image source={require("@/assets/images/WhiteTransparentLogo.png")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
-                </View>
+                {cardTitle != "NotPremium" && (
+                    <View style={{ flex: 0.3, paddingRight: 10 }}>
+                        <Image source={require("@/assets/images/WhiteTransparentLogo.png")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
+                    </View>
+                )}
             </ImageBackground>
             <Pressable onPress={handlePress} style={styles.pressableCover} />
         </View>
@@ -363,19 +381,19 @@ const styles = StyleSheet.create({
 
 interface FreeSessionsProps {
     cardTitle: string;
-    cardInfo: string;
     modalPress: React.Dispatch<React.SetStateAction<boolean>>;
   }
-export function FreeSessionsCard({ cardTitle, cardInfo, modalPress }: FreeSessionsProps) {
+export function FreeSessionsCard({ cardTitle, modalPress }: FreeSessionsProps) {
 
     return (
-        <View style={styles.container}>
-            <View style={[ShopStyles.myProgramsBlockContainer, {borderColor: 'grey', backgroundColor: 'rgba(0, 0, 0, 1)'}]}>
-                <View style={{ flex: 0.8 }}>
-                    <Text style={[DefaultTabStyles.defaultBoldText, { color: 'green' }]}>{cardTitle}</Text>
-                    <Text style={[DefaultTabStyles.defaultMediumText, { color: 'white' }]}>{cardInfo}</Text>
+        <View style={[styles.container]}>
+            <View style={[ShopStyles.myProgramsBlockContainer, {height: 140, borderColor: 'white', backgroundColor: 'rgba(0, 0, 0, 1)'}]}>
+                <View style={{ flex: 0.6 }}>
+                    <Text style={{fontWeight: "bold", color: 'rgba(72, 185, 1, 1)', fontSize: 24 }}>
+                        Time to <Text style={{fontFamily: "Edo", fontWeight: "normal", fontSize: 32, color: "white"}}>Train</Text>
+                    </Text>
                 </View>
-                <View style={{ flex: 0.3, paddingRight: 10 }}>
+                <View style={{ flex: 0.4, paddingRight: 10 }}>
                     <Image source={require("@/assets/images/cards/FreeCard.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
                 </View>
             </View>

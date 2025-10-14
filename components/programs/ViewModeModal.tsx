@@ -1,13 +1,13 @@
 import { ImageBackground } from "expo-image";
 import React from "react";
 import {
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 type ViewModeModalProps = {
@@ -47,7 +47,7 @@ export default function ViewModeModal({
             <View style={styles.explanationBox}>
               {/* <Text style={styles.explanationTitle}>Track</Text> */}
               <Text style={styles.explanationText}>
-                Enter tracking data! The day will be marked as complete.
+                Enter tracking data! The session will be marked as complete.
               </Text>
             </View>
           </View>

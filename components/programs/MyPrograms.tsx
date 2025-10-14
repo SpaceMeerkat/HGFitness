@@ -23,7 +23,7 @@ type MyProgramsLandingProps = {
 
 export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSessionsVisible, setSingleSessionsVisible}: MyProgramsLandingProps) {
 
-  const { myPrograms, trackingData } = useAppContext(); 
+  const { myPrograms, trackingData, profile } = useAppContext(); 
   // const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
   const image = require("@/assets/images/HGBackground.png");
@@ -89,42 +89,53 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
           setViewModeVisible={setViewModeVisible}/>
         )}
 
-        {/* Subscription card */}
-        <SubscriptionProgramCard
-          key={'subscription4'}
-          cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
-          cardTitle={"Subscription4Day-1-Men"}  // Display the program name
-          cardInfo={`4`}  // Display number of days per week
-          handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
-        />
+        {profile.premium ? (
+          <>
+          {/* Subscription card */}
+          <SubscriptionProgramCard
+            key={'subscription4'}
+            cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
+            cardTitle={"Subscription4Day-1-Men"}  // Display the program name
+            cardInfo={`4`}  // Display number of days per week
+            handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
+          />
 
-        {/* Subscription card */}
-        <SubscriptionProgramCard
-          key={'subscription2'}
-          cardImage={require('@/assets/images/SubscriptionCard2day.jpg')}
-          cardTitle={"Subscription2Day-1-Men"}  // Display the program name
-          cardInfo={`2`}  // Display number of days per week
-          handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
-        />
+          {/* Subscription card */}
+          <SubscriptionProgramCard
+            key={'subscription2'}
+            cardImage={require('@/assets/images/SubscriptionCard2day.jpg')}
+            cardTitle={"Subscription2Day-1-Men"}  // Display the program name
+            cardInfo={`2`}  // Display number of days per week
+            handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
+          />
+          </>
+        ) : (
+          <SubscriptionProgramCard
+            key={'subscription4'}
+            cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
+            cardTitle={"NotPremium"}  // Display the program name
+            cardInfo={`4`}  // Display number of days per week
+            handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
+          />
+        )}
 
         {/* Section Header Free Sessions */}
-        <View style={{flexDirection: "row", paddingVertical: 20, alignItems: "center", justifyContent: "center"}}>
+        <View style={{flexDirection: "row", paddingVertical: 10, alignItems: "center", justifyContent: "center"}}>
           <View style={{flex:0.45, backgroundColor: "white", height: 1, paddingLeft: 16}}></View>
           <View style={{flex:0.5, alignItems: "center", justifyContent: "center", paddingHorizontal: 8}}>
-            <Text style={{color: "white"}}>Free Sessions</Text>
+            <Text style={{color: "white"}}>Gym Sessions</Text>
           </View>
           <View style={{flex:0.45, backgroundColor: "white", height: 1, paddingRight: 16}}></View>
         </View>
 
         <FreeSessionsCard 
           key={'FreeSessions'}
-          cardTitle={"Free Sessions"}  // Display the program name
-          cardInfo={`Single day 1-shots`}  // Display number of days per week
+          cardTitle={"Time to train"}  // Display the program name
           modalPress = {setSingleSessionsVisible}
         />
 
         {/* Section Header Purchased Programs */}
-        <View style={{flexDirection: "row", paddingVertical: 20, alignItems: "center", justifyContent: "center"}}>
+        <View style={{flexDirection: "row", paddingVertical: 10, alignItems: "center", justifyContent: "center"}}>
           <View style={{flex:0.25, backgroundColor: "white", height: 1, paddingLeft: 16}}></View>
           <View style={{flex:0.5, alignItems: "center", justifyContent: "center", paddingHorizontal: 8}}>
             <Text style={{color: "white"}}>Purchased Programs</Text>
@@ -160,7 +171,7 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
         )}
 
         {/* Section Header Completed Programs */}
-        <View style={{flexDirection: "row", paddingVertical: 20, alignItems: "center", justifyContent: "center"}}>
+        <View style={{flexDirection: "row", paddingVertical: 10, alignItems: "center", justifyContent: "center"}}>
           <View style={{flex:0.25, backgroundColor: "white", height: 1, paddingLeft: 16}}></View>
           <View style={{flex:0.5, alignItems: "center", justifyContent: "center", paddingHorizontal: 8}}>
             <Text style={{color: "white"}}>Completed Programs</Text>

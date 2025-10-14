@@ -287,7 +287,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={weightPlaceholder}
                           value={exerciseSet.userInputWeights[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
-                          editable={!completedDay && trackingMode || oneShot}
+                          editable={!completedDay && trackingMode}
                         />
                       </View>
                     </View>
@@ -302,7 +302,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={repsPlaceholder}
                           value={exerciseSet.userInputReps[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
-                          editable={!completedDay && trackingMode || oneShot}
+                          editable={!completedDay && trackingMode}
                         />
                       </View>
                     </View>

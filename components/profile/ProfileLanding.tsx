@@ -8,10 +8,11 @@ import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
+import { MealChart } from "./MealChart";
 
 export function ProfileOverview() {
 
-  const { profileImagePaths, profile, trackingData, setProfile, myPrograms } = useAppContext();
+  const { profileImagePaths, profile, trackingData, setProfile } = useAppContext();
 
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const [profileAvatar, setProfileAvatar] = useState(profileImagePaths["avatarDefault"]);
@@ -43,7 +44,7 @@ export function ProfileOverview() {
   }, [trackingData]);
 
   useEffect(() => {
-    if (profile?.avatar && profile.avatar !== 'None') {
+    if (profile?.avatar && profile?.avatar !== 'None') {
       setProfileAvatar(profile.avatar);
     } else if (profileImagePaths?.avatarDefault) {
       setProfileAvatar(profileImagePaths["avatarDefault"]);
@@ -255,18 +256,20 @@ export function ProfileOverview() {
             ))}
           </View>
           {/* Meal chart if dictionary exists, or else an empty warning box to get tracking */}
-          {/* {dictionary && Object.keys(dictionary).length > 0 ? 
+          {dictionary && Object.keys(dictionary).length > 0 ? (
           <MealChart dictionary={dictionary} 
             mealType={`running${buttons[selected].label}`} 
             color={buttons[selected].color} 
             prefix={buttons[selected].prefix} 
             decimal = {buttons[selected].decimal} 
           /> 
-          :  */}
+          )
+          : (
           <View style={{flex: 0.25,flexDirection: 'column',backgroundColor: 'black',justifyContent: 'center',alignContent: 'center',
             paddingVertical: 50,borderRadius: 4,borderColor: 'grey',borderWidth: 2,}}>
             <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
           </View>
+          )}
         </View>        
 
       </ScrollView>

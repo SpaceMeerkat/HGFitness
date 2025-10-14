@@ -32,7 +32,6 @@ export default function MealScreen() {
   const [loginActive, setLoginActive] = useState(false);
   const [signupActive, setSignupActive] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
-  // const [mealItem, setMealItem] = useState<any | null>(null);
   const [activeMeal, setActiveMeal] = useState<any | null>(null);
   const [mealIndex, setMealIndex] = useState<any>(0); 
   const [versionLength, setVersionLength] = useState<any>(0); 
@@ -63,8 +62,6 @@ export default function MealScreen() {
     // Update AsyncStorage
     await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
   };
-
-  // console.log(profile.calorieCalculator);
 
   useEffect(() => {
     // Guard against empty dictionary as streak should be false by default
