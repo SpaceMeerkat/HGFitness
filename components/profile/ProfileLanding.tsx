@@ -8,6 +8,7 @@ import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
+import ProgressBarWithDots from "./LevelLoadingBar";
 import { MealChart } from "./MealChart";
 
 export function ProfileOverview() {
@@ -175,7 +176,7 @@ export function ProfileOverview() {
         {/* Main stats bar */}
         <View style={{flex: 1, paddingVertical: 8}}>
           <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
-            <View style={{flex: 0.3, flexDirection: 'column'}}>
+            <View style={{flex: 0.35, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
                 <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[2]}</Text>
               </View>
@@ -184,16 +185,16 @@ export function ProfileOverview() {
               </View>
             </View>
             <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
-            <View style={{flex: 0.4, flexDirection: 'column'}}>
+            <View style={{flex: 0.3, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
                 <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[1]}</Text>
               </View>
               <View style={{flex: 0.3}}>
-                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Achievements</Text>
+                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Level</Text>
               </View>
             </View>
             <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
-            <View style={{flex: 0.3, flexDirection: 'column'}}>
+            <View style={{flex: 0.35, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
                 <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[0]}</Text>
               </View>
@@ -226,6 +227,12 @@ export function ProfileOverview() {
             </View>
           </View>
         </View> */}
+
+        <ProgressBarWithDots
+          horizontalPadding={30}
+          dotPositions={[20, 80]}
+          fillPercentage={60}
+        />
 
         </Wrapper>
 
@@ -270,7 +277,44 @@ export function ProfileOverview() {
             <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
           </View>
           )}
-        </View>        
+        </View>   
+
+        {/* Gap between the meals and the weight goals */}
+        <View style={ProfileStyles.ProfileSpacer}/>
+
+        {/* Meal stats parent container */}
+        <View style={[ProfileStyles.MealStatsParentContanier, {alignItems: 'center'}]}>
+          {/* Meal stats header/title */}
+          <View style={[ProfileStyles.StatsHeaderContainer, {paddingBottom: 10}]}>
+            <Text style={ProfileStyles.StatsHeaderText}>Weight goals</Text>
+          {/* Meal stats button selector for meals/calories/protein/water */}
+          <Pressable
+            key={"add-weight-button"}
+            onPress={() => console.log("pressed")}
+            style={[
+              ProfileStyles.MealChartButtons,
+              {flex: 0.5, width: 200}
+            ]}
+          >
+            <Text style={{ color: "white", textAlign: "center" }}>Add Weigh-in</Text>
+          </Pressable>
+          </View>
+          {/* Meal chart if dictionary exists, or else an empty warning box to get tracking */}
+          {dictionary && Object.keys(dictionary).length > 0 ? (
+          <MealChart dictionary={dictionary} 
+            mealType={`running${buttons[selected].label}`} 
+            color={buttons[selected].color} 
+            prefix={buttons[selected].prefix} 
+            decimal = {buttons[selected].decimal} 
+          /> 
+          )
+          : (
+          <View style={{flex: 0.25,flexDirection: 'column',backgroundColor: 'black',justifyContent: 'center',alignContent: 'center',
+            paddingVertical: 50,borderRadius: 4,borderColor: 'grey',borderWidth: 2,}}>
+            <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
+          </View>
+          )}
+        </View>     
 
       </ScrollView>
       
