@@ -53,7 +53,7 @@ export default function SingleSessionsModal({
   const [debouncedText, setDebouncedText] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [filteredPrograms, setFilteredPrograms] = useState(Object.entries(programsInfo));
-
+  
   // --- Debounce effect for search ---
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -78,8 +78,20 @@ export default function SingleSessionsModal({
       return matchesText && matchesLevel;
     });
 
+    // Always sort beginner → intermediate → advanced
+    const levelOrder: Record<string, number> = {
+        beginner: 0,
+        intermediate: 1,
+        advanced: 2,
+      };
+
+    newFiltered.sort(([, a], [, b]) => {
+      return levelOrder[a.level] - levelOrder[b.level];
+    });
+
     setFilteredPrograms(newFiltered);
   }, [debouncedText, selectedLevel, programsInfo]);
+
 
   if (!programsInfo || !trackingData) return null;
 

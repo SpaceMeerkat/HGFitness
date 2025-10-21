@@ -393,8 +393,8 @@ export function FreeSessionsCard({ cardTitle, modalPress }: FreeSessionsProps) {
                         Time to <Text style={{fontFamily: "Edo", fontWeight: "normal", fontSize: 32, color: "white"}}>Train</Text>
                     </Text>
                 </View>
-                <View style={{ flex: 0.4, paddingRight: 10 }}>
-                    <Image source={require("@/assets/images/cards/FreeCard.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
+                <View style={{ flex: 0.4, paddingRight: 0 }}>
+                    <Image source={require("@/assets/images/cards/FreeCard2.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
                 </View>
             </View>
             <Pressable onPress={() =>modalPress(true)} style={styles.pressableCover} />
