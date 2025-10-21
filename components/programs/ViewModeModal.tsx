@@ -93,7 +93,7 @@ export default function ViewModeModal({
               onPress={onClose}
               style={[styles.btn, styles.closeBtn]}
             >
-              <Text style={[styles.btnText, {color: "white"}]}>close</Text>
+              <Text style={[styles.btnText, {color: "white"}]}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>

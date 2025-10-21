@@ -87,6 +87,17 @@ export default function SingleSessionsModal({
     setSelectedLevel(prev => (prev === level ? null : level));
   };
 
+    // Reset all filters
+  const resetFilters = () => {
+    setSelectedLevel(null);
+    setSearchText("");
+  };
+
+  const handleClose = () => {
+    resetFilters();
+    onClose();
+  };
+
   return (
     <Modal transparent animationType="fade" visible={visible}>
       <KeyboardAvoidingView style={styles.center} enabled={false}>
@@ -142,7 +153,7 @@ export default function SingleSessionsModal({
                   marginHorizontal: 4,
                   paddingVertical: 6,
                   borderWidth: selectedLevel === level ? 2 : 1,
-                  borderColor: selectedLevel === level ? "lime" : "grey",
+                  borderColor: selectedLevel === level ? levelColors[level] : "grey",
                   borderRadius: 10,
                 }}
               >
@@ -222,8 +233,8 @@ export default function SingleSessionsModal({
           <View style={{ flex: 0.01, borderRadius: 8, paddingVertical: 4 }} />
 
           <View style={styles.buttons}>
-            <TouchableOpacity onPress={onClose} style={[styles.btn, styles.closeBtn]}>
-              <Text style={{ color: "#333" }}>Close</Text>
+            <TouchableOpacity onPress={handleClose} style={[styles.btn, styles.closeBtn]}>
+              <Text style={{ color: "#ffffffff", fontWeight: "bold" }}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -286,5 +297,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginLeft: 8,
   },
-  closeBtn: { backgroundColor: "#eee" },
+  closeBtn: { backgroundColor: "black" },
 });
