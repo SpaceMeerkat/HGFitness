@@ -280,6 +280,47 @@ export function CompletedGymCard({ imgUri, cardLevel, cardTitle, cardInfo }: Com
     );
 }
 
+interface SubscriptionOptionsProps {
+    cardImage: any;
+    cardTitle: string;
+    cardInfo: string;
+    setSubscriptionsVisible: (data: any) => void
+  }
+
+
+export function SubscriptionOptionsCard({ cardImage, cardTitle, setSubscriptionsVisible }: SubscriptionOptionsProps) {
+
+    let shortCardTitle = "None";
+    let noImage = false;
+
+    if (cardTitle === "NotPremium") {
+        shortCardTitle = "Get New Programs Every Month";
+        noImage = true;
+    } else {
+        shortCardTitle = "Days a week";
+        noImage = false;
+    }
+      
+    const images: Record<string, any> = {
+    "4": require("@/assets/images/4Days.png"),
+    "2": require("@/assets/images/2Days.png"),
+    };
+
+    return (
+        <View style={styles.container}>
+            <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, 
+                {overflow: 'hidden', borderColor: 'grey', backgroundColor: 'transparent', 
+                height: 70, paddingBottom: 5}]
+                }>
+                <View style={{ flex: 1, paddingLeft: 4}}>
+                    <Text style={{ fontFamily: 'Edo', color: 'white', fontSize:20 }}>{shortCardTitle}</Text>
+                </View>
+            </ImageBackground>
+            <Pressable onPress={() => setSubscriptionsVisible(true)} style={styles.pressableCover} />
+        </View>
+    );
+}
+
 interface SubscriptionCardProps {
     cardImage: any;
     cardTitle: string;
@@ -319,6 +360,7 @@ export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handle
         if (programRawData !== null && programRawData !== undefined) {
             handleChildPage('programOverview', cardTitle, programRawData["data"], null, programRawData["memoryKeys"], programRawData["memoryData"]); 
         } else {
+            // Open up the modal here for the subscription purchase options
             console.log("woops!!!");
         }
     };
@@ -387,7 +429,7 @@ export function FreeSessionsCard({ cardTitle, modalPress }: FreeSessionsProps) {
 
     return (
         <View style={[styles.container]}>
-            <View style={[ShopStyles.myProgramsBlockContainer, {height: 140, borderColor: 'white', backgroundColor: 'rgba(0, 0, 0, 1)'}]}>
+            <View style={[ShopStyles.myProgramsBlockContainer, {height: 140, borderColor: 'grey', backgroundColor: 'rgba(0, 0, 0, 1)'}]}>
                 <View style={{ flex: 0.6 }}>
                     <Text style={{fontWeight: "bold", color: 'rgba(72, 185, 1, 1)', fontSize: 24 }}>
                         Time to <Text style={{fontFamily: "Edo", fontWeight: "normal", fontSize: 32, color: "white"}}>Train</Text>

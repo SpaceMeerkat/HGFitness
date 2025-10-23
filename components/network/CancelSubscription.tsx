@@ -60,7 +60,11 @@ export async function runSubscriptionCancellation(
                 const new_notifications = jsonResponse.new_notifications;
                 const new_transaction_queue = jsonResponse.new_transaction_queue;
 
+                console.log("new_notifications: ", new_notifications);
+
                 return {item_category, new_notifications, new_transaction_queue};
+
+                
 
             } else {
                 console.error("cancellation request failed with status:", response.status, await response.text());

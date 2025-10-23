@@ -27,6 +27,9 @@ export function ProfileOverview() {
     if (profile?.premium) {
       setPremium(true);
       setAccountLevel('premium');
+    } if (profile?.gymSubscription) {
+      setPremium(false);
+      setAccountLevel('subscription');
     } else {
       setPremium(false);
       setAccountLevel('free tier');

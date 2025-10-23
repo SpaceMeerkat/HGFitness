@@ -34,6 +34,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     } = useAppContext();
 
     const transactionQueue = profile?.purchaseQueue
+    const cancelledSubscription = Object.keys(profile?.purchaseQueue || {}).includes("CANCELLED")
 
     const { logout } = useLogout({
         profile,
@@ -49,11 +50,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [isSubscriber, setIsSubscriber] = useState(false)
 
     useEffect(() => {
-        if (profile?.premium) {
-        setIsSubscriber(true);
-        } else if (profile?.gymSubscription) {
-        setIsSubscriber(true);
-        }
+      if (Object.keys(profile?.purchaseQueue || {}).includes("CANCELLED")) {
+        setIsSubscriber(false);
+      } else {
+          if (profile?.premium) {
+          setIsSubscriber(true);
+          } else if (profile?.gymSubscription) {
+          setIsSubscriber(true);
+          }
+      }
     }, [profile]); 
 
     const sendEmail = async () => {

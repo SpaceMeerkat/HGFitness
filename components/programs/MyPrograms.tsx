@@ -1,10 +1,11 @@
 import { useAppContext } from "@/components/appContext";
 import { ShopStyles } from "@/components/HGStyles";
-import { CompletedGymCard, FreeSessionsCard, MyProgramCard, SubscriptionProgramCard } from "@/components/programs/MyProgramsCard";
+import { CompletedGymCard, FreeSessionsCard, MyProgramCard, SubscriptionOptionsCard, SubscriptionProgramCard } from "@/components/programs/MyProgramsCard";
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { S3_API_URL } from "../network/apiConfig";
 import SingleSessionsModal from "./SingleSessionsModal";
+import SubscriptionOptionsModal from "./SubscriptionOptions";
 import ViewModeModal from "./ViewModeModal";
 
 type PageType = 'programs' | 'programOverview' | 'programTracking';
@@ -35,6 +36,7 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
   const [fullName, setFullName] = useState<string | null>(null);
   const [selectedData, setSelectedData] = useState<any>(null);
   const [triggerRedirect, setTriggerRedirect] = useState(false);
+  const [subscriptionOptionsVisible, setSubscriptionOptionsVisible] = useState(false);
 
   useEffect (() => {
     if (fullName && selectedData) {
@@ -81,6 +83,8 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
   return (
       <ScrollView style={[ShopStyles.shopScrollContainer, {flex: 1, paddingTop: 8, paddingBottom: 20}]}>
 
+        <SubscriptionOptionsModal visible={subscriptionOptionsVisible} onClose={() => setSubscriptionOptionsVisible(false)}/>
+
         <ViewModeModal setTrackingMode={setTrackingMode} setTriggerRedirect={setTriggerRedirect} visible={viewModeVisible} onClose={() => setViewModeVisible(false)}/>
 
         {Object.keys(singlePrograms).length > 0 && Object.keys(trackingDataSoft).length > 0 && (
@@ -89,7 +93,7 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
           setViewModeVisible={setViewModeVisible}/>
         )}
 
-        {profile.premium ? (
+        {profile.premium || profile.gymSubscription? (
           <>
           {/* Subscription card */}
           <SubscriptionProgramCard
@@ -110,12 +114,12 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
           />
           </>
         ) : (
-          <SubscriptionProgramCard
+          <SubscriptionOptionsCard
             key={'subscription4'}
             cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
             cardTitle={"NotPremium"}  // Display the program name
             cardInfo={`4`}  // Display number of days per week
-            handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
+            setSubscriptionsVisible = {setSubscriptionOptionsVisible}
           />
         )}
 
