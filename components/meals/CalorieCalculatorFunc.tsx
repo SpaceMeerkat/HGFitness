@@ -1,5 +1,5 @@
 type Gender = "male" | "female";
-type ActivityLevel = "mild" | "medium" | "hard";
+type ActivityLevel = "sedentry" | "moderate" | "active" | "very_active" | "athlete";
 type Goal = "lose weight" | "maintain" | "gain";
 
 export function calculateCalories(
@@ -27,9 +27,11 @@ export function calculateCalories(
 
   // --- Step 4: Apply activity multiplier ---
   const activityMultipliers: Record<ActivityLevel, number> = {
-    mild: 1.2,
-    medium: (1.2 + 1.95) / 2, // ~1.575
-    hard: 1.95,
+    sedentry: 1,
+    moderate: 1 + (1.95-1) * 0.25,
+    active: (1 + 1.95) * 0.5, 
+    very_active: 1 + (1.95-1) * 0.75,
+    athlete: 1.95,
   };
   let weightedBmr = bmr * activityMultipliers[activity];
 
@@ -47,10 +49,19 @@ export function calculateCalories(
     female: 1.5,
     male: 2,
   };
-  let finalProtein = Math.min(weight * proteinMultipliers[gender], 200);
+  const proteinMax: Record<Gender, number> = {
+    female: 150,
+    male: 200,
+  };
+  let finalProtein = Math.min(weight * proteinMultipliers[gender], proteinMax[gender]);
+
+  const waterMax: Record<Gender, number> = {
+    female: 3,
+    male: 3.5,
+  };
 
   // --- Step 7: Calculate Water 1dp---
-  let finalWater = Math.round(weight * 0.035 * 10) / 10;
+  let finalWater = Math.min(Math.round(weight * 0.035 * 10) / 10, waterMax[gender]);
 
   return [Math.round(finalProtein), Math.round(finalCalories), finalWater]; // round to nearest integer
 }

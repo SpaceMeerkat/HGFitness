@@ -99,4 +99,34 @@ export const CalcStyles = StyleSheet.create({
   recalculateButton: {
     flex: 0.05, backgroundColor: 'black', borderColor: 'white', borderRadius: 200, borderWidth: 1, justifyContent: 'center', paddingVertical: 4
   },
+  activityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    paddingVertical: 4,
+  },
+
+  activityLeftCol: {
+    flex: 0.4,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingRight: 4,
+  },
+
+  activityRightCol: {
+    flex: 0.6,
+    justifyContent: 'center',
+    paddingLeft: 8,
+  },
+
+  dotPressable: {
+    marginLeft: 6,
+  },
+
+  activityInfoText: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'left',
+  },
 });

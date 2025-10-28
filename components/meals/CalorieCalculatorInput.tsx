@@ -6,7 +6,7 @@ import { calculateCalories } from "./CalorieCalculatorFunc";
 import { CalcStyles } from "./CalorieCalculatorStyles";
 
 type Gender = "male" | "female";
-type ActivityLevel = "mild" | "medium" | "hard";
+type ActivityLevel = "sedentry" | "moderate" | "active" | "very_active" | "athlete";
 type Goal = "lose weight" | "maintain" | "gain";
 
 type CalorieCalculatorModalProps = {
@@ -30,7 +30,7 @@ const CalorieCalculatorModal: React.FC<CalorieCalculatorModalProps> = ({
   const [age, setAge] = useState<string>("28"); // not specified, leave blank
   const [height, setHeight] = useState<string>("180"); // cm
   const [weight, setWeight] = useState<string>("70");  // kg
-  const [activity, setActivity] = useState<ActivityLevel>("medium");
+  const [activity, setActivity] = useState<ActivityLevel>("active");
   const [goal, setGoal] = useState<Goal>("maintain");
   const [buttonPressed, setButtonPressed] = useState(false);
   const [userCalorieCount, setUserCalorieCount] = useState(0);
@@ -136,6 +136,14 @@ const CalorieCalculatorModal: React.FC<CalorieCalculatorModalProps> = ({
   const renderCalculator = () => {
     const backgroundImageSource = require("@/assets/images/caloriecalculator.jpg")
 
+  const activityOptions: { key: ActivityLevel; label: string; info: string }[] = [
+    { key: "sedentry", label: "Sedentary", info: "Little To No Exercise In a Week" },
+    { key: "moderate", label: "Moderate", info: "Light Exercise 1–3 Times a Week" },
+    { key: "active", label: "Active", info: "Intense Exercise 3–5 Times a Week" },
+    { key: "very_active", label: "Very Active", info: "Intense Exercises 5+ Days a Week" },
+    { key: "athlete", label: "Athlete", info: "Intense Exercise Most Days, Sometimes Twice a Day" },
+  ];
+
     const Dot = ({ selected }: { selected: boolean }) => (
       <View
         style={{
@@ -227,27 +235,28 @@ const CalorieCalculatorModal: React.FC<CalorieCalculatorModalProps> = ({
           </View>
         </View>
 
-        {/* Activity (toggle dots) */}
+        {/* Activity (stacked rows with left/right columns) */}
         <View style={CalcStyles.inputBlock}>
           <View style={CalcStyles.inputTitle}>
             <Text style={CalcStyles.inputTitleText}>Weekly Activity Level</Text>
           </View>
-          <View style={CalcStyles.tickInputRow}>
-            <Pressable onPress={() => setActivity("mild")} style={CalcStyles.tickOption}>
-              <Dot selected={activity === "mild"} />
-              <Text style={CalcStyles.textTick}>Mild</Text>
-            </Pressable>
 
-            <Pressable onPress={() => setActivity("medium")} style={CalcStyles.tickOption}>
-              <Dot selected={activity === "medium"} />
-              <Text style={CalcStyles.textTick}>Medium</Text>
-            </Pressable>
+          {activityOptions.map(({ key, label, info }) => (
+            <View key={key} style={CalcStyles.activityRow}>
+              {/* Left Column */}
+              <View style={CalcStyles.activityLeftCol}>
+                <Text style={CalcStyles.textTick}>{label}</Text>
+                <Pressable onPress={() => setActivity(key)} style={CalcStyles.dotPressable}>
+                  <Dot selected={activity === key} />
+                </Pressable>
+              </View>
 
-            <Pressable onPress={() => setActivity("hard")} style={CalcStyles.tickOption}>
-              <Dot selected={activity === "hard"} />
-              <Text style={CalcStyles.textTick}>Hard</Text>
-            </Pressable>
-          </View>
+              {/* Right Column */}
+              <View style={CalcStyles.activityRightCol}>
+                <Text style={CalcStyles.activityInfoText}>{info}</Text>
+              </View>
+            </View>
+          ))}
         </View>
 
         {/* Goal (toggle dots) */}

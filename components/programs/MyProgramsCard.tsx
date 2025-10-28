@@ -429,7 +429,7 @@ export function FreeSessionsCard({ cardTitle, modalPress }: FreeSessionsProps) {
 
     return (
         <View style={[styles.container]}>
-            <View style={[ShopStyles.myProgramsBlockContainer, {height: 140, borderColor: 'grey', backgroundColor: 'rgba(0, 0, 0, 1)'}]}>
+            <View style={[ShopStyles.myProgramsBlockContainer, {height: 140, borderColor: 'lightgray', backgroundColor: 'rgba(0, 0, 0, 1)'}]}>
                 <View style={{ flex: 0.6 }}>
                     <Text style={{fontWeight: "bold", color: 'rgba(72, 185, 1, 1)', fontSize: 24 }}>
                         Time to <Text style={{fontFamily: "Edo", fontWeight: "normal", fontSize: 32, color: "white"}}>Train</Text>
