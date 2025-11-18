@@ -242,7 +242,7 @@ export function ProfileOverview() {
         {/* Gap between the Profile header and the stats */}
         <View style={ProfileStyles.ProfileSpacer}/>
 
-        {/* Meal stats parent container */}
+        Meal stats parent container
         <View style={ProfileStyles.MealStatsParentContanier}>
           {/* Meal stats header/title */}
           <View style={ProfileStyles.StatsHeaderContainer}>

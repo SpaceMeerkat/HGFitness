@@ -27,6 +27,8 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
   const { myPrograms, trackingData, profile } = useAppContext(); 
   // const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
+  // console.log(myPrograms);
+
   const image = require("@/assets/images/HGBackground.png");
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
   const [trackingDataSoft, setTrackingDataSoft] = useState<any>({}); // Store API response as an object
@@ -37,6 +39,8 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
   const [selectedData, setSelectedData] = useState<any>(null);
   const [triggerRedirect, setTriggerRedirect] = useState(false);
   const [subscriptionOptionsVisible, setSubscriptionOptionsVisible] = useState(false);
+
+
 
   useEffect (() => {
     if (fullName && selectedData) {
@@ -93,33 +97,41 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
           setViewModeVisible={setViewModeVisible}/>
         )}
 
-        {profile.premium || profile.gymSubscription? (
+        {profile.premium || profile.gymSubscription ? (
           <>
-          {/* Subscription card */}
-          <SubscriptionProgramCard
-            key={'subscription4'}
-            cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
-            cardTitle={"Subscription4Day-1-Men"}  // Display the program name
-            cardInfo={`4`}  // Display number of days per week
-            handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
-          />
+            {Object.keys(myPrograms)
+              .filter(key =>
+                key.toLowerCase().includes("subscription2day") ||
+                key.toLowerCase().includes("subscription4day")
+              )
+              .map((key) => {
+                const lower = key.toLowerCase();
+                const is4Day = lower.includes("subscription4day");
+                const is2Day = lower.includes("subscription2day");
 
-          {/* Subscription card */}
-          <SubscriptionProgramCard
-            key={'subscription2'}
-            cardImage={require('@/assets/images/SubscriptionCard2day.jpg')}
-            cardTitle={"Subscription2Day-1-Men"}  // Display the program name
-            cardInfo={`2`}  // Display number of days per week
-            handleChildPage={handleChildPage}  // Assuming this function is defined elsewhere
-          />
+                const cardInfo = is4Day ? "4" : "2";
+                const cardImage = is4Day
+                  ? require('@/assets/images/SubscriptionCard4day.jpg')
+                  : require('@/assets/images/SubscriptionCard2day.jpg');
+
+                return (
+                  <SubscriptionProgramCard
+                    key={key}
+                    cardImage={cardImage}
+                    cardTitle={key}          // full dynamic program title
+                    cardInfo={cardInfo}
+                    handleChildPage={handleChildPage}
+                  />
+                );
+              })}
           </>
         ) : (
           <SubscriptionOptionsCard
             key={'subscription4'}
             cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
-            cardTitle={"NotPremium"}  // Display the program name
-            cardInfo={`4`}  // Display number of days per week
-            setSubscriptionsVisible = {setSubscriptionOptionsVisible}
+            cardTitle={"NotPremium"}
+            cardInfo={`4`}
+            setSubscriptionsVisible={setSubscriptionOptionsVisible}
           />
         )}
 
