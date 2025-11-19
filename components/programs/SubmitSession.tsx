@@ -34,6 +34,7 @@ export const SubmitSession = async (
           const jsonResponse = await response.json();
           const completedStatus = jsonResponse.completed;
           const streakDates = jsonResponse.streakDates;
+          const rerunNumber = jsonResponse.rerunNumber;
           updatedTrackingData[programID] = { ...updatedTrackingData[programID] };
             updatedTrackingData[programID]['memoryData'] = { 
             ...updatedTrackingData[programID]['memoryData'], 
@@ -45,6 +46,8 @@ export const SubmitSession = async (
           updatedTrackingData[programID]['completed'] = completedStatus;
           // Update streakDates if subscription triggered a date appending
           updatedTrackingData[programID]['streakDates'] = streakDates;
+          // Update the rerunNumber for the single sessions
+          updatedTrackingData[programID]['rerunNumber'] = rerunNumber;
           await AsyncStorage.setItem('trackingData', JSON.stringify(updatedTrackingData));
           setTrackingData(updatedTrackingData);
         } else {

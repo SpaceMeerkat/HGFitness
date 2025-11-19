@@ -287,7 +287,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={weightPlaceholder}
                           value={exerciseSet.userInputWeights[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
-                          editable={!completedDay && trackingMode}
+                          editable={(!completedDay || oneShot) && trackingMode}
                         />
                       </View>
                     </View>
@@ -302,7 +302,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={repsPlaceholder}
                           value={exerciseSet.userInputReps[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
-                          editable={!completedDay && trackingMode}
+                          editable={(!completedDay || oneShot) && trackingMode}
                         />
                       </View>
                     </View>
@@ -520,8 +520,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   };
 
   const saveOpacity = completedDay && !oneShot || !trackingMode ? 0.5 : 1;
-
-  console.log(completedDay, oneShot, !trackingMode); 
 
   return (
     <>

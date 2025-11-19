@@ -24,7 +24,8 @@ export default function ViewModeModal({
   onClose,
 }: ViewModeModalProps) {
 
-  const arrowImage = require("@/assets/images/viewModeModal.jpg");
+  const arrowImageLeft = require("@/assets/images/viewModeModalLeft.jpg");
+  const arrowImageRight = require("@/assets/images/viewModeModalRight.jpg");
 
   return (
     <Modal transparent animationType="fade" visible={visible}>
@@ -33,34 +34,54 @@ export default function ViewModeModal({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View style={styles.card}>
-          <Text style={styles.title}>Choose an option</Text>
+          <Text style={styles.title}>What's the plan?</Text>
 
           {/* Explanations side by side */}
           <View style={styles.explanationRow}>
             <View style={styles.explanationBox}>
               {/* <Text style={styles.explanationTitle}>View</Text> */}
               <Text style={styles.explanationText}>
-                Take a peak at the session! Tracking is disabled
+                Take a <Text style={{color: 'lime', fontWeight: 'bold'}}>peek</Text> at the session! 
+              </Text>
+              <Text style={[styles.explanationText, {paddingTop: 4}]}>
+                Tracking is disabled
               </Text>
             </View>
 
             <View style={styles.explanationBox}>
               {/* <Text style={styles.explanationTitle}>Track</Text> */}
               <Text style={styles.explanationText}>
-                Enter tracking data! The session will be marked as complete.
+                Start <Text style={{color: 'lime', fontWeight: 'bold'}}>tracking</Text> your session!
+              </Text>
+              <Text style={[styles.explanationText, {paddingTop: 4}]}>
+                Tracking is enabled.
               </Text>
             </View>
           </View>
 
           {/* Space reserved for an image row */}
-          <ImageBackground
-            source={arrowImage}
+          <View style={{flex:0.7, flexDirection: 'row'}}>
+            <ImageBackground
+            source={arrowImageLeft}
             contentFit="contain"
             style={{
-              flex: 0.6,
+              flex: 0.5,
+              flexDirection: 'column',
               backgroundColor: "stretch",
             }}
           />
+          <ImageBackground
+            source={arrowImageRight}
+            contentFit="contain"
+            style={{
+              flex: 0.5,
+              flexDirection: 'column',
+              backgroundColor: "stretch",
+            }}
+          />
+            
+          </View>
+          
 
           {/* View & Track buttons side by side */}
           <View style={styles.buttonRow}>
@@ -70,9 +91,9 @@ export default function ViewModeModal({
                 setTriggerRedirect(true);
                 onClose();
               }}
-              style={[styles.btn, styles.flexBtn]}
+              style={[styles.btn, styles.flexBtnView]}
             >
-              <Text style={styles.btnText}>View</Text>
+              <Text style={styles.btnTextView}>View</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -111,8 +132,9 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "94%",
-    height: "80%",
-    padding: 16,
+    height: "60%",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     backgroundColor: "black",
     borderRadius: 12,
     borderWidth: 1,
@@ -156,6 +178,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  flexBtnView: {
+    flex: 1,
+    marginHorizontal: 6,
+    backgroundColor: "#656565ff",
+  },
   flexBtn: {
     flex: 1,
     marginHorizontal: 6,
@@ -163,11 +190,22 @@ const styles = StyleSheet.create({
   },
   closeRow: {
     alignItems: "center",
-    paddingTop: 34,
+    paddingTop: 4,
+  },
+  btnView: {
+    paddingVertical: 14,
+    borderRadius: 8,
+    backgroundColor: 'grey'
   },
   btn: {
     paddingVertical: 14,
     borderRadius: 8,
+  },
+  btnTextView: {
+    color: "#ffffffff",
+    fontSize: 16,
+    textAlign: "center",
+    fontWeight: "500",
   },
   btnText: {
     color: "#000000ff",
