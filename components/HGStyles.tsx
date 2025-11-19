@@ -3,10 +3,10 @@ import { StyleSheet } from "react-native";
 export const ProfileStyles = StyleSheet.create({
     MealStatsParentContanier: {
         backgroundColor: 'black', 
-        flex: 1, 
+        flex: 0.25, 
         paddingTop: 10,
         borderColor: 'grey',
-        borderWidth: 2,
+        borderWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 2,
         paddingBottom: 2,
@@ -157,9 +157,7 @@ export const ShopStyles = StyleSheet.create({
     shopScrollContainer: {
       paddingHorizontal: 16,
       paddingTop: 8,
-      paddingBottom: 16,
-      marginBottom: 0,
-      marginTop: 0,
+      paddingBottom: 0,
     },
     shopBlockContainer: {
       flexDirection: "row",
@@ -200,26 +198,27 @@ export const ShopStyles = StyleSheet.create({
         borderColor: "grey",
         borderWidth: 2,
         borderRadius: 8,
-        marginVertical: 5,
         alignItems: "center",
         height: 155,
+        overflow: 'hidden'
       },
     shopHotRowContainer: {
-        flexDirection: 'row', gap: 4, paddingVertical: 2
+        flexDirection: 'row', gap: 0, paddingVertical: 2
     },
     shopHotSpacer: {
-        paddingLeft: 10, 
-        paddingRight: 10, paddingVertical: 0, 
+        paddingLeft: 0, 
+        paddingRight: 0, paddingVertical: 0, 
         justifyContent: 'center',
-        borderWidth: 2, borderRadius: 8,
-        backgroundColor: 'dimgrey',
-        opacity: 0.4
+        borderWidth: 1, borderRadius: 8, borderColor: 'black',
+        backgroundColor: 'black',
+        overflow: "hidden",
+        opacity: 1
     },
     shopHotButton: {
-        paddingLeft: 10, 
-        paddingRight: 10, paddingVertical: 0, 
+        paddingLeft: 0, 
+        paddingRight: 0, paddingVertical: 0, 
         justifyContent: 'center',
-        borderWidth: 2, borderRadius: 8, borderColor: 'grey',
+        borderWidth: 0, borderRadius: 8, borderColor: 'black',
         backgroundColor: 'black'
     },
     shopHotLeft: {

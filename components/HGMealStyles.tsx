@@ -32,8 +32,8 @@ export const MealTrackingStyles = StyleSheet.create({
         alignItems: "center",
     },
     TrackingOptionsContainer: {
-        width: "90%",
-        height: "90%",
+        width: "100%",
+        height: "100%",
         backgroundColor: "black",
         padding: 0,
         borderRadius: 10,

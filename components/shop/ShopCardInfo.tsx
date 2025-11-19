@@ -1,12 +1,15 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, ImageBackground } from "react-native";
-import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
-import * as SecureStore from 'expo-secure-store';
-import { BASE_API_URL } from "../network/apiConfig";
 import { useAppContext } from "@/components/appContext";
+import { ShopStyles } from "@/components/HGStyles";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from "react";
+import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
+import { BASE_API_URL } from "../network/apiConfig";
 // import { Linking } from 'react-native';
 import * as Linking from 'expo-linking';
 
 interface CardInfoProps {
+    cardFullName: string;
     cardInfo: {
         Name: string[];
         Level: ("beginner" | "advanced" | "intermediate")[];
@@ -22,7 +25,7 @@ interface CardInfoProps {
     };
 }
 
-export function CardInfo({ cardInfo }: CardInfoProps) {
+export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
     const cardName = cardInfo.Name[0];
     const cardSlogan = cardInfo.Slogan[0];
     const cardLevel = cardInfo.Level[0];
@@ -32,16 +35,19 @@ export function CardInfo({ cardInfo }: CardInfoProps) {
     const cardFeatures = cardInfo.Features;
     const cardGoals = cardInfo.Goals;
     const cardWhy = cardInfo.Why[0];    
-    const { profile } = useAppContext(); // needed for the client being logged in
+    const { myPrograms, profile, setProfile } = useAppContext(); // needed for the client being logged in
+    const [isPurchased, setIsPurchased] = useState(false);
     const image = require("@/assets/images/HGBackground.png");
 
-    const SubmitPayFastQuery = async (prgramName: String, programPrice: Number, profile: any) => { 
+    useEffect(() => {
+        const keys = Object.keys(myPrograms);
+        const found = keys.some((key) => key === cardFullName);
+        setIsPurchased(found);
+    }, [cardFullName, myPrograms]);  
+
+    const SubmitPayFastQuery = async (programName: String, programPrice: Number, profile: any) => { 
         // Fetch the jwt from securestore
-        console.log("pressed!");
-        // const url = Linking.useURL();
-        // console.log(url);
         const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-        console.log(profile);
         if (retrievedToken && profile) {
           try {
               const url = `${BASE_API_URL}/query_payment`;
@@ -51,19 +57,29 @@ export function CardInfo({ cardInfo }: CardInfoProps) {
                       'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
-                      item_name: prgramName,
+                      item_name: programName,
                       item_price: programPrice,
-                      token: retrievedToken
+                      item_category: "gymplan",
+                      token: retrievedToken,
                   }),
               });
               if (response.ok) {
-                console.log('status OK');
                 const jsonResponse = await response.json();
                 const query = jsonResponse.PayFastQuery;
-                console.log('Received PayFast query: ', query)
+                // Set the profile purchaseQuery dict to match the separately updated backend profile -----------
+                const updatedProfile = {
+                    ...profile,
+                    purchaseQueue: {
+                        ...profile.purchaseQueue, // Spreads the existing items in purchaseQueue
+                        [query.m_payment_id]: "PENDING", // Adds the new key-value pair
+                    },
+                };
+                setProfile(updatedProfile);
+                await AsyncStorage.setItem("profile", JSON.stringify(profile));
+                // ----------------------------------------------------------------------------------------------
                 const urlParams = new URLSearchParams(query).toString();
                 const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
-                console.log(url);
+                // const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
                 const supported = await Linking.canOpenURL(url);
                 if (supported) {
                     await Linking.openURL(url);
@@ -143,7 +159,13 @@ export function CardInfo({ cardInfo }: CardInfoProps) {
                 <Pressable style={[{
                     flex: 1, flexDirection: 'column', 
                     justifyContent: 'center', alignItems: 'center',
-                    borderWidth: 1, borderRadius: 8, borderColor: 'white', paddingVertical: 12}]} onPress={() => SubmitPayFastQuery(cardName, cardPrice, profile)}>
+                    borderWidth: 1, borderRadius: 8, borderColor: 'white', paddingVertical: 12,
+                    opacity: isPurchased? 0.5: 1}]} 
+                    onPress={
+                        isPurchased
+                        ? undefined // 👈 do nothing
+                        : () => SubmitPayFastQuery(cardFullName, cardPrice, profile)
+                    }>
                     <Text style={{color: 'white', fontSize: 15, fontWeight: 'bold'}}>PURCHASE THIS PROGRAM!</Text>
                 </Pressable>
             </ImageBackground>

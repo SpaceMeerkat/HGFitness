@@ -1,19 +1,27 @@
-import { View, Text, Pressable, ScrollView, BackHandler, Image, ImageBackground} from "react-native";
-import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles"
+import { DefaultTabStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
+import { Image, ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
 
 type GymProgramProps = {
     handleChildPage: (page: 'beginner' | 'intermediate' | 'advanced') => void;
+    handleBackButton: () => boolean;
   };
 
-export function GymPrograms({ handleChildPage }: GymProgramProps) {
+export function GymPrograms({ handleChildPage, handleBackButton }: GymProgramProps) {
 
     const image = require("@/assets/images/HGBackground.png");
 
     return(
         <ImageBackground source={image} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
         <ScrollView style={ShopStyles.shopScrollContainer}>
+          {/* Back button */}
+          <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 8, paddingTop: 10, paddingBottom: 20, justifyContent: 'center'}} onPress={handleBackButton}>
+              <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+          </Pressable>
+          <View style={{flex: 1, paddingBottom: 14}}>
+          {/*  Beginner programs */}
+          <View style={{flex: 0.25, paddingVertical: 4}}>
           <Pressable onPress={() => handleChildPage('beginner')}>
-          <View style={[ShopStyles.shopLevelContainer, {paddingLeft: 20}]}>
+            <View style={[ShopStyles.shopLevelContainer, {paddingLeft: 20}]}>
               <View style={{flex:0.4}}>
                 <Text style={[DefaultTabStyles.defaultBoldText, {color:'cyan'}]}>Beginner programs</Text>
                 <Text style={DefaultTabStyles.defaultBodyText}>This is where the fun begins</Text>
@@ -23,10 +31,13 @@ export function GymPrograms({ handleChildPage }: GymProgramProps) {
               </View>
             </View>
           </Pressable>
-          <Pressable onPress={() => handleChildPage('intermediate')}>
-          <View style={[ShopStyles.shopBlockContainer]}>
+          </View>
+          {/* Intermediate programs */}
+          <View style={{flex: 0.25, paddingVertical: 4}}>
+          <Pressable style={{flex: 0.25}} onPress={() => handleChildPage('intermediate')}>
+            <View style={[ShopStyles.shopLevelContainer]}>
               <View style={{flex:0.5}}>
-                  <Image source={require("@/assets/images/cards/IntermediateCardGold.jpg")} style={{ flex: 1, height: 155, width: 155}} />
+                  <Image source={require("@/assets/images/cards/IntermediateCardGold.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
               </View>
               <View style={{flex:0.5, paddingLeft: 30}}>
                 <Text style={[DefaultTabStyles.defaultBoldText, {color:'gold'}]}>Intermediate programs</Text>
@@ -34,8 +45,11 @@ export function GymPrograms({ handleChildPage }: GymProgramProps) {
               </View>
             </View>
           </Pressable>
-          <Pressable onPress={() => handleChildPage('advanced')}>
-          <View style={[ShopStyles.shopLevelContainer, {paddingLeft: 20}]}>
+          </View>
+          {/* Advanced Programs */}
+          <View style={{flex: 0.25, paddingVertical: 4}}>
+          <Pressable style={{flex: 0.25}} onPress={() => handleChildPage('advanced')}>
+            <View style={[ShopStyles.shopLevelContainer, {paddingLeft: 20}]}>
             <View style={{flex:0.4}}>
               <Text style={[DefaultTabStyles.defaultBoldText, {color:'magenta'}]}>Advanced programs</Text>
               <Text style={DefaultTabStyles.defaultBodyText}>It's your funeral...</Text>
@@ -45,17 +59,22 @@ export function GymPrograms({ handleChildPage }: GymProgramProps) {
               </View>
           </View>
           </Pressable>
-          <Pressable onPress={() => console.log("no subscription page yet")}>
-          <View style={[ShopStyles.shopLevelContainer, {paddingLeft: 0}]}>
-              <View style={{flex:0.6}}>
-                  <Image source={require("@/assets/images/cards/card4.jpg")} style={{ flex: 1, width: "90%", resizeMode: "contain"}} />
+          </View>
+          {/* Free Programs */}
+          <View style={{flex: 0.25, paddingVertical: 4}}>
+          <Pressable style={{flex: 0.25}} onPress={() => console.log("pressed")}>
+            <View style={[ShopStyles.shopLevelContainer]}>
+              <View style={{flex:0.5}}>
+                  <Image source={require("@/assets/images/cards/FreeCard.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
               </View>
-              <View style={{flex:0.4}}>
-                <Text style={[DefaultTabStyles.defaultBoldText, {color:'white'}]}>Online Coaching</Text>
-                <Text style={DefaultTabStyles.defaultBodyText}>Fully individualised programs</Text>
+              <View style={{flex:0.6, paddingLeft: 30}}>
+                <Text style={[DefaultTabStyles.defaultBoldText, {color:'white'}]}>Padel programs</Text>
+                <Text style={DefaultTabStyles.defaultBodyText}>Cheap skate...</Text>
               </View>
             </View>
           </Pressable>
+          </View>
+          </View>
       </ScrollView> 
       </ImageBackground>
     )

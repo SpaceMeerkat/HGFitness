@@ -1,12 +1,18 @@
-import { DefaultTabStyles, ProgramStyles, ShopStyles } from "@/components/HGStyles";
+import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { S3_API_URL } from "@/components/network/apiConfig";
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { WebView } from 'react-native-webview';
 import { FindPrecedingNumber } from './FindPrecedingNumber';
 import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
 import SaveSession from "./SaveSession";
 import TrackingNotes from "./TrackingNotes";
+import { ExerciseDescriptions } from "./TrackingStyles";
 
 import { useAppContext } from "@/components/appContext";
 
@@ -19,6 +25,8 @@ type ProgramTrackerProps = {
   programDay: any;
   completedKeys: any;
   handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking', programLevel?: string, programID?: any, programData?: any, programDay?: any, completedKeys?: any) => void;
+  trackingMode: any;
+  setSingleSessionsVisible: any;
 };
 
 type ProgramLevel = 'advanced' | 'intermediate' | 'beginner';
@@ -42,12 +50,43 @@ interface Placeholders {
   week: string;
 }
 
-export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage }: ProgramTrackerProps) {
+type GymProgramEntry = [string, string, string, string];
 
-  const { setTrackingData, trackingData } = useAppContext();
+export const getDescriptionByExerciseName = (
+  exerciseName: string,
+  masterGymProgramsDictionary: GymProgramEntry[]
+): string | null => {
+  const match = masterGymProgramsDictionary.find(
+    ([, name]) => name.trim().toLowerCase() === exerciseName.trim().toLowerCase()
+  );
+  return match ? match[3] : null;
+};
+
+export const getAlternativeByExerciseName = (
+  exerciseName: string,
+  masterGymProgramsDictionary: GymProgramEntry[]
+): string => {
+  // First: find the match by name (column 2)
+  const initialMatch = masterGymProgramsDictionary.find(
+    ([, name]) => name.trim().toLowerCase() === exerciseName.trim().toLowerCase()
+  );
+  if (!initialMatch) return '';
+  const alternativeId = initialMatch[2];
+  // Second: find the entry whose ID (column 1) matches alternativeId
+  const alternativeMatch = masterGymProgramsDictionary.find(
+    ([id]) => id === alternativeId
+  );
+  // Return the name (column 2) of the matched alternative
+  return alternativeMatch ? alternativeMatch[1] : '';
+};
+
+export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage, trackingMode, setSingleSessionsVisible }: ProgramTrackerProps) {
+
+  const { setTrackingData, trackingData, masterGymProgramsDictionary } = useAppContext();
   // Handle the memory keys/data for tracker placeholders
-  let memoryKeys = trackingData[programID]["memoryKeys"];
-  let memoryData = trackingData[programID]["memoryData"];
+  const memoryKeys = trackingData[programID]["memoryKeys"];
+  const memoryData = trackingData[programID]["memoryData"];
+  const oneShot = programID.toLowerCase().includes("singlesession");
   const completedDay = completedKeys.includes(`${programDay[0]}_${programDay[1]}`);
   const [placeholders, setPlaceHolders] = useState<Placeholders | null>(null);
   // Handle the dictionary of exercises and keys from reading in
@@ -66,9 +105,24 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [saving, setSaving] = useState(false);
   // Styling
   const image = require("@/assets/images/HGBackground.png");
-
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalExercise, setModalExercise] = useState<string | ''>('');
+  const [modalDescription, setModalDescription] = useState<string[]>([]);
+  const [alternativeIsPressed, setAlternativeIsPressed] = useState(false);
   // State to hold the index of the exercise for which notes are being edited
-  const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(null);
+  const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(0);
+
+  const showExerciseModal = (exercise: string) => {
+    // For showing the exercise descriptions step by step guides
+    const description = getDescriptionByExerciseName(exercise, masterGymProgramsDictionary);
+    if (description) {
+      const splitDescription = description.split('/');
+      setModalExercise(exercise);
+      setModalDescription(splitDescription);
+      setModalVisible(true);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -81,9 +135,10 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       }
     };
     fetchProfile(); 
-  });
+  }, []);
   
   const handleExerciseClick = (index: number) => {
+    setCurrentExerciseIndexForNotes(index);
     setExerciseDictionary(prevState => {
       const newState = { ...prevState };
       Object.keys(newState).forEach(key => {
@@ -101,7 +156,11 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       } else if (type === 'reps') {
         newState[index].userInputReps[setIndex] = value;
       } else if (type === 'notes') {
-        newState[index].userNotes = value;
+        if (value === '') {
+          newState[index].userNotes = null;
+        } else {
+          newState[index].userNotes = value;
+        }
       }
       return newState;
     });
@@ -109,14 +168,26 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
   useEffect(() => {
     const result = FindPrecedingNumber(memoryKeys, programDay[0]);
+
+    let newPlaceholders: Placeholders | null = null;
+
     if (result !== 0 && !completedDay) {
-      setPlaceHolders(memoryData[`week-${result}-day-${programDay[1]}`]); // Set placeholders when the component mounts or dependencies change
+      newPlaceholders = memoryData[`week-${result}-day-${programDay[1]}`];
     } else if (completedDay) {
-      setPlaceHolders(memoryData[`week-${programDay[0]}-day-${programDay[1]}`]); // Set placeholders when the day is tracked already
-    } else {
-      setPlaceHolders(null);
+      newPlaceholders = memoryData[`week-${programDay[0]}-day-${programDay[1]}`];
     }
-  }, [memoryKeys, programDay, memoryData]); // Run the effect when memoryKeys, programDay, or memoryData changes   
+
+    // set placeholders (this is async)
+    setPlaceHolders(newPlaceholders);
+
+    // Force a shallow update of exerciseDictionary so components that depend on it re-render.
+    // This avoids any stale closures / mutated-object problems.
+    setExerciseDictionary(prev => {
+      if (!prev) return prev;
+      return { ...prev };
+    });
+
+  }, [memoryKeys, programDay, memoryData]);
 
   const renderExercises = () => {
 
@@ -164,7 +235,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   </Text>
                 </View>
               </View>
-              {exerciseSet.subsetExercises.map((exercise, setIndex) => {
+              {(exerciseSet.subsetExercises.map((exercise, setIndex) => {
                 let weightPlaceholder: string;
                 let repsPlaceholder: string;
                 let rowColour = 'black';
@@ -177,6 +248,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                 }
 
                 if (placeholders !== null) {
+                  // console.log("PLACEHOLDERS are not null");
                   // Use the placeholders if they exist
                   try {
                     weightPlaceholder = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userInputWeights[setIndex] || '';
@@ -187,12 +259,13 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   }
                 } else {
                   // Define blank placeholders based on the length of subsetExercises
+                  // console.log("defaulting placeholders!");
                   weightPlaceholder = ''; // Default to an empty string
                   repsPlaceholder = '';   // Default to an empty string
                 }
 
                 return (
-                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
+                  <Pressable onPress={() => showExerciseModal(exercise)} key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
                     <View style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
                       <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
                         {exercise}
@@ -214,7 +287,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={weightPlaceholder}
                           value={exerciseSet.userInputWeights[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
-                          editable={!completedDay}
+                          editable={!completedDay && trackingMode}
                         />
                       </View>
                     </View>
@@ -229,20 +302,129 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholder={repsPlaceholder}
                           value={exerciseSet.userInputReps[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
-                          editable={!completedDay}
+                          editable={!completedDay && trackingMode}
                         />
                       </View>
                     </View>
-                  </View>
+                  </Pressable>
                 );
-              })}
+              }))}
+              <Modal visible={modalVisible} animationType="slide" transparent={true} onRequestClose={() => setModalVisible(false)}>
+                <View style={ExerciseDescriptions.ModalBackground}>
+                  <Pressable onPress={() => setModalVisible(false)} style={{paddingVertical: 20 }}>
+                    <Text style={ExerciseDescriptions.ModalCloseText}>Back</Text>
+                  </Pressable>
+                  <ScrollView style={ExerciseDescriptions.ModalScrollBox}>
+                    <View style={ExerciseDescriptions.ModalDescriptionBox}>
+                      <View style={{flex: 1, flexDirection: 'row'}}>
+                        <View style={ExerciseDescriptions.ModalTitleParentBox}>
+                          <View style={[ExerciseDescriptions.ModalTitleBox, {borderColor: alternativeIsPressed ? 'gold' : 'grey'}]}>
+                            <Text style={ExerciseDescriptions.ModalTitle}>
+                              {modalExercise}
+                            </Text>
+                          </View>
+                        </View>
+                        <Pressable style={ExerciseDescriptions.ModalSwitchBox} 
+                          onPressIn={() => {
+                            setAlternativeIsPressed(true);
+                            setExerciseDictionary(prevDict => {
+                              const newDict = { ...prevDict };
+                              const index = parseInt(exerciseSet.uniqueSetKey); // use uniqueSetKey as the lookup key
+                              const currentSet = { ...newDict[index] };
+
+                              const newSubsetExercises = [...currentSet.subsetExercises];
+                              const newAlternativeExercises = [...currentSet.alternativeExercises];
+                              const alternativeIDs = currentSet.alternativeIDs;
+
+                              // Find which ID matches the modalExercise (either in subset or alt)
+                              let targetID: string | null = null;
+                              for (let i = 0; i < newSubsetExercises.length; i++) {
+                                if (
+                                  newSubsetExercises[i].trim() === modalExercise.trim() ||
+                                  newAlternativeExercises[i].trim() === modalExercise.trim()
+                                ) {
+                                  targetID = alternativeIDs[i];
+                                  break;
+                                }
+                              }
+
+                              if (!targetID) return newDict; // no match found
+
+                              // Swap all entries with the matching ID
+                              for (let i = 0; i < newSubsetExercises.length; i++) {
+                                if (alternativeIDs[i] === targetID) {
+                                  const temp = newSubsetExercises[i];
+                                  newSubsetExercises[i] = newAlternativeExercises[i];
+                                  newAlternativeExercises[i] = temp;
+                                }
+                              }
+
+                              // Update the set in the dictionary
+                              currentSet.subsetExercises = newSubsetExercises;
+                              currentSet.alternativeExercises = newAlternativeExercises;
+                              newDict[index] = currentSet;
+
+                              // Update modalExercise to the toggled version
+                              const updatedModal = newSubsetExercises.find((e, i) =>
+                                alternativeIDs[i] === targetID &&
+                                e.trim() !== modalExercise.trim()
+                              );
+
+                              if (updatedModal) {
+                                setModalExercise(updatedModal);
+                                const description = getDescriptionByExerciseName(updatedModal, masterGymProgramsDictionary);
+                                if (description) {
+                                  const splitDescription = description.split('/');
+                                  setModalDescription(splitDescription);
+                                }
+                              }
+
+                              return newDict;
+                            });
+                          }}
+
+                        onPressOut={() => setAlternativeIsPressed(false)}
+                        >
+                            <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
+                        </Pressable>
+                      </View>
+                    <View style={ExerciseDescriptions.ModalGifParentBox}>
+                      <View style={ExerciseDescriptions.ModalGifChildBox}>
+                        <WebView
+                          source={{ uri: `${S3_API_URL}/testgif.gif` }}
+                          style={{ flex: 1, backgroundColor: 'transparent' }}
+                          scrollEnabled={false}
+                          scalesPageToFit={true}
+                        />
+                      </View>
+                    </View>
+                      <View style={ExerciseDescriptions.ModalSubtitleBox}>
+                        <Text style={ExerciseDescriptions.ModalSubtitleText}>
+                          How to perform this exercise...
+                        </Text>
+                      </View>
+                      {modalDescription.map((line, index) => (
+                        <>
+                          <View style={ExerciseDescriptions.ModalMappingBox}>
+                            <Text style={ExerciseDescriptions.ModalStepNumber}>
+                                <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={20} color="lime" />
+                            </Text>
+                          </View>
+                          <Text key={index} style={ExerciseDescriptions.ModalText}>
+                            {line.trim()}
+                          </Text>
+                        </>
+                      ))}
+                    </View>
+                  </ScrollView>
+                </View>
+              </Modal>
               {/* user notes pressable icon */}
               <View style={{backgroundColor: "black", flex: 1, flexDirection: "row", justifyContent : 'space-between', paddingRight: 24, paddingLeft:8, paddingTop: 12}}>
                 <View style={{flex:0.665, flexDirection: 'row', paddingTop: 15}}> 
                   <Pressable 
                     style={{flex: 0.3, flexDirection: "row"}} 
-                    onPress={() => {
-                      setCurrentExerciseIndexForNotes(index); // Set the index of the exercise whose notes are being edited
+                    onPress={() => { // Set the index of the exercise whose notes are being edited
                       setIsNotesVisible(true);
                     }}
                   >
@@ -303,29 +485,64 @@ export function ProgramTracker({programLevel, programID, programData, programDay
               </View>
             </View>
           ) : (
-            <Pressable onPress={() => handleExerciseClick(index)}>
-              <View style={ProgramStyles.trackingInactive}>
-                <Text style={[DefaultTabStyles.defaultMediumText, {color: 'black'}]}>{exerciseSet.type}</Text>
-              </View>
-            </Pressable>
+            exerciseDictionary &&
+            exerciseDictionary[index] &&
+            exerciseDictionary[index].userInputReps &&
+            exerciseDictionary[index].userInputWeights &&
+            exerciseDictionary[index].subsetExercises &&
+            exerciseDictionary[index].userInputReps.length === exerciseDictionary[index].subsetExercises.length &&
+            exerciseDictionary[index].userInputWeights.length === exerciseDictionary[index].subsetExercises.length &&
+            exerciseDictionary[index].userInputReps.every((val: any) => val !== null) &&
+            exerciseDictionary[index].userInputWeights.every((val: any) => val !== null) ? 
+            (
+              <Pressable onPress={() => handleExerciseClick(index)} style={{borderColor: 'lime'}}>
+                <Ionicons 
+                  name="checkmark-circle" 
+                  size={24} 
+                  color="lime" 
+                  style={[ProgramStyles.completedTickIcon, { position: 'absolute', right: -10, top: -4, zIndex: 100 }]} 
+                />
+                <View style={[ProgramStyles.trackingInactive, {borderColor: 'lime'}]}>
+                      <Text style={[DefaultTabStyles.defaultMediumText, {color: 'black'}]}>{exerciseSet.type}</Text>
+                </View>
+              </Pressable>
+            ) : (
+              <Pressable onPress={() => handleExerciseClick(index)} style={{borderColor: 'lime'}}>
+                <View style={ProgramStyles.trackingInactive}>
+                      <Text style={[DefaultTabStyles.defaultMediumText, {color: 'black'}]}>{exerciseSet.type}</Text>
+                </View>
+              </Pressable>
+            )
           )}
         </View>
       );
     }); 
   };
 
-  const saveOpacity = completedDay ? 0.5 : 1;
+  const saveOpacity = completedDay && !oneShot || !trackingMode ? 0.5 : 1;
+
+  console.log(completedDay, oneShot, !trackingMode); 
 
   return (
-    <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
+    <>
       <ScrollView style={ShopStyles.shopScrollContainer}>
+        { (((completedDay && !oneShot) && !trackingMode) || 
+        ((!completedDay && !oneShot) && !trackingMode) || 
+        ((completedDay && !oneShot) && trackingMode) ||
+        (oneShot && !trackingMode)) && (
+          <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} 
+          onPress={() => oneShot ? [setSingleSessionsVisible(true), handleChildPage('programs')] : handleChildPage('programOverview')}>
+            <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+          </Pressable>
+        )}
+        
         <View>
           {renderExercises()}
           <Pressable 
           style={[ProgramStyles.trackingSaveButton, {opacity: saveOpacity, backgroundColor: saveIsPressed? 'grey': 'black'}]}
-          onPressIn={completedDay ? undefined : () => { setSaveIsPressed(true) }}
-          onPressOut={completedDay ? undefined : () => { setSaveIsPressed(false) }}
-          onPress={completedDay ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
+          onPressIn={completedDay && !oneShot || !trackingMode ? undefined : () => { setSaveIsPressed(true) }}
+          onPressOut={completedDay && !oneShot || !trackingMode ? undefined : () => { setSaveIsPressed(false) }}
+          onPress={completedDay && !oneShot || !trackingMode ? undefined : () => { setIsSaveVisible(true); setSaveIsPressed(false); }}
           >
             <Text style={{color: "white"}}>Save session</Text>
           </Pressable>
@@ -333,9 +550,14 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       </ScrollView>
 
       {/* TrackingNotes modal moved outside ScrollView and ImageBackground */}
+
       {currentExerciseIndexForNotes !== null && (
         <TrackingNotes
-          memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || (placeholders?.trackingData[exerciseDictionary[currentExerciseIndexForNotes]?.uniqueSetKey]?.userNotes || '')}
+          // memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || 
+          //   placeholders?.trackingData[currentExerciseIndexForNotes]?.userNotes || 
+          //   ''}
+          memoryNotes = {placeholders?.trackingData}
+          mutableExerciseDictionary={exerciseDictionary} 
           handleInputChange={handleInputChange}
           visible={isNotesVisible}
           onClose={() => setIsNotesVisible(false)}
@@ -355,7 +577,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
         setTrackingData = {setTrackingData}
         setSaving = {setSaving}
         handleChildPage={handleChildPage}
+        setSingleSessionsVisible={setSingleSessionsVisible}
       />
-    </ImageBackground>
+      </>
   );
 }

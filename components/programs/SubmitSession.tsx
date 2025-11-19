@@ -11,26 +11,40 @@ export const SubmitSession = async (
     setSaving: (saving: boolean) => void
 ) => { 
     setSaving(true);
-    let updatedTrackingData = trackingData;
+    let updatedTrackingData = { ...trackingData };
+    
     // Submit to the asyncStorage
     // Submit to the backend as a POST request
     try {
-        const url = `${BASE_API_URL}/saveProgramTracking?programID=${programID}&week=${programDay[0]}&day=${programDay[1]}`;
+        const url = `${BASE_API_URL}/saveProgramTracking`;
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                programID: programID,
+                week: programDay[0],
+                day: programDay[1],
                 trackingData: trackingDictionary,
                 token: token
             }),
         });
         if (response.ok) {
-          const message = await response.json();
-          updatedTrackingData[programID]['memoryData'][`week-${programDay[0]}-day-${programDay[1]}`] = {};
-          updatedTrackingData[programID]['memoryData'][`week-${programDay[0]}-day-${programDay[1]}`]['trackingData'] = trackingDictionary;
-        //   console.log('saved tracking data: ', trackingDictionary)
+          const jsonResponse = await response.json();
+          const completedStatus = jsonResponse.completed;
+          const streakDates = jsonResponse.streakDates;
+          updatedTrackingData[programID] = { ...updatedTrackingData[programID] };
+            updatedTrackingData[programID]['memoryData'] = { 
+            ...updatedTrackingData[programID]['memoryData'], 
+            [`week-${programDay[0]}-day-${programDay[1]}`]: {
+                trackingData: trackingDictionary
+            }
+            };
+          // Update the completed status
+          updatedTrackingData[programID]['completed'] = completedStatus;
+          // Update streakDates if subscription triggered a date appending
+          updatedTrackingData[programID]['streakDates'] = streakDates;
           await AsyncStorage.setItem('trackingData', JSON.stringify(updatedTrackingData));
           setTrackingData(updatedTrackingData);
         } else {

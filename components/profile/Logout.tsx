@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
-import { Button, Alert } from 'react-native';
+import { useAppContext } from "@/components/appContext";
+import { BASE_API_URL } from "@/components/network/apiConfig";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { useAppContext } from "@/components/appContext";
-import { BASE_API_URL } from "../network/apiConfig";
+import React from 'react';
+import { Alert, Button } from 'react-native';
 
 const LAST_UPDATE_KEY = 'lastUpdate'; // Define your LAST_UPDATE_KEY here
 
 const LogoutButton = () => {
 
-  const { trackingData, setProfile, setMyPrograms, setTrackingData } = useAppContext();
+  const { trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary } = useAppContext();
 
   const clearStorage = async () => {
     try {
@@ -17,6 +17,9 @@ const LogoutButton = () => {
         await AsyncStorage.removeItem('profile');
         await AsyncStorage.removeItem('myPrograms');
         await AsyncStorage.removeItem('trackingData');
+        await AsyncStorage.removeItem('mealPrograms');
+        await AsyncStorage.removeItem('profileImagePaths');
+        await AsyncStorage.removeItem('masterGymProgramsDictionary');
         await AsyncStorage.removeItem(LAST_UPDATE_KEY);
 
         // Remove authentication token from SecureStore
@@ -24,6 +27,9 @@ const LogoutButton = () => {
         setProfile(undefined);
         setMyPrograms(undefined);
         setTrackingData(undefined);
+        setMealPrograms(undefined);
+        setprofileImagePaths(undefined);
+        setMasterGymProgramsDictionary(undefined);
 
       Alert.alert('Logout Successful', 'You have been logged out.', [{ text: 'OK' }]);
     } catch (error) {

@@ -1,8 +1,10 @@
+import { TrackingNotesStyles } from "@/components/HGStyles";
 import React from 'react';
-import { View, Text, Pressable, Modal } from 'react-native';
-import { TrackingNotesStyles } from "@/components/HGStyles"
+import { Modal, Pressable, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { SubmitSession } from './SubmitSession';
+
+import { useAppContext } from "@/components/appContext";
 
 interface SaveSessionProps {
     // SubmitSession : (programID: any, token: any, exerciseDictionary: any, trackingData: any) => void;
@@ -16,15 +18,18 @@ interface SaveSessionProps {
     setTrackingData: (data: any) => void,
     setSaving: (saving: boolean) => void,
     handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking') => void;
+    setSingleSessionsVisible: any;
   }
 
-  export default function SaveSession({ visible, onClose, programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving, handleChildPage}: SaveSessionProps) {
+  export default function SaveSession({ visible, onClose, programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving, handleChildPage, setSingleSessionsVisible}: SaveSessionProps) {
+
+    const { profile } = useAppContext();
 
     const showToast = () => {
         // console.log("showing toast");
         Toast.show({
           type: 'success',
-          text1: 'Nice job!',
+          text1: `Nice job ${profile.username}!`,
           text2: 'Session saved...',
           visibilityTime: 3000,  // Duration the toast will be visible
           position: 'bottom',  // You can change this to 'bottom' if you prefer
@@ -37,6 +42,7 @@ interface SaveSessionProps {
     const handlePageChange = () => {
         // Use handleInputChange to update the notes in the dictionary
         // console.log("pressed child handler");
+        setSingleSessionsVisible(false);
         handleChildPage("programs"); 
         // Close the modal and redirect
     };

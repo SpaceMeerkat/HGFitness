@@ -1,25 +1,29 @@
-import { BASE_API_URL } from "@/components/network/apiConfig";// AppContextProvider.tsx
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { BASE_API_URL } from "@/components/network/apiConfig"; // AppContextProvider.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
 // Define the structure of the context
 interface AppContextType {
   profile: any | null;
+  masterGymProgramsDictionary: any | null;
   mealPrograms: any | null;
   myPrograms: any | null;
   beginnerPrograms: any | null;
   intermediatePrograms: any | null;
   advancedPrograms: any | null;
   trackingData: any | null;
+  // subscriptionTrackingData: any | null;
   profileImagePaths: {[key: string]: string};
   bestSellers: any | null;
   loading: boolean | null;
   setProfile: (profile: any | null) => void; // Add setProfile function;
+  setMasterGymProgramsDictionary: (masterGymProgramsDictionary: any | null) => void;
   setMealPrograms: (mealPrograms: any | null) => void;
   setMyPrograms: (myPrograms: any | null) => void; // Add setMyPrograms function;
   setTrackingData: (trackingData: any | null) => void; // Add setTrackingData function;
+  // setSubscriptionTrackingData: (subscriptionTrackingData: any | null) => void;
   setBestSellers: (bestSellers: any | null) => void;
   setprofileImagePaths: (profileImagePaths: any | null) => void;
   setBeginnerPrograms: (beginnerPrograms: any | null) => void;
@@ -60,11 +64,13 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
 
   const [profile, setProfile] = useState<any | null>(null);
   const [mealPrograms, setMealPrograms] = useState<any | null>(null);
+  const [masterGymProgramsDictionary, setMasterGymProgramsDictionary] = useState<any | null>(null);
   const [myPrograms, setMyPrograms] = useState<any | null>(null);  // Add myPrograms state
   const [beginnerPrograms, setBeginnerPrograms] = useState<any | null>(null);
   const [intermediatePrograms, setIntermediatePrograms] = useState<any | null>(null);
   const [advancedPrograms, setAdvancedPrograms] = useState<any | null>(null);
   const [trackingData, setTrackingData] = useState<any | null>(null);
+  // const [subscriptionTrackingData , setSubscriptionTrackingData] = useState<any | null>(null);
   const [profileImagePaths, setprofileImagePaths] = useState<any | null>(null);
   const [bestSellers, setBestSellers] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean | null>(true);
@@ -83,8 +89,8 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
 
     try {
       // Check if data is present in AsyncStorage
-      // const storedProfile = null;
       const storedProfile = await AsyncStorage.getItem('profile');
+      const storedMasterGymProgramsDictionary = await AsyncStorage.getItem('masterGymProgramsDictionary');
       const storedMealPrograms = await AsyncStorage.getItem('mealPrograms');
       const storedMyPrograms = await AsyncStorage.getItem('myPrograms');  // Check if myPrograms is present
       const storedBeginnerPrograms = await AsyncStorage.getItem('beginnerPrograms');
@@ -95,18 +101,28 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       const bestSellers = await AsyncStorage.getItem('bestSellers');
       const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
 
-      if (storedMealPrograms && bestSellers && storedProfileImagePaths && storedProfile && storedMyPrograms && storedBeginnerPrograms && storedIntermediatePrograms && storedAdvancedPrograms && storedTrackingData && lastUpdateDate && isToday(lastUpdateDate)) {
+      // console.log("storedProfile ", storedProfile);
+      // console.log("storedMasterGymProgramsDictionary ", storedMasterGymProgramsDictionary);
+      // console.log("storedMealPrograms ", storedMealPrograms);
+      // console.log("storedMyPrograms ", storedMyPrograms);
+      // console.log("storedTrackingData ", storedTrackingData);
+      // console.log("storedProfileImagePaths ", storedProfileImagePaths);
+      // console.log("bestSellers ", bestSellers);
+      // console.log("lastUpdateDate ", lastUpdateDate);
+
+      if (storedMasterGymProgramsDictionary && storedMealPrograms && bestSellers && storedProfileImagePaths && storedProfile && storedMyPrograms && storedBeginnerPrograms && storedIntermediatePrograms && storedAdvancedPrograms && storedTrackingData && lastUpdateDate && isToday(lastUpdateDate)) {
         // If the data is present and is from today, load it from AsyncStorage
         setProfile(JSON.parse(storedProfile));
+        setMasterGymProgramsDictionary(JSON.parse(storedMasterGymProgramsDictionary));
         setMealPrograms(JSON.parse(storedMealPrograms));
-        setMyPrograms(JSON.parse(storedMyPrograms));  // Load myPrograms from AsyncStorage
+        setMyPrograms(JSON.parse(storedMyPrograms)); 
         setBeginnerPrograms(JSON.parse(storedBeginnerPrograms));
         setIntermediatePrograms(JSON.parse(storedIntermediatePrograms));
         setAdvancedPrograms(JSON.parse(storedAdvancedPrograms));
         setTrackingData(JSON.parse(storedTrackingData));
         setprofileImagePaths(JSON.parse(storedProfileImagePaths));
         setBestSellers(JSON.parse(bestSellers));
-        console.log('leaving...');
+        console.log('all data already present in async storage, leaving...');
         setLoading(false);
         return;  // No need to make any network requests
       }
@@ -114,13 +130,24 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       // If data is not from today, check for JWT token in SecureStore
       const retrievedToken = await SecureStore.getItemAsync('jwtToken');
       // If there is mealTracking data, it needs to go with the daily POST request
-      const retrievedTrackingData = await SecureStore.getItemAsync('trackingData');
-      // console.log(retrievedTrackingData);  
+      let storedMealData = null;
+      let storedCalorieCalculatorData = null;
 
-      if (retrievedToken) {
+      if (storedTrackingData !== null && storedProfile !== null) {
+        const parsedData = JSON.parse(storedTrackingData);
+        storedMealData = parsedData.meals;
+        const parsedProfile = JSON.parse(storedProfile);
+        storedCalorieCalculatorData = parsedProfile.calorieCalculator;
+      }
+
+      if (retrievedToken && storedMealData && storedCalorieCalculatorData) {
         console.log("running full get request");
         // If token is present, make a POST request
-        const loginData = { token: retrievedToken, mealTrackingData: retrievedTrackingData };
+        const loginData = { 
+          token: retrievedToken, 
+          mealTrackingData: storedMealData,
+          calorieCalculatorData: storedCalorieCalculatorData,
+        };
 
         const response = await fetch(`${BASE_API_URL}/getContext`, {
           method: 'POST',
@@ -138,6 +165,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         
         // Save the response data to AsyncStorage
         await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
+        await AsyncStorage.setItem('masterGymProgramsDictionary', JSON.stringify(jsonResponse.masterGymDictionary));
         await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
         await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));  // Save myPrograms to AsyncStorage
         await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
@@ -149,6 +177,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         await AsyncStorage.setItem(LAST_UPDATE_KEY, new Date().toISOString());
 
         setProfile(jsonResponse.profile);
+        setMasterGymProgramsDictionary(jsonResponse.masterGymDictionary)
         setMealPrograms(jsonResponse.mealPrograms);
         setMyPrograms(jsonResponse.myPrograms);  // Update myPrograms state
         setBeginnerPrograms(jsonResponse.beginner);
@@ -175,7 +204,6 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
         console.log('running GET only');
         
         // Save the response data to AsyncStorage
-        // await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
         await AsyncStorage.setItem('beginnerPrograms', JSON.stringify(jsonResponse.beginner));
         await AsyncStorage.setItem('intermediatePrograms', JSON.stringify(jsonResponse.intermediate));
         await AsyncStorage.setItem('advancedPrograms', JSON.stringify(jsonResponse.advanced));
@@ -185,7 +213,6 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
           await AsyncStorage.setItem(LAST_UPDATE_KEY, new Date().toISOString());
         }
 
-        setMealPrograms(jsonResponse.mealPrograms);
         setBeginnerPrograms(jsonResponse.beginner);
         setIntermediatePrograms(jsonResponse.intermediate);
         setAdvancedPrograms(jsonResponse.advanced);
@@ -199,6 +226,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       // If there's an error, set everything to null
       setProfile(null);
       setMealPrograms(null);
+      setMasterGymProgramsDictionary(null);
       setMyPrograms(null);  // Reset myPrograms state on error
       setBeginnerPrograms(null);
       setIntermediatePrograms(null);
@@ -216,8 +244,8 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
   }, []);
 
   return (
-    <AppContext.Provider value={{ profile, mealPrograms, myPrograms, beginnerPrograms, intermediatePrograms, advancedPrograms, trackingData, profileImagePaths, bestSellers, loading,
-    updateData, setProfile, setMealPrograms, setMyPrograms, setTrackingData, setprofileImagePaths, setBeginnerPrograms, setIntermediatePrograms, setBestSellers,
+    <AppContext.Provider value={{ profile, masterGymProgramsDictionary, mealPrograms, myPrograms, beginnerPrograms, intermediatePrograms, advancedPrograms, trackingData, profileImagePaths, bestSellers, loading,
+    updateData, setMasterGymProgramsDictionary, setProfile, setMealPrograms, setMyPrograms, setTrackingData, setprofileImagePaths, setBeginnerPrograms, setIntermediatePrograms, setBestSellers,
     setAdvancedPrograms }}>
       {children}
     </AppContext.Provider>

@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, Alert, Pressable, Image } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
-import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
-import LogoutButton from "@/components/profile/Logout";
 import { useAppContext } from "@/components/appContext";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
+import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
 import { BASE_API_URL } from "@/components/network/apiConfig";
-import { MealChart, NoMealsChart } from "@/components/profile/MealChart";
+import { PremiumButton } from "@/components/profile/PremiumButton";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ImageBackground } from "expo-image";
+import * as SecureStore from 'expo-secure-store';
+import React, { useEffect, useState } from "react";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
+import ProgressBarWithDots from "./LevelLoadingBar";
+import { MealChart } from "./MealChart";
 
 export function ProfileOverview() {
 
@@ -17,21 +19,41 @@ export function ProfileOverview() {
   const [profileAvatar, setProfileAvatar] = useState(profileImagePaths["avatarDefault"]);
   const [dictionary, setDictionary] = useState(trackingData?.profileStats || undefined); 
   const [selected, setSelected] = useState<number | 0>(0);
+  const [premium, setPremium] = useState(false);
+  const [accountLevel, setAccountLevel] = useState('free tier');
+  const [achievements, setAchievements] = useState<number[]>([0,0,0]);
 
   useEffect(() => {
-    if (trackingData) {
+    if (profile?.premium) {
+      setPremium(true);
+      setAccountLevel('premium');
+    } if (profile?.gymSubscription) {
+      setPremium(false);
+      setAccountLevel('subscription');
+    } else {
+      setPremium(false);
+      setAccountLevel('free tier');
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    if (trackingData?.profileStats) { 
       setDictionary(trackingData?.profileStats || undefined);
+      const completedProgramsCount = getTotalPrograms(trackingData);
+      const completedSessionsCount = getTotalSessions(trackingData);
+      const achievementsList = [completedProgramsCount, 0, completedSessionsCount];
+      setAchievements(achievementsList);
     } else {
     }
   }, [trackingData]);
 
   useEffect(() => {
-    if (profile.avatar !== 'None' ) {
-      setProfileAvatar(profile.avatar)
-    } else {
-      setProfileAvatar(profileImagePaths["avatarDefault"])
+    if (profile?.avatar && profile?.avatar !== 'None') {
+      setProfileAvatar(profile.avatar);
+    } else if (profileImagePaths?.avatarDefault) {
+      setProfileAvatar(profileImagePaths["avatarDefault"]);
     }
-  }, []);
+  }, [profile, profileImagePaths]);
 
   const handleProfileImageClick = () => {
     Alert.alert(
@@ -51,7 +73,6 @@ export function ProfileOverview() {
         [
             {
                 text: 'Cancel',
-                onPress: () => console.log('Avatar change canceled'),
                 style: 'cancel',
             },
             {
@@ -109,57 +130,119 @@ export function ProfileOverview() {
     { label: "Meals", color: ['70','195','0'], prefix: "", decimal: 0 },
   ];
 
+  if (!profile) return <Text style={{color:'cyan'}}>Loading profile...</Text>;
+
+  const Wrapper = premium ? ImageBackground : View;
+
   return (
     <View style={{ flex: 1, width: '100%', zIndex: 9}}>
       <ScrollView style={[{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 20 }]}>
-        <View style={{borderWidth: 2, borderRadius: 4, borderColor: 'grey'}}>
+
+        <PremiumButton />
+
+        <Wrapper
+          {...(premium
+            ? {
+                source: require("@/assets/images/profileBackground.jpg"),
+                contentFit: "fill",
+              }
+            : {})}
+          style={{
+            flex: 0.25,
+            borderWidth: 1,
+            borderRadius: 4,
+            borderColor: "grey",
+            backgroundColor: 'black',
+            overflow: 'hidden'
+          }}
+        >
         {/* Main header component */}
         <View style={{
-          borderWidth: 1,
-          borderRadius: 4,
           flexDirection: "row",
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-          backgroundColor: "black",
-          height: 120
+          paddingTop: 12,
+          paddingHorizontal: 14,
         }}>
           {/* Profile image - pressable */}
           <Pressable onPress={handleProfileImageClick} style={{flex: 0.5}}>
             <View>
-              <Image source={{ uri: profileAvatar }} style={{ width: 100, height: 100, borderRadius: 50, borderWidth: 2, borderColor: 'white' }} />
+              <Image source={profileAvatar ? { uri: profileAvatar } : require("@/assets/images/appIcon.png")} style={{ width: 100, height: 100, borderRadius: 50, borderWidth: 2, borderColor: 'white' }} />
             </View>
           </Pressable>
 
           {/* Profile mini info - username and sex */}
           <View style={{ flex: 0.8, justifyContent: "center" }}>
             <Text style={DefaultTabStyles.defaultBoldText}>{profile.username}</Text>
-            <Text style={DefaultTabStyles.defaultBodyText}>Program types: {profile.sex}</Text>
+            <Text style={[DefaultTabStyles.defaultBodyText, {fontSize: 14}]}>Account level: {accountLevel}</Text>
+          </View>
+        </View>
+
+        {/* Main stats bar */}
+        <View style={{flex: 1, paddingVertical: 8}}>
+          <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
+            <View style={{flex: 0.35, flexDirection: 'column'}}>
+              <View style={{flex: 0.7}}>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[2]}</Text>
+              </View>
+              <View style={{flex: 0.3}}>
+                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Sessions</Text>
+              </View>
+            </View>
+            <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
+            <View style={{flex: 0.3, flexDirection: 'column'}}>
+              <View style={{flex: 0.7}}>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[1]}</Text>
+              </View>
+              <View style={{flex: 0.3}}>
+                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Level</Text>
+              </View>
+            </View>
+            <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
+            <View style={{flex: 0.35, flexDirection: 'column'}}>
+              <View style={{flex: 0.7}}>
+                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[0]}</Text>
+              </View>
+              <View style={{flex: 0.3}}>
+                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Programs</Text>
+              </View>
+            </View>
           </View>
         </View>
 
         {/* Row for displaying badges */}
-        <View style={{ backgroundColor: "black", height: 50, flexDirection: "row", paddingHorizontal: 26 }}>
-          <View style={{ flex: 0.25, justifyContent: "center", alignItems: "center" }}>
-            <Ionicons name="star-outline" size={30} color="magenta" />
+        {/* <View style={{ flex: 1, flexDirection: "row", paddingHorizontal: 12, paddingVertical: 12}}>
+          <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'center'}}>
+            <Text style={{color: 'white', fontWeight: 'bold', fontSize: 20, textAlign: 'center'}}>
+              Medals:
+            </Text>
           </View>
-          <View style={{ flex: 0.25, justifyContent: "center", alignItems: "center" }}>
-            <Ionicons name="medal-outline" size={24} color="gold" />
+          <View style={{flex: 0.4, flexDirection: 'row'}}>
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <Ionicons name="star-outline" size={30} color="magenta" />
+            </View>
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <Ionicons name="medal-outline" size={30} color="gold" />
+            </View>
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <Ionicons name="water-outline" size={30} color="cyan" />
+            </View>
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <Ionicons name="repeat-outline" size={30} color="white" />
+            </View>
           </View>
-          <View style={{ flex: 0.25, justifyContent: "center", alignItems: "center" }}>
-            <Ionicons name="water-outline" size={30} color="cyan" />
-          </View>
-          <View style={{ flex: 0.25, justifyContent: "center", alignItems: "center" }}>
-            <Ionicons name="repeat-outline" size={30} color="white" />
-          </View>
-        </View>
+        </View> */}
 
-        <LogoutButton />
-        </View>
+        <ProgressBarWithDots
+          horizontalPadding={30}
+          dotPositions={[20, 80]}
+          fillPercentage={60}
+        />
+
+        </Wrapper>
 
         {/* Gap between the Profile header and the stats */}
         <View style={ProfileStyles.ProfileSpacer}/>
 
-        {/* Meal stats parent container */}
+        Meal stats parent container
         <View style={ProfileStyles.MealStatsParentContanier}>
           {/* Meal stats header/title */}
           <View style={ProfileStyles.StatsHeaderContainer}>
@@ -183,13 +266,58 @@ export function ProfileOverview() {
             ))}
           </View>
           {/* Meal chart if dictionary exists, or else an empty warning box to get tracking */}
-          {dictionary? <MealChart dictionary={dictionary} 
-          mealType={`running${buttons[selected].label}`} 
-          color={buttons[selected].color} 
-          prefix={buttons[selected].prefix} 
-          decimal = {buttons[selected].decimal} />: <NoMealsChart/>}
-        </View>
-        
+          {dictionary && Object.keys(dictionary).length > 0 ? (
+          <MealChart dictionary={dictionary} 
+            mealType={`running${buttons[selected].label}`} 
+            color={buttons[selected].color} 
+            prefix={buttons[selected].prefix} 
+            decimal = {buttons[selected].decimal} 
+          /> 
+          )
+          : (
+          <View style={{flex: 0.25,flexDirection: 'column',backgroundColor: 'black',justifyContent: 'center',alignContent: 'center',
+            paddingVertical: 50,borderRadius: 4,borderColor: 'grey',borderWidth: 2,}}>
+            <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
+          </View>
+          )}
+        </View>   
+
+        {/* Gap between the meals and the weight goals */}
+        <View style={ProfileStyles.ProfileSpacer}/>
+
+        {/* Meal stats parent container */}
+        <View style={[ProfileStyles.MealStatsParentContanier, {alignItems: 'center'}]}>
+          {/* Meal stats header/title */}
+          <View style={[ProfileStyles.StatsHeaderContainer, {paddingBottom: 10}]}>
+            <Text style={ProfileStyles.StatsHeaderText}>Weight goals</Text>
+          {/* Meal stats button selector for meals/calories/protein/water */}
+          <Pressable
+            key={"add-weight-button"}
+            onPress={() => console.log("pressed")}
+            style={[
+              ProfileStyles.MealChartButtons,
+              {flex: 0.5, width: 200}
+            ]}
+          >
+            <Text style={{ color: "white", textAlign: "center" }}>Add Weigh-in</Text>
+          </Pressable>
+          </View>
+          {/* Meal chart if dictionary exists, or else an empty warning box to get tracking */}
+          {dictionary && Object.keys(dictionary).length > 0 ? (
+          <MealChart dictionary={dictionary} 
+            mealType={`running${buttons[selected].label}`} 
+            color={buttons[selected].color} 
+            prefix={buttons[selected].prefix} 
+            decimal = {buttons[selected].decimal} 
+          /> 
+          )
+          : (
+          <View style={{flex: 0.25,flexDirection: 'column',backgroundColor: 'black',justifyContent: 'center',alignContent: 'center',
+            paddingVertical: 50,borderRadius: 4,borderColor: 'grey',borderWidth: 2,}}>
+            <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
+          </View>
+          )}
+        </View>     
 
       </ScrollView>
       

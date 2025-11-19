@@ -1,22 +1,32 @@
 import { DefaultTabStyles } from "@/components/HGStyles";
-import React, { useEffect, useRef, useState } from "react";
-import { BackHandler, ScrollView } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { ImageBackground } from "react-native";
 
 import { useAppContext } from "@/components/appContext";
 import { HGHeader } from "@/components/HeaderBar";
+import { runPaymentStatus } from "@/components/network/PollPurchase";
+import { runSubscriptionPolling } from "@/components/network/PollSubscription";
 import { MyProgramsLanding } from "@/components/programs/MyPrograms";
 import { ProgramOverview } from "@/components/programs/ProgramOverview";
 import { ProgramTracker } from "@/components/programs/ProgramTracking";
+import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
+
 
 type PageType = 'programs' | 'programOverview' | 'programTracking';
 
 export default function MyPrograms() {
-  const image = require("@/assets/images/HGBackground.png");
 
-  const [loggedIn, setLoggedIn] = useState(true);
+  // const [purchaseQueue, setPurchaseQueue] = useState<Record<string, string> | null>(null);
+
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loginSignupActive, setLoginSignupActive] = useState(false);
   const [loginActive, setLoginActive] = useState(false);
   const [signupActive, setSignupActive] = useState(false);
   const [userProfile, setUserProfile] = useState<string | null>(null);
@@ -28,58 +38,79 @@ export default function MyPrograms() {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms } = useAppContext(); 
+  const [trackingMode, setTrackingMode] = useState(false);
+  const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
+
+
   const scrollViewRef = useRef<ScrollView>(null); // Add reference
+
+  const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms, setProfile, setMyPrograms, setTrackingData, setMealPrograms } =
+    useAppContext();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!profile?.purchaseQueue || Object.keys(profile?.purchaseQueue).length === 0) return;
+
+      const processQueue = async () => {
+        await runPaymentStatus(profile.purchaseQueue, {
+          profile,
+          myPrograms,
+          trackingData,
+          setProfile,
+          setMyPrograms,
+          setTrackingData,
+        });
+
+        await runSubscriptionPolling(profile.purchaseQueue, {
+          profile,
+          myPrograms,
+          trackingData,
+          setProfile,
+          setMyPrograms,
+          setTrackingData,
+          setMealPrograms,
+        });
+      };
+
+      processQueue();
+    }, [profile?.purchaseQueue]) // 👈 no purchaseQueue dependency
+  );
+
+  console.log("purchase queue: ", profile?.purchaseQueue);
 
   useEffect(() => {
     if (!profile) {
+      setLoginSignupActive(true);
       setLoggedIn(false);
-      setLoginActive(true);
+      setLoginActive(false);
     } else if (myPrograms !== null) {
+      setLoginSignupActive(false);
       setLoggedIn(true);
       setLoginActive(false);
       setUserProfile(profile);
     }
   }, [profile, myPrograms]);
 
-  const handleLoginChildPage = (loggedIn: boolean, login: boolean, signup: boolean) => {
+  const handleLoginChildPage = (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => {
     if (loggedIn) {
+      setLoginSignupActive(false);
       setLoggedIn(true);
       setLoginActive(false);
       setSignupActive(false);
     }
     if (login) {
+      setLoginSignupActive(false);
       setLoggedIn(false);
       setLoginActive(true);
       setSignupActive(false);
     }
     if (signup) {
+      setLoginSignupActive(false);
       setLoggedIn(false);
       setLoginActive(false);
       setSignupActive(true);
     }
   };
-
-  useEffect(() => {
-    const backAction = () => {
-      if (programOverviewOpen) {
-        handleChildPage('programs');
-        return true;
-      }
-      if (programTrackingOpen) {
-        handleChildPage('programOverview');
-        return true;
-      }
-      return false;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, [programOverviewOpen, programTrackingOpen]);
 
   const getProgramLevel = (selectedProgramID: string): 'advanced' | 'intermediate' | 'beginner' | null => {
     if (advancedPrograms.hasOwnProperty(selectedProgramID)) {
@@ -93,7 +124,8 @@ export default function MyPrograms() {
     }
   };
 
-  const handleChildPage = (page: PageType, 
+  const handleChildPage = (
+    page: PageType, 
     programID: any = null, 
     programData: any = null, 
     programDay: any = null,
@@ -114,6 +146,12 @@ export default function MyPrograms() {
     setProgramTrackingOpen(page === 'programTracking');
   };
 
+  const renderLoginSignup = () => {
+      return(
+        <LoginSignupWindow handleChildPage={handleLoginChildPage}/>
+      )
+    }
+
   const renderLogin = () => {
     return <LoginWindow handleChildPage={handleLoginChildPage} />;
   };
@@ -125,11 +163,14 @@ export default function MyPrograms() {
   const renderPageContent = () => {
     if (loginActive) {
       return renderLogin();
+    } else if (loginSignupActive) {
+      return renderLoginSignup();
     } else if (signupActive) {
       return renderSignup();
     } else if (loggedIn && userProfile) {
       if (myProgramsOpen) {
-        return <MyProgramsLanding handleChildPage={handleChildPage} />;
+        return <MyProgramsLanding handleChildPage={handleChildPage} setTrackingMode={setTrackingMode}
+                singleSessionsVisible={singleSessionsVisible} setSingleSessionsVisible={setSingleSessionsVisible}/>;
       }
       if (selectedProgramID) {
         // Find the Week_Day IDs to keep track of tracked sets 
@@ -137,15 +178,21 @@ export default function MyPrograms() {
           const match = key.match(/week-(\d+)-day-(\d+)/);
           return match ? `${match[1]}_${match[2]}` : null;
         }).filter(Boolean);
+
+        
   
         if (programOverviewOpen && selectedProgram) {
           const selectedLevel = getProgramLevel(selectedProgramID);
-          return <ProgramOverview programLevel={selectedLevel} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
+          const streakDates = trackingData[selectedProgramID]?.streakDates;
+          return <ProgramOverview programLevel={selectedLevel} programID={selectedProgramID} programData={selectedProgram} 
+            programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} streakDates={streakDates}
+            setTrackingMode={setTrackingMode}/>
         }
   
         if (programTrackingOpen) {
           const selectedLevel = getProgramLevel(selectedProgramID);
-          return <ProgramTracker programLevel={selectedLevel || 'beginner'} programID={selectedProgramID} programData={selectedProgram} programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage}/>;
+          return <ProgramTracker programLevel={selectedLevel || 'beginner'} programID={selectedProgramID} programData={selectedProgram} 
+          programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} trackingMode={trackingMode} setSingleSessionsVisible={setSingleSessionsVisible}/>;
         }
       }
     }
@@ -153,10 +200,12 @@ export default function MyPrograms() {
     return null;
   };
 
+  const image = require("@/assets/images/HGBackground.png");
+
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
-      {/* <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}> */}
+        <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
         <ScrollView 
           contentContainerStyle={{ flexGrow: 1 }} 
           keyboardShouldPersistTaps="handled" 
@@ -164,7 +213,7 @@ export default function MyPrograms() {
         >
           {renderPageContent()}
         </ScrollView>
-      {/* </ImageBackground> */}
+      </ImageBackground>
     </SafeAreaView>
   );
 }

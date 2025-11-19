@@ -1,20 +1,21 @@
-import { useEffect, useState } from "react";
-import { BackHandler } from "react-native";
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 
 import { HGHeader } from "@/components/HeaderBar";
 import { DefaultTabStyles } from "@/components/HGStyles";
+import { ApparelShop } from "@/components/shop/Apparel";
+import { OnlineCoachingShop } from "@/components/shop/OnlineCoaching";
 import { AdvancedPrograms } from "@/components/shop/ShopAdvanced";
 import { BeginnerPrograms } from "@/components/shop/ShopBeginner";
 import { GymPrograms } from "@/components/shop/ShopGymPrograms";
 import { IntermediatePrograms } from "@/components/shop/ShopIntermediate";
 import { ShopLanding } from "@/components/shop/ShopLanding";
-import { MealPrograms } from "@/components/shop/ShopMealPrograms";
+import MealPrograms from "@/components/shop/ShopMealPrograms";
+import { SubscriptionPage } from "@/components/shop/Subscription";
 import { WhatsHot } from "@/components/shop/WhatsHot";
 
-type PageType = 'programs' | 'mealPrograms' | 'beginner' | 'intermediate' | 'advanced' | 'hot';
-
+type PageType = 'programs' | 'mealPrograms' | 'beginner' | 'intermediate' | 'advanced' | 'hot' | 'subscription' | 'apparel' | 'coaching';
 
 export default function ShopScreen() {
 
@@ -22,6 +23,9 @@ export default function ShopScreen() {
   const [programsOpen, setProgramsOpen] = useState(false);
   const [mealProgramsOpen, setMealProgramsOpen] = useState(false);
   const [hotOpen, setHotOpen] = useState(false);
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
+  const [apparelOpen, setApparelOpen] = useState(false);
+  const [coachingOpen, setCoachingOpen] = useState(false);
 
   const [beginnerOpen, setBeginnerOpen] = useState(false);
   const [intermediateOpen, setIntermediateOpen] = useState(false);
@@ -35,6 +39,9 @@ export default function ShopScreen() {
     setIntermediateOpen(page === 'intermediate');
     setAdvancedOpen(page === 'advanced');
     setHotOpen(page === 'hot');
+    setSubscriptionOpen(page === 'subscription');
+    setApparelOpen(page === 'apparel');
+    setCoachingOpen(page === 'coaching');
   }
 
   const handleBackButton = () => {
@@ -47,6 +54,9 @@ export default function ShopScreen() {
       setIntermediateOpen(false);
       setAdvancedOpen(false);
       setHotOpen(false);
+      setSubscriptionOpen(false);
+      setApparelOpen(false);
+      setCoachingOpen(false);
       return true;
     } else if (mealProgramsOpen) {
       // Close meals and set shop open
@@ -57,6 +67,9 @@ export default function ShopScreen() {
       setIntermediateOpen(false);
       setAdvancedOpen(false);
       setHotOpen(false);
+      setSubscriptionOpen(false);
+      setApparelOpen(false);
+      setCoachingOpen(false);
       return true;
     } else if (beginnerOpen || intermediateOpen || advancedOpen) {
       // Close programs and set intermediate step
@@ -67,6 +80,9 @@ export default function ShopScreen() {
       setIntermediateOpen(false);
       setAdvancedOpen(false);
       setHotOpen(false);
+      setSubscriptionOpen(false);
+      setApparelOpen(false);
+      setCoachingOpen(false);
       return true;
     } else if (hotOpen) {
       // Close programs and set what's hot page to open
@@ -77,6 +93,48 @@ export default function ShopScreen() {
       setIntermediateOpen(false);
       setAdvancedOpen(false);
       setHotOpen(false);
+      setSubscriptionOpen(false);
+      setApparelOpen(false);
+      setCoachingOpen(false);
+      return true;
+    } else if (subscriptionOpen) {
+      // Close programs and set what's hot page to open
+      setShopOpen(true);
+      setProgramsOpen(false);
+      setMealProgramsOpen(false);
+      setBeginnerOpen(false);
+      setIntermediateOpen(false);
+      setAdvancedOpen(false);
+      setHotOpen(false);
+      setSubscriptionOpen(false);
+      setApparelOpen(false);
+      setCoachingOpen(false);
+      return true;
+    } else if (apparelOpen) {
+      // Close programs and set what's hot page to open
+      setShopOpen(true);
+      setProgramsOpen(false);
+      setMealProgramsOpen(false);
+      setBeginnerOpen(false);
+      setIntermediateOpen(false);
+      setAdvancedOpen(false);
+      setHotOpen(false);
+      setSubscriptionOpen(false);
+      setApparelOpen(false);
+      setCoachingOpen(false);
+      return true;
+    } else if (coachingOpen) {
+      // Close programs and set what's hot page to open
+      setShopOpen(true);
+      setProgramsOpen(false);
+      setMealProgramsOpen(false);
+      setBeginnerOpen(false);
+      setIntermediateOpen(false);
+      setAdvancedOpen(false);
+      setHotOpen(false);
+      setSubscriptionOpen(false);
+      setApparelOpen(false);
+      setCoachingOpen(false);
       return true;
     } else {
       // No menus open, default behavior (exit app)
@@ -84,14 +142,15 @@ export default function ShopScreen() {
     }
   };
 
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      handleBackButton
-    );
 
-    return () => backHandler.remove();
-  }, [shopOpen, programsOpen, mealProgramsOpen, beginnerOpen, intermediateOpen, advancedOpen, hotOpen]);
+  // useEffect(() => {
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     handleBackButton
+  //   );
+
+  //   return () => backHandler.remove();
+  // }, [shopOpen, programsOpen, mealProgramsOpen, beginnerOpen, intermediateOpen, advancedOpen, hotOpen, subscriptionOpen]);
 
   let content = null;
 
@@ -100,27 +159,39 @@ export default function ShopScreen() {
   }
 
   if (programsOpen) {
-    content = <GymPrograms handleChildPage={handleChildPage}/>;
+    content = <GymPrograms handleChildPage={handleChildPage} handleBackButton={handleBackButton}/>;
   }
 
   if (beginnerOpen) {
-    content = <BeginnerPrograms />;
+    content = <BeginnerPrograms handleBackButton={handleBackButton}/>;
   }
 
   if (intermediateOpen) {
-    content = <IntermediatePrograms />;
+    content = <IntermediatePrograms handleBackButton={handleBackButton}/>;
   }
 
   if (advancedOpen) {
-    content = <AdvancedPrograms />;
+    content = <AdvancedPrograms handleBackButton={handleBackButton}/>;
   }
 
   if (mealProgramsOpen) {
-    content = <MealPrograms />;
+    content = <MealPrograms handleBackButton={handleBackButton}/>;
   }
 
   if (hotOpen) {
-    content = <WhatsHot handleBackButton={handleBackButton} />
+    content = <WhatsHot handleBackButton={handleBackButton} />;
+  }
+
+  if (subscriptionOpen) {
+    content = <SubscriptionPage handleBackButton={handleBackButton} />;
+  }
+
+  if ( apparelOpen ) {
+    content = <ApparelShop handleBackButton={handleBackButton} />;
+  }
+
+  if ( coachingOpen ) {
+    content = <OnlineCoachingShop handleBackButton={handleBackButton} />
   }
 
   return (

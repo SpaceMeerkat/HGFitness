@@ -1,20 +1,21 @@
-import { View, Text, Image, Pressable} from "react-native";
-import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles"
+import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
+import { Image, ImageBackground, Text, View } from "react-native";
 
 type SubscriptionCardProps = {
+    cardImage: any;
     cardTitle: string,
     cardDays: any,
   };
 
-export function SubscriptionCard({ cardTitle, cardDays }: SubscriptionCardProps) {
+export function SubscriptionCard({ cardImage, cardTitle, cardDays }: SubscriptionCardProps) {
 
-    const imageSource = require("@/assets/images/OfficialLogo.jpg");
+    const imageSource = require("@/assets/images/WhiteTransparentLogo.png");
     const shortCardTitle = cardTitle 
     let content = null;
 
     return (
 
-        <View style={[ShopStyles.myProgramsBlockContainer]}>
+        <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden'}]}>
             {content}
             <View style={{ flex: 0.8 }}>
                 <Text style={[DefaultTabStyles.defaultBoldText, { color: 'white' }]}>{shortCardTitle}</Text>
@@ -23,6 +24,6 @@ export function SubscriptionCard({ cardTitle, cardDays }: SubscriptionCardProps)
             <View style={{ flex: 0.3, paddingRight: 10 }}>
                 <Image source={imageSource} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
             </View>
-        </View>
+        </ImageBackground>
     );
 }

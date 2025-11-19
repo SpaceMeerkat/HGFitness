@@ -2,18 +2,22 @@ import { MealTrackingStyles } from "@/components/HGMealStyles";
 import { DefaultTabStyles } from "@/components/HGStyles";
 import { HGHeader } from "@/components/HeaderBar";
 import { useAppContext } from "@/components/appContext";
+import CalorieCalculatorModal from "@/components/meals/CalorieCalculatorInput";
+import { MealStyles } from "@/components/meals/MealStyles";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
-import { addMealItem, getMealNames, getWaterNames, handleMealPress, iconColors, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
+import { addMealItem, getMealNames, getWaterNames, handleMealPress, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
+import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
+import { FontAwesome } from "@expo/vector-icons";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MealScreen() {
@@ -21,12 +25,13 @@ export default function MealScreen() {
   const image = require("@/assets/images/HGBackground.png");
   const premiumImage = require("@/assets/images/OfficialLogo.jpg");
 
-  const { profile, mealPrograms, trackingData, setTrackingData } = useAppContext(); 
+  const { profile, mealPrograms, trackingData, setProfile, setTrackingData } = useAppContext(); 
+
+  const [loginSignupActive, setLoginSignupActive] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [loginActive, setLoginActive] = useState(true);
+  const [loginActive, setLoginActive] = useState(false);
   const [signupActive, setSignupActive] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
-  // const [mealItem, setMealItem] = useState<any | null>(null);
   const [activeMeal, setActiveMeal] = useState<any | null>(null);
   const [mealIndex, setMealIndex] = useState<any>(0); 
   const [versionLength, setVersionLength] = useState<any>(0); 
@@ -41,6 +46,45 @@ export default function MealScreen() {
   const [runningMealCount, setRunningMealCount] = useState(dictionary?.runningMeals || 0);
   const [runningCalories, setRunningCalories] = useState(dictionary?.runningCalories || 0);
   const [runningProtein, setRunningProtein] = useState(dictionary?.runningProtein || 0);
+
+  const [calculatorVisible, setCalculatorVisible] = useState(false);
+  const [calorieCalculatorClicked, setCalorieCalculatorClicked] = useState(false);
+
+  const updateCalorieCalculatorStreak = async (streakBool: boolean) => {
+    const updatedProfile = {
+        ...profile,
+        calorieCalculator: {
+          ...profile.calorieCalculator,
+          streak: streakBool
+        },
+      };
+    setProfile(updatedProfile); // Update context
+    // Update AsyncStorage
+    await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
+  };
+
+  useEffect(() => {
+    // Guard against empty dictionary as streak should be false by default
+    if (!dictionary) return;
+    // If all targets are met, update the streak boolean in profile to true
+    if (runningMealCount > 0 || runningWater > 0) {
+      updateCalorieCalculatorStreak(true)
+    } else {
+        updateCalorieCalculatorStreak(false);
+    }
+    // If any tracker child falls below the target, set the streak boolean to false
+    if (profile.calorieCalculator.streak) {
+      if (runningMealCount === 0 && runningWater === 0
+      ) {
+        updateCalorieCalculatorStreak(false)
+      } else {
+        return;
+      }
+    }
+  }, [runningMealCount, runningWater, runningCalories, runningProtein]);
+
+  // console.log(profile.calorieCalculator);
+
 
   useEffect(() => {
     setRunningMealCount(dictionary?.runningMeals || 0);
@@ -57,7 +101,7 @@ export default function MealScreen() {
     if (trackingData) {
       setDictionary(trackingData?.meals || undefined);
     } else {
-      setLoginActive(true);
+      setLoginSignupActive(true);
     }
   }, [trackingData]);
   
@@ -65,13 +109,14 @@ export default function MealScreen() {
   useEffect(() => {
     if (profile === null) {
       setLoggedIn(false);
-      setLoginActive(true);
+      setLoginActive(false);
+      setLoginSignupActive(true);
     } else {
       setLoggedIn(true);
     }
   }, [profile]);
 
-  const handleChildPage = (loggedIn: boolean, login: boolean, signup: boolean) => {
+  const handleChildPage = (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => {
     if (loggedIn) {
       setLoggedIn(true);
       setLoginActive(false);
@@ -81,11 +126,13 @@ export default function MealScreen() {
       setLoggedIn(false);
       setLoginActive(true);
       setSignupActive(false);
+      setLoginSignupActive(false);
     }
     if (signup) {
       setLoggedIn(false);
       setLoginActive(false);
       setSignupActive(true);
+      setLoginSignupActive(false);
     } 
   };
 
@@ -119,6 +166,13 @@ export default function MealScreen() {
           setMealProgramsState = {setMealProgramsState}
           setCurrentInstructions={setCurrentInstructions}
           setCurrentIngredients={setCurrentIngredients}
+          setDictionary={setDictionary}
+          storeTrackingAsync={storeTrackingAsync}
+          setTrackingData={setTrackingData}
+          setOverlayVisible={setOverlayVisible}
+          dictionary={dictionary}
+          trackingData={trackingData}
+          instructionsVisible={instructionsVisible}
           mealProgramState = {mealProgramsState}
           activeMeal = {activeMeal}
           currentMealIndex = {mealIndex}
@@ -131,12 +185,13 @@ export default function MealScreen() {
     if (loggedIn && overlayVisible && activeMeal) {
       // Show the default overlay if overlayVisible and activeMeal are true
       return (
-      <View style={MealTrackingStyles.TrackingOverlay}>
+      <Modal visible={overlayVisible} animationType="slide" transparent>
+        <View style={MealStyles.modalBackground}>
         <Pressable
             onPress={() => setOverlayVisible(false)}
             style={MealTrackingStyles.TrackingBackButton}
           >
-            <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingLeft: 15}}>Back</Text>
+            <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingBottom: 10}}>Back</Text>
         </Pressable>
         <View style={MealTrackingStyles.TrackingOptionsContainer}>
           <ImageBackground source={image} resizeMode="cover" style={{flex: 1, overflow: "hidden"}}>
@@ -152,7 +207,7 @@ export default function MealScreen() {
               </>
             ) : (
             Object.values(mealProgramsState[activeMeal] || {}).map((item: any, index: number) => {
-              if (index > 3) {
+              if (index > 15 && profile.premium === false) {
                 return (
                   <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
                     <View style={MealTrackingStyles.MealOptionLayoutContainer}>
@@ -174,8 +229,8 @@ export default function MealScreen() {
                 );
               }
 
-              // index === 3: render PremiumRibbon + simplified view
-              if (index === 3) {
+              // index === 15: render PremiumRibbon + simplified view
+              if (index === 15 && profile.premium === false) {
                 return (
                   <React.Fragment key={index}>
                     <PremiumRibbon />
@@ -215,7 +270,7 @@ export default function MealScreen() {
                     >
                       {/* Meal name */}
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
-                        <Text style={{ color: "white", fontSize: 22, fontWeight: 'bold' }}>{item.name}</Text>
+                        <Text style={{ color: "white", fontSize: 22, fontWeight: 'bold', textAlign: 'center' }}>{item.name}</Text>
                       </View>
 
                       {/* Protein + Calories */}
@@ -289,28 +344,45 @@ export default function MealScreen() {
         </ImageBackground>
         </View>
       </View>
+      </Modal>
     )}
   };
 
   const renderMeals = () => {
+    const iconDict: Record<string, React.ReactNode> = {
+      Breakfast: <MaterialCommunityIcons name="egg-fried" size={24} color="gold" />,
+      Lunch: <MaterialCommunityIcons name="hamburger" size={24} color="chocolate" />,
+      Dinner: <MaterialCommunityIcons name="food-turkey" size={24} color="brown" />,
+      Snack: <FontAwesome6 name="apple-whole" size={24} color="lime" />,
+    };
     return (
+      <>
+      {/* Calorie Calculator modal */}
+      <CalorieCalculatorModal 
+        visible={calculatorVisible}
+        onClose={() => setCalculatorVisible(false)}
+      />
+      
       <ScrollView contentContainerStyle={{ flexGrow: 1}}>
-        <ImageBackground source={image} resizeMode="cover" style={{flex: 1}}>
 
         {/* Meals header component */}
 
-        <View style={{flex: 0.15, paddingBottom:10}}>
+        <View style={{flex: 0.15}}>
 
           <View style={MealTrackingStyles.HeaderContainer}>
+
             {/* Column 1 */}
             <View style={MealTrackingStyles.HeaderStackedColumn}>
               <View style={MealTrackingStyles.HeaderBox}>
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Meals</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningMealCount}</Text>
+                <Text style={{textAlign: 'center', 
+                  color: profile.calorieCalculator.active? runningMealCount === 0? 'grey': runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white': 'white', 
+                  fontSize: 22}}>{ profile.calorieCalculator.active? runningMealCount === 0? profile.calorieCalculator.meals : runningMealCount : runningMealCount}</Text>
               </View>
             </View>
+            {/* {profile.calorieCalculator.active ? `/${profile.calorieCalculator.meals}` : ""} */}
 
             {/* Separator 1 */}
             <View style={MealTrackingStyles.HeaderSeparator} />
@@ -321,7 +393,9 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Calories</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningCalories.toFixed(0)}</Text>
+                <Text style={{textAlign: 'center', 
+                  color: profile.calorieCalculator.active? runningCalories === 0? 'grey': runningCalories >= profile.calorieCalculator.calories? 'lime': 'white': 'white', 
+                  fontSize: 22}}>{ profile.calorieCalculator.active? runningCalories === 0? profile.calorieCalculator.calories : runningCalories : runningCalories}</Text>
               </View>
             </View>
 
@@ -334,7 +408,9 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Protein</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningProtein.toFixed(0)}</Text>
+                <Text style={{textAlign: 'center', 
+                  color: profile.calorieCalculator.active? runningProtein === 0? 'grey': runningProtein >= profile.calorieCalculator.protein? 'lime': 'white': 'white', 
+                  fontSize: 22}}>{ profile.calorieCalculator.active? runningProtein === 0? profile.calorieCalculator.protein : runningProtein : runningProtein}g</Text>
               </View>
             </View>
 
@@ -347,16 +423,34 @@ export default function MealScreen() {
                 <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Water</Text>
               </View>
               <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 24}}>{runningWater}L</Text>
+                <Text style={{textAlign: 'center', 
+                  color: profile.calorieCalculator.active? runningWater === 0? 'grey': runningWater >= profile.calorieCalculator.water? 'lime': 'white': 'white', 
+                  fontSize: 22}}>{ profile.calorieCalculator.active? runningWater === 0? profile.calorieCalculator.water : runningWater : runningWater}L</Text>
               </View>
             </View>
           </View>
 
           {/* Divider */}
-
-          <View style={{paddingVertical: 10}}>
+          <View style={{paddingTop:8, paddingBottom: 24}}>
+            {/* Lightening bolt component for streaks */}
+            <View style={{flex: 1, flexDirection: 'row'}}>
+              <View style={{flex: 0.1, flexDirection: 'row', justifyContent: 'center',
+                position: "absolute",
+                        left: 0,
+                        right: 0,
+                        top: -24,
+                        zIndex: 1000,
+              }}>
+                <View style={{flexDirection: 'row', justifyContent: 'center', backgroundColor: 'black',
+                  borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 50, width: 50 
+                }}>
+                    <FontAwesome name="bolt" size={30} color="orange" style= {{textAlign: 'center', textAlignVertical: 'center'}}/>
+                    <Text style={{color: 'orange', fontSize: 12, textAlignVertical: 'center', paddingTop: 8}}>{profile.calorieCalculator.streak? profile.calorieCalculator.streakCounter + 1 : profile.calorieCalculator.streakCounter}</Text>
+                </View>
+              </View>
+            </View> 
             <View style={{height: 1, backgroundColor: 'white'}} />
-          </View>
+          </View>    
 
           {removableIcons === true ? (
             <View style={{flex: 1, paddingHorizontal: 10, paddingTop: 10, justifyContent: 'center'}}>
@@ -374,7 +468,7 @@ export default function MealScreen() {
 
           <Pressable onLongPress={() => setRemovableIcons(true)} key={meal} style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 10, paddingVertical: 6}}>
             <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 4, borderColor: 'grey', paddingHorizontal: 10, paddingVertical: 4}}>
-              <Text style={{textAlign: 'left', color: 'white', fontSize: 22}}><Ionicons name={"restaurant-outline"} size={20} color={iconColors[meal as keyof typeof iconColors]} textAlignVertical='bottom' /> {meal}</Text>
+              <Text style={{textAlign: 'left', color: 'white', fontSize: 22}}>{iconDict[meal]} {meal}</Text>
               <View style={{height: 1, backgroundColor: 'white'}} />
               {getMealNames(meal, dictionary, mealPrograms).map(({ mealName, calorieValue, proteinValue }, index) => (
                 <View key={`${meal}_${index}`} style={{ paddingVertical: 8, paddingHorizontal: 5, flexDirection: 'row' }}>
@@ -388,8 +482,13 @@ export default function MealScreen() {
                     <Ionicons name="remove-circle-outline" size={24} color="red" />
                   </Pressable>
                   ) : null }
-                  <View style={{flex:0.85, flexDirection:'column'}}>
-                    <Text style={{ color: "white", fontSize: 18 }}>{mealName}</Text>
+                  <View style={{flex:1, flexDirection:'row'}}>
+                    <View style={{flex:0.7, flexDirection:'column'}}>
+                      <Text style={{ color: "white", fontSize: 18 }}>{mealName}</Text>
+                    </View>
+                    <View style={{flex:0.3, flexDirection:'column'}}>
+                      <Text style={{ color: "white", fontSize: 18, textAlign: 'right'}}>{calorieValue} <FontAwesome6 name="fire" size={14} color="orange" /></Text>
+                    </View>
                   </View>
                 </View>
               ))}
@@ -434,8 +533,25 @@ export default function MealScreen() {
             </Pressable>
           </View>
         </Pressable>
-        </ImageBackground>
+
+        <Pressable onPress={() => profile.premium? setCalculatorVisible(true) : null} 
+          onPressIn={()=>setCalorieCalculatorClicked(true)} 
+          onPressOut={()=>setCalorieCalculatorClicked(false)}
+          style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>
+          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: calorieCalculatorClicked? 'lime': 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
+
+            <Text style={{color: 'white', fontSize: 20, textAlignVertical: 'center'}}> Calorie calculator</Text>
+          </View>
+        </Pressable>
+
       </ScrollView>
+      </>
+    )
+  }
+
+  const renderLoginSignup = () => {
+    return(
+      <LoginSignupWindow handleChildPage={handleChildPage}/>
     )
   }
 
@@ -454,6 +570,8 @@ export default function MealScreen() {
   const renderPageContent = () => {
     if (loggedIn && profile && mealPrograms && trackingData && dictionary) {
       return renderMeals()
+    } else if (loginSignupActive) {
+      return renderLoginSignup();
     } else if (loginActive) {
       return renderLogin();
     } else if (signupActive) {
@@ -467,6 +585,7 @@ export default function MealScreen() {
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
       <HGHeader />
+      <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
       <ScrollView 
         contentContainerStyle={{ flexGrow: 1 }} 
         keyboardShouldPersistTaps="handled"
@@ -476,6 +595,7 @@ export default function MealScreen() {
       {renderOverlay()}
 
       </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 }

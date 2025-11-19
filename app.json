@@ -4,7 +4,7 @@
     "slug": "HGMobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/playIcon.png",
+    "icon": "./assets/images/appIcon2.png",
     "scheme": "hoolegainz",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -13,7 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/playIcon.png",
+        "foregroundImage": "./assets/images/appIcon2.png",
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
@@ -29,9 +29,8 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/HGsplash3.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
+          "image": "./assets/images/HGsplash2.png",
+          "resizeMode": "cover",
           "backgroundColor": "#000000"
         }
       ],

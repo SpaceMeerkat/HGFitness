@@ -1,0 +1,67 @@
+type Gender = "male" | "female";
+type ActivityLevel = "sedentry" | "moderate" | "active" | "very_active" | "athlete";
+type Goal = "lose weight" | "maintain" | "gain";
+
+export function calculateCalories(
+  gender: Gender,
+  age: number,
+  height: number, // cm
+  weight: number, // kg
+  activity: ActivityLevel,
+  goal: Goal
+): [number, number, number] {
+  // --- Step 1: Calculate BMR using Mifflin-St Jeor ---
+  let bmrMifflin =
+    gender === "male"
+      ? 10 * weight + 6.25 * height - 5 * age + 5
+      : 10 * weight + 6.25 * height - 5 * age - 161;
+
+  // --- Step 2: Calculate BMR using Revised Harris-Benedict ---
+  let bmrHarris =
+    gender === "male"
+      ? 13.397 * weight + 4.799 * height - 5.677 * age + 88.362
+      : 9.247 * weight + 3.098 * height - 4.33 * age + 447.593;
+
+  // --- Step 3: Average BMR ---
+  let bmr = (bmrMifflin + bmrHarris) / 2;
+
+  // --- Step 4: Apply activity multiplier ---
+  const activityMultipliers: Record<ActivityLevel, number> = {
+    sedentry: 1,
+    moderate: 1 + (1.95-1) * 0.25,
+    active: (1 + 1.95) * 0.5, 
+    very_active: 1 + (1.95-1) * 0.75,
+    athlete: 1.95,
+  };
+  let weightedBmr = bmr * activityMultipliers[activity];
+
+  // --- Step 5: Apply goal adjustment ---
+  const goalMultipliers: Record<Goal, number> = {
+    "lose weight": 0.9,
+    maintain: 1.0,
+    gain: 1.1,
+  };
+  let finalCalories = weightedBmr * goalMultipliers[goal];
+
+  // --- Step 6: Calculate Protein ---
+  // LIMIT THIS TO 200g maximum
+  const proteinMultipliers: Record<Gender, number> = {
+    female: 1.5,
+    male: 2,
+  };
+  const proteinMax: Record<Gender, number> = {
+    female: 150,
+    male: 200,
+  };
+  let finalProtein = Math.min(weight * proteinMultipliers[gender], proteinMax[gender]);
+
+  const waterMax: Record<Gender, number> = {
+    female: 3,
+    male: 3.5,
+  };
+
+  // --- Step 7: Calculate Water 1dp---
+  let finalWater = Math.min(Math.round(weight * 0.035 * 10) / 10, waterMax[gender]);
+
+  return [Math.round(finalProtein), Math.round(finalCalories), finalWater]; // round to nearest integer
+}
