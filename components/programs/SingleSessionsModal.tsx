@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useEffect, useState } from "react";
 import {
   ImageBackground, KeyboardAvoidingView,
@@ -211,9 +212,13 @@ export default function SingleSessionsModal({
                         flexDirection: 'column',
                         backgroundColor: levelColors[info.level],
                         borderRadius: 6,
-                        opacity: 0.8
+                        opacity: 0.8,
+                        justifyContent: 'center'
                       }}
-                    />
+                    >
+                        <MaterialIcons name="loop" size={16} color="black" style={{textAlign: 'center'}} />
+                        <Text style={{color: 'black', textAlignVertical: 'center', textAlign: 'center', fontSize: 12}}>{trackingData[fullName]['rerunNumber']}</Text>
+                      </View>
                     <View style={{
                       flex: 0.65,
                       flexDirection: 'column',
@@ -222,7 +227,7 @@ export default function SingleSessionsModal({
                       paddingLeft: 24
                     }}>
                       <Text style={styles.programText}>
-                        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{info.name}</Text>
+                        <Text style={{ fontSize: 20}}>{info.name}</Text>
                       </Text>
                     </View>
                     <View style={{
@@ -242,7 +247,7 @@ export default function SingleSessionsModal({
             ))}
           </ScrollView>
 
-          <View style={{ flex: 0.01, borderRadius: 8, paddingVertical: 4 }} />
+          <View style={{ flex: 0.01, borderRadius: 8, paddingVertical: 0 }} />
 
           <View style={styles.buttons}>
             <TouchableOpacity onPress={handleClose} style={[styles.btn, styles.closeBtn]}>
@@ -278,7 +283,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: 'Edo',
     fontSize: 32,
-    paddingTop: 16,
+    paddingTop: 0,
     marginBottom: 12,
     fontWeight: "600",
     textAlign: "center",
@@ -293,6 +298,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   programText: {
+    fontFamily: 'Edo',
     color: "white",
     fontSize: 16,
     textAlign: "left",
@@ -304,7 +310,7 @@ const styles = StyleSheet.create({
   },
   buttons: { flexDirection: "row", justifyContent: "center" },
   btn: {
-    paddingVertical: 10,
+    paddingTop: 4,
     paddingHorizontal: 14,
     borderRadius: 8,
     marginLeft: 8,

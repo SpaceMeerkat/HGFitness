@@ -357,7 +357,6 @@ export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handle
 
     const handlePress = async () => {
         const programRawData = trackingData[cardTitle]
-        console.log(cardTitle);
         if (programRawData !== null && programRawData !== undefined) {
             handleChildPage('programOverview', cardTitle, programRawData["data"], null, programRawData["memoryKeys"], programRawData["memoryData"]); 
         } else {

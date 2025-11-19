@@ -63,6 +63,8 @@ const Calendar: React.FC<CalendarProps> = ({ streakDates, streakThreshold }) => 
     weeks.push(days.slice(i, i + 7));
   }
 
+  const uniqueStreakDates = new Set(streakDates);
+
   return (
     <View style={styles.container}>
       {/* Month title */}
@@ -94,7 +96,7 @@ const Calendar: React.FC<CalendarProps> = ({ streakDates, streakThreshold }) => 
       const highlightCount = week.reduce((count, d) => {
         if (d.type !== "curr") return count;
         const key = `${year}_${month}_${d.day}`;
-        return count + streakDates.filter(date => date === key).length;
+        return count + (uniqueStreakDates.has(key) ? 1 : 0);
       }, 0);
 
       return (
