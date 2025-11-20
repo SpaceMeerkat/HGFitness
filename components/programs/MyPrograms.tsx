@@ -25,6 +25,7 @@ type MyProgramsLandingProps = {
 export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSessionsVisible, setSingleSessionsVisible}: MyProgramsLandingProps) {
 
   const { myPrograms, trackingData, profile } = useAppContext(); 
+  if (!profile) return null;
   // const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
   // console.log(myPrograms);
@@ -39,8 +40,6 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
   const [selectedData, setSelectedData] = useState<any>(null);
   const [triggerRedirect, setTriggerRedirect] = useState(false);
   const [subscriptionOptionsVisible, setSubscriptionOptionsVisible] = useState(false);
-
-
 
   useEffect (() => {
     if (fullName && selectedData) {
@@ -82,7 +81,7 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
       setSinglePrograms({});
       setPurchasedPrograms({});
     }
-  }, []);
+  }, [trackingData]); // PollPurchase awaits setting new myPrograms before setting new trackingData, so wait for trackingData for this useEffect trigger
 
   return (
       <ScrollView style={[ShopStyles.shopScrollContainer, {flex: 1, paddingTop: 8, paddingBottom: 20}]}>
@@ -97,7 +96,7 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
           setViewModeVisible={setViewModeVisible}/>
         )}
 
-        {profile.premium || profile.gymSubscription ? (
+        {profile?.premium || profile?.gymSubscription ? (
           <>
             {Object.keys(myPrograms)
               .filter(key =>
