@@ -9,7 +9,6 @@ import React, { useEffect, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
 import ProgressBarWithDots from "./LevelLoadingBar";
-import { MealChart } from "./MealChart";
 
 export function ProfileOverview() {
 
@@ -242,13 +241,10 @@ export function ProfileOverview() {
         {/* Gap between the Profile header and the stats */}
         <View style={ProfileStyles.ProfileSpacer}/>
 
-        Meal stats parent container
-        <View style={ProfileStyles.MealStatsParentContanier}>
-          {/* Meal stats header/title */}
+        {/* <View style={ProfileStyles.MealStatsParentContanier}>
           <View style={ProfileStyles.StatsHeaderContainer}>
             <Text style={ProfileStyles.StatsHeaderText}>MEAL STATS</Text>
           </View>
-          {/* Meal stats button selector for meals/calories/protein/water */}
           <View style={ProfileStyles.MealChartButtonsContainer}>
             {buttons.map((button, index) => (
               <Pressable
@@ -265,7 +261,6 @@ export function ProfileOverview() {
               </Pressable>
             ))}
           </View>
-          {/* Meal chart if dictionary exists, or else an empty warning box to get tracking */}
           {dictionary && Object.keys(dictionary).length > 0 ? (
           <MealChart dictionary={dictionary} 
             mealType={`running${buttons[selected].label}`} 
@@ -282,15 +277,11 @@ export function ProfileOverview() {
           )}
         </View>   
 
-        {/* Gap between the meals and the weight goals */}
         <View style={ProfileStyles.ProfileSpacer}/>
 
-        {/* Meal stats parent container */}
         <View style={[ProfileStyles.MealStatsParentContanier, {alignItems: 'center'}]}>
-          {/* Meal stats header/title */}
           <View style={[ProfileStyles.StatsHeaderContainer, {paddingBottom: 10}]}>
             <Text style={ProfileStyles.StatsHeaderText}>Weight goals</Text>
-          {/* Meal stats button selector for meals/calories/protein/water */}
           <Pressable
             key={"add-weight-button"}
             onPress={() => console.log("pressed")}
@@ -302,7 +293,6 @@ export function ProfileOverview() {
             <Text style={{ color: "white", textAlign: "center" }}>Add Weigh-in</Text>
           </Pressable>
           </View>
-          {/* Meal chart if dictionary exists, or else an empty warning box to get tracking */}
           {dictionary && Object.keys(dictionary).length > 0 ? (
           <MealChart dictionary={dictionary} 
             mealType={`running${buttons[selected].label}`} 
@@ -317,7 +307,7 @@ export function ProfileOverview() {
             <Text style={{ color: "white", textAlign: "center", textAlignVertical: 'center' }}>Get nomming to see meal stats!</Text>
           </View>
           )}
-        </View>     
+        </View>      */}
 
       </ScrollView>
       
