@@ -189,6 +189,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
   }, [memoryKeys, programDay, memoryData]);
 
+  // console.log(trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]);
+
   const renderExercises = () => {
 
     return Object.keys(exerciseDictionary).map(key => {
@@ -265,17 +267,17 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                 }
 
                 return (
-                  <Pressable onPress={() => showExerciseModal(exercise)} key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
-                    <View style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
+                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
+                    <Pressable onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
                       <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
                         {exercise}
                       </Text>
-                    </View>
-                    <View style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
+                    </Pressable>
+                    <Pressable onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
                       <Text style={DefaultTabStyles.defaultBoldText}>
                         {exerciseSet.subsetReps[setIndex]}
                       </Text>
-                    </View>
+                    </Pressable>
                     <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingExerciseInput}>
                         <TextInput
@@ -306,7 +308,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         />
                       </View>
                     </View>
-                  </Pressable>
+                  </View>
                 );
               }))}
               <Modal visible={modalVisible} animationType="slide" transparent={true} onRequestClose={() => setModalVisible(false)}>
@@ -524,15 +526,37 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   return (
     <>
       <ScrollView style={ShopStyles.shopScrollContainer}>
+        <View style={{flex: 1, flexDirection: 'row'}}>
         { (((completedDay && !oneShot) && !trackingMode) || 
         ((!completedDay && !oneShot) && !trackingMode) || 
         ((completedDay && !oneShot) && trackingMode) ||
-        (oneShot && !trackingMode)) && (
-          <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} 
-          onPress={() => oneShot ? [setSingleSessionsVisible(true), handleChildPage('programs')] : handleChildPage('programOverview')}>
-            <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-          </Pressable>
-        )}
+        (oneShot && !trackingMode)) ? (
+          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={{flex: 1, flexDirection: 'row'}}>
+            <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 4, justifyContent: 'center'}} 
+            onPress={() => oneShot ? [setSingleSessionsVisible(true), handleChildPage('programs')] : handleChildPage('programOverview')}>
+              <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+            </Pressable>
+            <View style={{flex:0.85, flexDirection: 'column', justifyContent: 'center', paddingBottom: 4, paddingTop: 10,}}>
+                <Text style={{color: 'white', textAlign: 'right', paddingRight: 16, fontFamily: 'Edo', fontSize: 20}}>
+                  {oneShot ? programID.split('-')[2] : trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]}
+                </Text>
+            </View>
+          </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 16 }}>
+              {/* <Ionicons name="eye-outline" size={10} color="lime" /> */}
+              <Text style={{ color: 'lime', fontSize: 12 }}>View Mode</Text>
+            </View>
+          </View>
+        ) : (
+          <View style={{flex:1, flexDirection: 'column', justifyContent: 'center', paddingTop: 10, paddingBottom: 10}}>
+              <Text style={{color: 'white', textAlign: 'center', paddingRight: 0, fontFamily: 'Edo', fontSize: 20}}>
+                {oneShot ? programID.split('-')[2] : trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]}
+              </Text>
+          </View>
+        )
+        } 
+        </View>
         
         <View>
           {renderExercises()}

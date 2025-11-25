@@ -4,6 +4,7 @@ import { HGHeader } from "@/components/HeaderBar";
 import { useAppContext } from "@/components/appContext";
 import CalorieCalculatorModal from "@/components/meals/CalorieCalculatorInput";
 import { MealStyles } from "@/components/meals/MealStyles";
+import TargetsModal from "@/components/meals/TargetsModal";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
 import { addMealItem, getMealNames, getWaterNames, handleMealPress, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
@@ -48,6 +49,7 @@ export default function MealScreen() {
   const [runningProtein, setRunningProtein] = useState(dictionary?.runningProtein || 0);
 
   const [calculatorVisible, setCalculatorVisible] = useState(false);
+  const [targetsModalVisible, setTargetsModalVisible] = useState(false);
   const [calorieCalculatorClicked, setCalorieCalculatorClicked] = useState(false);
 
   const updateCalorieCalculatorStreak = async (streakBool: boolean) => {
@@ -362,12 +364,27 @@ export default function MealScreen() {
         visible={calculatorVisible}
         onClose={() => setCalculatorVisible(false)}
       />
+
+      {/* Calorie Calculator modal */}
+      <TargetsModal 
+        visible={targetsModalVisible}
+        streak={profile.calorieCalculator.streakCounter}
+        meals={runningMealCount}
+        mealsTarget={profile.calorieCalculator.meals}
+        calories={runningCalories}
+        caloriesTarget={profile.calorieCalculator.calories}
+        protein={runningProtein}
+        proteinTarget={profile.calorieCalculator.protein}
+        water={runningWater}
+        waterTarget={profile.calorieCalculator.water}
+        onClose={() => setTargetsModalVisible(false)}
+      />
       
       <ScrollView contentContainerStyle={{ flexGrow: 1}}>
 
         {/* Meals header component */}
 
-        <View style={{flex: 0.15}}>
+        <Pressable style={{flex: 0.15}} onPress={()=>setTargetsModalVisible(true)}>
 
           <View style={MealTrackingStyles.HeaderContainer}>
 
@@ -460,7 +477,7 @@ export default function MealScreen() {
             </View>
           ) : null }
 
-        </View>
+        </Pressable>
 
         {/* Meals section */}
 
