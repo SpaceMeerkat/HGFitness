@@ -213,9 +213,9 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
               
                 <View style={{width: "100%", height: '100%'}}>
 
-                    <Pressable style={{flex: 0.1, width: "20%", paddingLeft: 20, paddingTop: 5, paddingBottom: 5, justifyContent: 'center'}} onPress={handleBackButton}>
+                    <TouchableOpacity style={{flex: 0.1, width: "20%", paddingLeft: 20, paddingTop: 5, paddingBottom: 5, justifyContent: 'center'}} onPress={handleBackButton}>
                         <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-                    </Pressable>
+                    </TouchableOpacity>
 
                         <View style={{flex: 1, flexDirection: 'column', width: "100%", height: '100%', paddingHorizontal: 10, paddingBottom: 20}}>
 
@@ -278,12 +278,12 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
                             zIndex: 10,
                         }}>
 
-                        <Pressable style={{flex: 0.1, width: "20%", paddingLeft: 20, marginTop: 0, 
+                        <TouchableOpacity style={{flex: 0.1, width: "20%", paddingLeft: 20, marginTop: 0, 
                             marginBottom: 30, justifyContent: 'flex-end'}} onPress={() => [
                                 setisWindowVisible(false), 
                                 setContent(null)]}>
                             <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-                        </Pressable>
+                        </TouchableOpacity>
 
                         {content}
 

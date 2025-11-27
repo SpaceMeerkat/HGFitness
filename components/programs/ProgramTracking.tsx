@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { WebView } from 'react-native-webview';
 import { FindPrecedingNumber } from './FindPrecedingNumber';
 import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
@@ -313,9 +313,9 @@ export function ProgramTracker({programLevel, programID, programData, programDay
               }))}
               <Modal visible={modalVisible} animationType="slide" transparent={true} onRequestClose={() => setModalVisible(false)}>
                 <View style={ExerciseDescriptions.ModalBackground}>
-                  <Pressable onPress={() => setModalVisible(false)} style={{paddingVertical: 20 }}>
-                    <Text style={ExerciseDescriptions.ModalCloseText}>Back</Text>
-                  </Pressable>
+                  <TouchableOpacity onPress={() => setModalVisible(false)} style={{paddingVertical: 20 }}>
+                    <Text style={[ExerciseDescriptions.ModalCloseText, {fontWeight: 'bold'}]}>Back</Text>
+                  </TouchableOpacity>
                   <ScrollView style={ExerciseDescriptions.ModalScrollBox}>
                     <View style={ExerciseDescriptions.ModalDescriptionBox}>
                       <View style={{flex: 1, flexDirection: 'row'}}>
@@ -424,7 +424,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
               {/* user notes pressable icon */}
               <View style={{backgroundColor: "black", flex: 1, flexDirection: "row", justifyContent : 'space-between', paddingRight: 24, paddingLeft:8, paddingTop: 12}}>
                 <View style={{flex:0.665, flexDirection: 'row', paddingTop: 15}}> 
-                  <Pressable 
+                  <TouchableOpacity 
                     style={{flex: 0.3, flexDirection: "row"}} 
                     onPress={() => { // Set the index of the exercise whose notes are being edited
                       setIsNotesVisible(true);
@@ -466,7 +466,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         </>
                       );
                     })()}
-                  </Pressable>
+                  </TouchableOpacity>
                 </View>
                 {/* user pressable next set button */}
                 <Pressable style={{flex:0.335, 
@@ -533,10 +533,10 @@ export function ProgramTracker({programLevel, programID, programData, programDay
         (oneShot && !trackingMode)) ? (
           <View style={{flex: 1, flexDirection: 'column'}}>
           <View style={{flex: 1, flexDirection: 'row'}}>
-            <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 4, justifyContent: 'center'}} 
+            <TouchableOpacity style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 4, justifyContent: 'center'}} 
             onPress={() => oneShot ? [setSingleSessionsVisible(true), handleChildPage('programs')] : handleChildPage('programOverview')}>
               <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-            </Pressable>
+            </TouchableOpacity>
             <View style={{flex:0.85, flexDirection: 'column', justifyContent: 'center', paddingBottom: 4, paddingTop: 10,}}>
                 <Text style={{color: 'white', textAlign: 'right', paddingRight: 16, fontFamily: 'Edo', fontSize: 20}}>
                   {oneShot ? programID.split('-')[2] : trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]}

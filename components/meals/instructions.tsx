@@ -4,7 +4,7 @@ import { addMealItem, updateActiveVersion } from "@/components/meals/mealUtils";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { ImageBackground, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { ImageBackground, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export type TrackingData = {
   datestamp: Date;
@@ -75,11 +75,11 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
     return(
         <Modal visible={instructionsVisible} animationType="slide" transparent>
             <View style={MealStyles.modalBackground}>
-            <Pressable
+            <TouchableOpacity
                 onPress={() => handleInstructionsClick(false)}
                 style={MealTrackingStyles.TrackingBackButton}>
                 <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingLeft: 15}}>Back</Text>
-            </Pressable>
+            </TouchableOpacity>
             <View style={MealTrackingStyles.TrackingOptionsContainer}>
                 <ImageBackground source={image} resizeMode="cover" style={{ flex: 1 }}>
                     <ScrollView contentContainerStyle={{ flexGrow: 1}}>

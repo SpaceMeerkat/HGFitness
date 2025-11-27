@@ -139,12 +139,12 @@ export default function SingleSessionsModal({
               />
             </View>
             <View style={{ flex: 0.1, flexDirection: 'column' }}>
-              <Pressable
+              <TouchableOpacity
                 onPress={() => setSearchText("")}
                 style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
               >
                 <Ionicons name="close-circle-outline" size={28} color="white" />
-              </Pressable>
+              </TouchableOpacity>
             </View>
           </View>
 

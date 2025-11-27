@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, TouchableOpacity, View } from "react-native";
 import { TrackingNotesStyles } from "../HGStyles";
 import PricingModal from "../premium/PricingModal";
 import { SubscriptionCard } from "./SubscriptionCard";
@@ -24,9 +24,9 @@ export function SubscriptionPage({handleBackButton}: WhatsHotProps) {
 
         <View style={{flex: 1, paddingTop: 10, paddingHorizontal: 10, justifyContent: 'center'}}>
         <View style={{flex: 0.2, width: '100%', justifyContent: 'center'}}>
-            <Pressable style={{flex: 1, width: "20%", paddingLeft: 10, paddingTop: 5, paddingBottom: 5, justifyContent: 'center'}} onPress={handleBackButton}>
+            <TouchableOpacity style={{flex: 1, width: "20%", paddingLeft: 10, paddingTop: 5, paddingBottom: 5, justifyContent: 'center'}} onPress={handleBackButton}>
                 <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-            </Pressable>
+            </TouchableOpacity>
         </View>
         <View style={{flex: 0.1, width: '100%', paddingBottom: 20}}>
             <Text style={{fontFamily: 'Edo', color: 'gold', fontSize: 30, textAlign: 'center'}}>

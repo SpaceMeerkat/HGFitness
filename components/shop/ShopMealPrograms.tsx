@@ -1,5 +1,5 @@
 import React from "react";
-import { Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { TrackingNotesStyles } from "../HGStyles";
 
 type MealProgramProps = {
@@ -15,7 +15,7 @@ const MealPrograms = ({ handleBackButton }: MealProgramProps) => {
       <ScrollView contentContainerStyle={MealsMadeEasyStyles.scrollContainer}>
         
         {/* Back button */}
-        <Pressable
+        <TouchableOpacity
           style={{
             flex: 0.15,
             width: "20%",
@@ -27,7 +27,7 @@ const MealPrograms = ({ handleBackButton }: MealProgramProps) => {
           onPress={handleBackButton}
         >
           <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-        </Pressable>
+        </TouchableOpacity>
 
         {/* Row 1 (text left, image right) */}
         <View style={MealsMadeEasyStyles.rowFlex03}>

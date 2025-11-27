@@ -1,6 +1,6 @@
 import { TrackingNotesStyles } from "@/components/HGStyles";
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface NotesProps {
     memoryNotes: any;
@@ -58,9 +58,9 @@ interface NotesProps {
       >
         <View style={TrackingNotesStyles.overlay}>
           <View style={TrackingNotesStyles.container}>
-            <Pressable style={TrackingNotesStyles.backButton} onPress={handleSaveNote}>
+            <TouchableOpacity style={TrackingNotesStyles.backButton} onPress={handleSaveNote}>
               <Text style={TrackingNotesStyles.backButtonText}>Back</Text>
-            </Pressable>
+            </TouchableOpacity>
             <Text style={TrackingNotesStyles.title}>Notes</Text>
             <TextInput
               style={[TrackingNotesStyles.textInput, {color: "black"}]}

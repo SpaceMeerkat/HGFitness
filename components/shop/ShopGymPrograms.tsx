@@ -1,5 +1,5 @@
 import { DefaultTabStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
-import { Image, ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
+import { Image, ImageBackground, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 type GymProgramProps = {
     handleChildPage: (page: 'beginner' | 'intermediate' | 'advanced') => void;
@@ -14,9 +14,9 @@ export function GymPrograms({ handleChildPage, handleBackButton }: GymProgramPro
         <ImageBackground source={image} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
         <ScrollView style={ShopStyles.shopScrollContainer}>
           {/* Back button */}
-          <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 8, paddingTop: 10, paddingBottom: 20, justifyContent: 'center'}} onPress={handleBackButton}>
+          <TouchableOpacity style={{flex: 0.15, width: "20%", paddingLeft: 8, paddingTop: 10, paddingBottom: 20, justifyContent: 'center'}} onPress={handleBackButton}>
               <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-          </Pressable>
+          </TouchableOpacity>
           <View style={{flex: 1, paddingBottom: 14}}>
           {/*  Beginner programs */}
           <View style={{flex: 0.25, paddingVertical: 4}}>

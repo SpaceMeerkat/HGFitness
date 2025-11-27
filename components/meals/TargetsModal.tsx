@@ -1,31 +1,68 @@
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import React from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CalcStyles } from "./CalorieCalculatorStyles";
+
+type StatRowProps = {
+    icon: any,
+    label: string,
+    value: number,
+    target: any
+};
+
+const StatRow: React.FC<StatRowProps> = ({ icon, label, value, target }) => (
+  <View style={[styles.container, {opacity: value >= target ? 0.5 : 1}]}>
+    <View style={styles.leftColumn}>
+      <View style={styles.iconContainerOuter}>
+        <View style={styles.iconCircle}>
+          <Text>{icon}</Text>
+        </View>
+
+        <View style={styles.iconLabel}>
+          <Text style={styles.iconText}>{label}</Text>
+        </View>
+      </View>
+    </View>
+
+    <View style={styles.valueColumn}>
+      <Text style={[styles.valueText, {color: value >= target ? 'lime' : 'white'}]}>{value}</Text>
+    </View>
+
+    <View style={styles.divider} />
+
+    <View style={styles.valueColumn}>
+      <Text style={[styles.valueText, {color: value >= target ? 'lime' : 'white'}]}>{target}</Text>
+      {React.isValidElement(target) && target.type === FontAwesome? (<Text style={[styles.valueText, {fontSize: 12}]}>premium</Text>) : (null)}
+    </View>
+  </View>
+);
+
 
 type Gender = "male" | "female";
 type ActivityLevel = "sedentry" | "moderate" | "active" | "very_active" | "athlete";
 type Goal = "lose weight" | "maintain" | "gain";
 
 type TargetsModalProps = {
-  visible: boolean;
+  visible: boolean,
+  targetState: any,
   streak: number,
   meals: number,
-  mealsTarget: number | undefined,
+  mealsTarget: any,
   calories: number,
-  caloriesTarget: number | undefined,
+  caloriesTarget: any,
   protein: number,
-  proteinTarget: number | undefined,
+  proteinTarget: any,
   water: number,
-  waterTarget: number | undefined,
+  waterTarget: any,
 
   onClose: () => void;
 };
 
 const TargetsModal: React.FC<TargetsModalProps> = ({
   visible,
+  targetState, 
   streak,
   meals,
   mealsTarget,
@@ -42,18 +79,10 @@ const TargetsModal: React.FC<TargetsModalProps> = ({
       onClose();
   };
 
-  console.log(streak,
-  meals,
-  mealsTarget,
-  calories,
-  caloriesTarget,
-  protein,
-  proteinTarget,
-  water,
-  waterTarget,);
+  const renderContent = () => { 
 
 
-  const renderContent = () => {
+    console.log(targetState);
 
     return (
       <>
@@ -64,7 +93,7 @@ const TargetsModal: React.FC<TargetsModalProps> = ({
           contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
         >
 
-            <View style={{flex:0.2, justifyContent: 'center', backgroundColor: 'black', alignItems: 'center'}}>
+            <View style={{flex:0.2, justifyContent: 'center', backgroundColor: 'black', alignItems: 'center', paddingVertical: 20}}>
                 <View style={{flexDirection: 'row', justifyContent: 'center', backgroundColor: 'black',
                   borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 150, width: 150 
                 }}>
@@ -85,109 +114,42 @@ const TargetsModal: React.FC<TargetsModalProps> = ({
                     </View>
                 </View>
 
-                <View style={{flex:1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'grey', alignItems: 'center',
-                    borderRadius: 8, marginBottom: 8
-                }}>
-                    <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-                        <View style={{flex: 0.3, flexDirection: 'column', justifyContent: 'center'}}>
-                            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black',
-                                borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 32, width: 32 
-                            }}>
-                                <Text style={{textAlign: 'center'}}><MaterialCommunityIcons name="food-apple" size={20} color="lime" /></Text>
-                            </View>
-                            <View style={{flex: 0.7, flexDirection: 'row', justifyContent: 'center'}}>
-                            <Text style={{color: 'white', fontSize: 10, textAlign: 'center'}}>Meals</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <Text style={{textAlign: 'center', fontSize: 32, color: 'white'}}>{calories}</Text>
-                    </View>
-                    <View style={{flex: 0.05, flexDirection: 'column', height:50, maxWidth: 2, backgroundColor: 'black', paddingVertical: 0,
-                        borderRadius: 100
-                    }}/>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <Text style={{textAlign: 'center', fontSize: 32, color: 'white'}}>{calories}</Text>
-                    </View>
-                </View>
+                <StatRow
+                icon={<MaterialCommunityIcons name="food-apple" size={20} color="lime" />}
+                label="Meals"
+                value={meals}
+                target={targetState !== "free"? 
+                  (targetState !== "undefined"? 
+                  mealsTarget: <Text style={{ color: "white", fontSize: 12 }}>Set Calorie Calculator</Text>):(<FontAwesome name="lock" size={24} color="white" />)}
+                />
 
-                <View style={{flex:1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'grey', alignItems: 'center',
-                    borderRadius: 8, marginBottom: 8
-                }}>
-                    <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-                        <View style={{flex: 0.3, flexDirection: 'column', justifyContent: 'center'}}>
-                            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black',
-                                borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 32, width: 32 
-                            }}>
-                                <Text style={{textAlign: 'center'}}><MaterialCommunityIcons name="food-apple" size={20} color="lime" /></Text>
-                            </View>
-                            <View style={{flex: 0.7, flexDirection: 'row', justifyContent: 'center'}}>
-                            <Text style={{color: 'white', fontSize: 10, textAlign: 'center'}}>Meals</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <Text style={{textAlign: 'center', fontSize: 32, color: 'white'}}>{meals}</Text>
-                    </View>
-                    <View style={{flex: 0.05, flexDirection: 'column', height:50, maxWidth: 2, backgroundColor: 'black', paddingVertical: 0,
-                        borderRadius: 100
-                    }}/>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <Text style={{textAlign: 'center', fontSize: 32, color: 'white'}}>{mealsTarget}</Text>
-                    </View>
-                </View>
+                <StatRow
+                icon={<FontAwesome6 name="fire" size={14} color="orange" />}
+                label="Calories"
+                value={calories}
+                target={targetState !== "free"? 
+                  (targetState !== "undefined"? 
+                  caloriesTarget: <Text style={{ color: "white", fontSize: 12 }}>Set Calorie Calculator</Text>):(<FontAwesome name="lock" size={24} color="white" />)}
+                />
 
-                <View style={{flex:1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'grey', alignItems: 'center',
-                    borderRadius: 8, marginBottom: 8
-                }}>
-                    <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-                        <View style={{flex: 0.3, flexDirection: 'column', justifyContent: 'center'}}>
-                            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black',
-                                borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 32, width: 32 
-                            }}>
-                                <Text style={{textAlign: 'center'}}><MaterialCommunityIcons name="food-apple" size={20} color="lime" /></Text>
-                            </View>
-                            <View style={{flex: 0.7, flexDirection: 'row', justifyContent: 'center'}}>
-                            <Text style={{color: 'white', fontSize: 10, textAlign: 'center'}}>Meals</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <Text style={{textAlign: 'center', fontSize: 32, color: 'white'}}>{meals}</Text>
-                    </View>
-                    <View style={{flex: 0.05, flexDirection: 'column', height:50, maxWidth: 2, backgroundColor: 'black', paddingVertical: 0,
-                        borderRadius: 100
-                    }}/>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <Text style={{textAlign: 'center', fontSize: 32, color: 'white'}}>{mealsTarget}</Text>
-                    </View>
-                </View>
+                <StatRow
+                icon={<MaterialCommunityIcons name="food-drumstick" size={14} color="brown" />}
+                label="Protein"
+                value={protein}
+                target={targetState !== "free"? 
+                  (targetState !== "undefined"? 
+                  proteinTarget: <Text style={{ color: "white", fontSize: 12 }}>Set Calorie Calculator</Text>):(<FontAwesome name="lock" size={24} color="white" />)}
+                />
 
-                <View style={{flex:1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'grey', alignItems: 'center',
-                    borderRadius: 8, marginBottom: 8
-                }}>
-                    <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-                        <View style={{flex: 0.3, flexDirection: 'column', justifyContent: 'center'}}>
-                            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black',
-                                borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 32, width: 32 
-                            }}>
-                                <Text style={{textAlign: 'center'}}><MaterialCommunityIcons name="food-apple" size={20} color="lime" /></Text>
-                            </View>
-                            <View style={{flex: 0.7, flexDirection: 'row', justifyContent: 'center'}}>
-                            <Text style={{color: 'white', fontSize: 10, textAlign: 'center'}}>Meals</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <Text style={{textAlign: 'center', fontSize: 32, color: 'white'}}>{meals}</Text>
-                    </View>
-                    <View style={{flex: 0.05, flexDirection: 'column', height:50, maxWidth: 2, backgroundColor: 'black', paddingVertical: 0,
-                        borderRadius: 100
-                    }}/>
-                    <View style={{flex: 1, flexDirection: 'column'}}>
-                        <Text style={{textAlign: 'center', fontSize: 32, color: 'white'}}>{mealsTarget}</Text>
-                    </View>
-                </View>
+                <StatRow
+                icon={<FontAwesome6 name="bottle-water" size={20} color="cyan" />}
+                label="Water"
+                value={water}
+                target={targetState !== "free"? 
+                  (targetState !== "undefined"? 
+                  waterTarget: <Text style={{ color: "white", fontSize: 12 }}>Set Calorie Calculator</Text>):(<FontAwesome name="lock" size={24} color="white" />)}
+                />
+
                 
             </View>
 
@@ -195,9 +157,9 @@ const TargetsModal: React.FC<TargetsModalProps> = ({
 
       </View>
       {/* Close Button */}
-      <Pressable onPress={() => handleClose()} style={CalcStyles.closeButton}>
+      <TouchableOpacity onPress={() => handleClose()} style={CalcStyles.closeButton}>
           <Text style={CalcStyles.closeText}>Close</Text>
-      </Pressable>
+      </TouchableOpacity>
       </>
     );
   };
@@ -212,3 +174,74 @@ const TargetsModal: React.FC<TargetsModalProps> = ({
   }
 
 export default TargetsModal;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    backgroundColor: "grey",
+    alignItems: "center",
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+
+  leftColumn: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  iconContainerOuter: {
+    flex: 0.3,
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+
+  iconCircle: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "black",
+    borderColor: "white",
+    borderWidth: 2,
+    borderRadius: 200,
+    height: 32,
+    width: 32,
+  },
+
+  iconLabel: {
+    flex: 0.7,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+
+  iconText: {
+    color: "white",
+    fontSize: 10,
+    textAlign: "center",
+  },
+
+  valueColumn: {
+    flex: 1,
+    flexDirection: "column",
+  },
+
+  valueText: {
+    textAlign: "center",
+    fontSize: 32,
+    color: "white",
+  },
+
+  divider: {
+    flex: 0.05,
+    flexDirection: "column",
+    height: 50,
+    maxWidth: 2,
+    backgroundColor: "black",
+    paddingVertical: 0,
+    borderRadius: 100,
+  },
+});
+

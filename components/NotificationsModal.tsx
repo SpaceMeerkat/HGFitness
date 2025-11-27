@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type NotificationItem = {
   date: string;
@@ -40,9 +40,9 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
             {line.trim()}
           </Text>
         ))}
-        <Pressable onPress={handleBack} style={styles.closeButton}>
+        <TouchableOpacity onPress={handleBack} style={styles.closeButton}>
           <Text style={styles.closeText}>Back</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -55,9 +55,9 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No notifications right now</Text>
           </View>
-          <Pressable onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeText}>Close</Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
       );
     }
@@ -87,9 +87,9 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
             </Pressable>
           )}
         />
-        <Pressable onPress={onClose} style={styles.closeButton}>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Text style={styles.closeText}>Close</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     );
   };

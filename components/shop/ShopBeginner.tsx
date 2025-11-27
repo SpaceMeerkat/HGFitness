@@ -52,9 +52,9 @@ export function BeginnerPrograms({handleBackButton}: ShopProgramProps) {
     return (
         <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: "100%", height: "100%" }}>
             <ScrollView style={ShopStyles.shopScrollContainer}>
-                <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 8, paddingTop: 10, paddingBottom: 0, justifyContent: 'center'}} onPress={handleBackButton}>
+                <TouchableOpacity style={{flex: 0.15, width: "20%", paddingLeft: 8, paddingTop: 10, paddingBottom: 0, justifyContent: 'center'}} onPress={handleBackButton}>
                     <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-                </Pressable>
+                </TouchableOpacity>
                 <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', paddingTop: 16, paddingHorizontal: 8}}>
                 <View style = {{flex: 0.8}}>
                     <Text style={[DefaultTabStyles.defaultBoldText, {textAlignVertical: 'center'}]}>Beginner Programs</Text>
