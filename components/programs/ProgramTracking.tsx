@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { WebView } from 'react-native-webview';
 import { FindPrecedingNumber } from './FindPrecedingNumber';
 import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
@@ -189,6 +189,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
   }, [memoryKeys, programDay, memoryData]);
 
+  // console.log(trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]);
+
   const renderExercises = () => {
 
     return Object.keys(exerciseDictionary).map(key => {
@@ -265,17 +267,17 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                 }
 
                 return (
-                  <Pressable onPress={() => showExerciseModal(exercise)} key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
-                    <View style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
+                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
+                    <Pressable onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
                       <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
                         {exercise}
                       </Text>
-                    </View>
-                    <View style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
+                    </Pressable>
+                    <Pressable onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
                       <Text style={DefaultTabStyles.defaultBoldText}>
                         {exerciseSet.subsetReps[setIndex]}
                       </Text>
-                    </View>
+                    </Pressable>
                     <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingExerciseInput}>
                         <TextInput
@@ -306,14 +308,14 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         />
                       </View>
                     </View>
-                  </Pressable>
+                  </View>
                 );
               }))}
               <Modal visible={modalVisible} animationType="slide" transparent={true} onRequestClose={() => setModalVisible(false)}>
                 <View style={ExerciseDescriptions.ModalBackground}>
-                  <Pressable onPress={() => setModalVisible(false)} style={{paddingVertical: 20 }}>
-                    <Text style={ExerciseDescriptions.ModalCloseText}>Back</Text>
-                  </Pressable>
+                  <TouchableOpacity onPress={() => setModalVisible(false)} style={{paddingVertical: 20 }}>
+                    <Text style={[ExerciseDescriptions.ModalCloseText, {fontWeight: 'bold'}]}>Back</Text>
+                  </TouchableOpacity>
                   <ScrollView style={ExerciseDescriptions.ModalScrollBox}>
                     <View style={ExerciseDescriptions.ModalDescriptionBox}>
                       <View style={{flex: 1, flexDirection: 'row'}}>
@@ -422,7 +424,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
               {/* user notes pressable icon */}
               <View style={{backgroundColor: "black", flex: 1, flexDirection: "row", justifyContent : 'space-between', paddingRight: 24, paddingLeft:8, paddingTop: 12}}>
                 <View style={{flex:0.665, flexDirection: 'row', paddingTop: 15}}> 
-                  <Pressable 
+                  <TouchableOpacity 
                     style={{flex: 0.3, flexDirection: "row"}} 
                     onPress={() => { // Set the index of the exercise whose notes are being edited
                       setIsNotesVisible(true);
@@ -464,7 +466,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         </>
                       );
                     })()}
-                  </Pressable>
+                  </TouchableOpacity>
                 </View>
                 {/* user pressable next set button */}
                 <Pressable style={{flex:0.335, 
@@ -524,15 +526,37 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   return (
     <>
       <ScrollView style={ShopStyles.shopScrollContainer}>
+        <View style={{flex: 1, flexDirection: 'row'}}>
         { (((completedDay && !oneShot) && !trackingMode) || 
         ((!completedDay && !oneShot) && !trackingMode) || 
         ((completedDay && !oneShot) && trackingMode) ||
-        (oneShot && !trackingMode)) && (
-          <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} 
-          onPress={() => oneShot ? [setSingleSessionsVisible(true), handleChildPage('programs')] : handleChildPage('programOverview')}>
-            <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-          </Pressable>
-        )}
+        (oneShot && !trackingMode)) ? (
+          <View style={{flex: 1, flexDirection: 'column'}}>
+          <View style={{flex: 1, flexDirection: 'row'}}>
+            <TouchableOpacity style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 4, justifyContent: 'center'}} 
+            onPress={() => oneShot ? [setSingleSessionsVisible(true), handleChildPage('programs')] : handleChildPage('programOverview')}>
+              <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+            </TouchableOpacity>
+            <View style={{flex:0.85, flexDirection: 'column', justifyContent: 'center', paddingBottom: 4, paddingTop: 10,}}>
+                <Text style={{color: 'white', textAlign: 'right', paddingRight: 16, fontFamily: 'Edo', fontSize: 20}}>
+                  {oneShot ? programID.split('-')[2] : trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]}
+                </Text>
+            </View>
+          </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 16 }}>
+              {/* <Ionicons name="eye-outline" size={10} color="lime" /> */}
+              <Text style={{ color: 'lime', fontSize: 12 }}>View Mode</Text>
+            </View>
+          </View>
+        ) : (
+          <View style={{flex:1, flexDirection: 'column', justifyContent: 'center', paddingTop: 10, paddingBottom: 10}}>
+              <Text style={{color: 'white', textAlign: 'center', paddingRight: 0, fontFamily: 'Edo', fontSize: 20}}>
+                {oneShot ? programID.split('-')[2] : trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]}
+              </Text>
+          </View>
+        )
+        } 
+        </View>
         
         <View>
           {renderExercises()}

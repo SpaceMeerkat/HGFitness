@@ -75,7 +75,6 @@ export const CalcStyles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 100,
     alignItems: 'center',
-    backgroundColor: 'black',
   },
   closeText: {
     color: 'white',

@@ -3,7 +3,7 @@ import { DefaultTabStyles } from "@/components/HGStyles";
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { useState } from "react";
-import { Pressable, Text, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import NotificationsModal from "./NotificationsModal";
 import SettingsModal from "./SettingsModal";
 
@@ -39,12 +39,12 @@ export function HGHeader() {
                     </View>
                 )}
             </Text>
-            <Pressable onPress={() => setNotificationsVisible(true)} style={{flex: 0.12}}>
+            <TouchableOpacity onPress={() => setNotificationsVisible(true)} style={{flex: 0.12}}>
                 <TabBarIcon name={'notifications'} size={28} color="white" />
-            </Pressable>
-            <Pressable onPress={() => setSettingsVisible(true)} style={{flex: 0.12}}>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSettingsVisible(true)} style={{flex: 0.12}}>
                 <SimpleLineIcons name="menu" size={28} color="white" style={{textAlign: 'right'}} />
-            </Pressable>
+            </TouchableOpacity>
         </View>
         <View style={{borderWidth: 0.5, borderColor: "white", marginTop: 0, marginBottom: 0}}></View>
         </>

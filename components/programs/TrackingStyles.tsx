@@ -81,7 +81,8 @@ export const ExerciseDescriptions = StyleSheet.create({
     ModalCloseText: {
         color: 'white', 
         textAlign: 'left',
-        paddingLeft: 20
+        paddingLeft: 18,
+        fontSize: 16
     },
     ModalGifParentBox: {
         flex: 1, 

@@ -1,7 +1,7 @@
 import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Calendar from "./StreakCalendar";
 import ViewModeModal from "./ViewModeModal";
 
@@ -129,9 +129,9 @@ export function ProgramOverview({ programLevel, programData, programDay, program
   return (
       <ScrollView contentContainerStyle={{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 16 }}>
         <ViewModeModal setTrackingMode={setTrackingMode} setTriggerRedirect={setTriggerRedirect} visible={viewModeVisible} onClose={() => setViewModeVisible(false)}/>
-        <Pressable style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} onPress={() => handleChildPage('programs')}>
+        <TouchableOpacity style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} onPress={() => handleChildPage('programs')}>
             <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
-        </Pressable>
+        </TouchableOpacity>
         <View>
           {renderCalendar()}
           {renderWeeks(programData, completedKeys)} 

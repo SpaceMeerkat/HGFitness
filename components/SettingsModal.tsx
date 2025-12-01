@@ -2,7 +2,7 @@ import { useAppContext } from "@/components/appContext";
 import { BASE_API_URL } from "@/components/network/apiConfig";
 import { PricingStyles } from '@/components/premium/PricingStyles';
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { runSubscriptionCancellation } from "./network/CancelSubscription";
 import PasswordChangeModal from "./users/ChangePasswordModal";
 import LoadingModal from "./users/LoadingModal";
@@ -116,9 +116,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             
 
             {/* Close Button */}
-            <Pressable onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeText}>Close</Text>
-            </Pressable>
+            </TouchableOpacity>
         </View>
     );
     };

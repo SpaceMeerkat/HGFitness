@@ -4,6 +4,7 @@ import { HGHeader } from "@/components/HeaderBar";
 import { useAppContext } from "@/components/appContext";
 import CalorieCalculatorModal from "@/components/meals/CalorieCalculatorInput";
 import { MealStyles } from "@/components/meals/MealStyles";
+import TargetsModal from "@/components/meals/TargetsModal";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
 import { addMealItem, getMealNames, getWaterNames, handleMealPress, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
@@ -17,7 +18,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MealScreen() {
@@ -48,6 +49,7 @@ export default function MealScreen() {
   const [runningProtein, setRunningProtein] = useState(dictionary?.runningProtein || 0);
 
   const [calculatorVisible, setCalculatorVisible] = useState(false);
+  const [targetsModalVisible, setTargetsModalVisible] = useState(false);
   const [calorieCalculatorClicked, setCalorieCalculatorClicked] = useState(false);
 
   const updateCalorieCalculatorStreak = async (streakBool: boolean) => {
@@ -187,12 +189,12 @@ export default function MealScreen() {
       return (
       <Modal visible={overlayVisible} animationType="slide" transparent>
         <View style={MealStyles.modalBackground}>
-        <Pressable
+        <TouchableOpacity
             onPress={() => setOverlayVisible(false)}
             style={MealTrackingStyles.TrackingBackButton}
           >
             <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingBottom: 10}}>Back</Text>
-        </Pressable>
+        </TouchableOpacity>
         <View style={MealTrackingStyles.TrackingOptionsContainer}>
           <ImageBackground source={image} resizeMode="cover" style={{flex: 1, overflow: "hidden"}}>
 
@@ -362,12 +364,34 @@ export default function MealScreen() {
         visible={calculatorVisible}
         onClose={() => setCalculatorVisible(false)}
       />
+
+      {/* Calorie Calculator modal */}
+      <TargetsModal 
+        visible={targetsModalVisible}
+        targetState={
+          profile.premium
+            ? (profile.calorieCalculator?.calories === 0
+                ? "undefined"
+                : "premium")
+            : "free"
+        }
+        streak={profile.calorieCalculator.streakCounter}
+        meals={runningMealCount}
+        mealsTarget={profile.calorieCalculator.meals}
+        calories={runningCalories}
+        caloriesTarget={profile.calorieCalculator.calories}
+        protein={runningProtein}
+        proteinTarget={profile.calorieCalculator.protein}
+        water={runningWater}
+        waterTarget={profile.calorieCalculator.water}
+        onClose={() => setTargetsModalVisible(false)}
+      />
       
       <ScrollView contentContainerStyle={{ flexGrow: 1}}>
 
         {/* Meals header component */}
 
-        <View style={{flex: 0.15}}>
+        <Pressable style={{flex: 0.15}} onPress={()=>setTargetsModalVisible(true)}>
 
           <View style={MealTrackingStyles.HeaderContainer}>
 
@@ -460,7 +484,7 @@ export default function MealScreen() {
             </View>
           ) : null }
 
-        </View>
+        </Pressable>
 
         {/* Meals section */}
 
@@ -492,12 +516,12 @@ export default function MealScreen() {
                   </View>
                 </View>
               ))}
-              <Pressable onPress={() => {
+              <TouchableOpacity onPress={() => {
                 const mealarg = meal;
                 handleMealPress({mealarg, setActiveMeal, setOverlayVisible})}
                 }>
                 <Text style={{color: 'grey', fontSize: 20, paddingTop: 8}}> <Ionicons name="add-circle-outline" size={20} color="grey" textAlignVertical='center' /> Add food</Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
           </Pressable>
         ))}
