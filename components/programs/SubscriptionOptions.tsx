@@ -1,15 +1,15 @@
 import React from "react";
 import {
-    Image,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { useAppContext } from "../appContext";
 import { DefaultTabStyles, ShopStyles } from "../HGStyles";
@@ -34,8 +34,7 @@ import { SubscriptionPayment } from "../premium/PremiumPayment";
     const { profile, setProfile } = useAppContext();
     const itemCategory = "gymSubscription";
     const shortCardTitle = "Days a week";
-    const image = require("@/assets/images/HGBackground.png");
-    
+    const image = require("@/assets/images/HGBackground.png");   
 
       return (
         <Modal transparent animationType="fade" visible={visible}>
@@ -53,12 +52,12 @@ import { SubscriptionPayment } from "../premium/PremiumPayment";
                 </View>
                 <View style={{flex: 0.4, width: '100%', paddingHorizontal: 10, paddingBottom: 0}}>
                     <Text style={{color: 'white', fontSize: 15, textAlign: 'center'}}>
-                        If you want a new and exciting gym program each month, that builds upon the previous program, you're in the right place!
+                        If you want a new and exciting gym program every month, that builds upon the previous program, you're in the right place!
                     </Text>
                 </View>
                 <View style={{flex: 0.3, width: '100%', paddingHorizontal: 10, paddingBottom: 0}}>
                     <Text style={{color: 'white', fontSize: 15, textAlign: 'center'}}>
-                        Gain access to fresh 2 and 4 day gym plans every first Monday of the month!
+                        Gain access to both 2 and 4 day gym plans!
                     </Text>
                 </View>
                 <View style={{flex: 0.3, width: '100%', paddingHorizontal: 10, paddingBottom: 0}}>

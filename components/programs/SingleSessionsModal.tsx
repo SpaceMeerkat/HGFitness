@@ -134,13 +134,14 @@ export default function SingleSessionsModal({
                   paddingLeft: 16
                 }}
                 placeholder={"Program search"}
+                placeholderTextColor={"grey"}
                 value={searchText}
                 onChangeText={setSearchText}
               />
             </View>
             <View style={{ flex: 0.1, flexDirection: 'column' }}>
               <TouchableOpacity
-                onPress={() => setSearchText("")}
+                onPress={() => resetFilters()}
                 style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
               >
                 <Ionicons name="close-circle-outline" size={28} color="white" />
