@@ -1,13 +1,13 @@
 import { useAppContext } from "@/components/appContext";
 import { ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import { S3_API_URL } from "@/components/network/apiConfig";
+import { PremiumButton } from "@/components/profile/PremiumButton";
 import { GymCard } from "@/components/shop/ShopCard";
 import { CardInfo } from "@/components/shop/ShopCardInfo";
 import { useEffect, useState } from "react";
 import { ImageBackground, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import PricingModal from "../premium/PricingModal";
 import { FreeProgramCard } from "./FreeProgramCard";
-import { SubscriptionCard } from "./SubscriptionCard";
 
 type WhatsHotProps = {
     handleBackButton: () => void;
@@ -112,27 +112,18 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
             <>
             <View style={{flex: 0.5, width: '100%', paddingHorizontal: 8}}>
             <View style={{flex: 0.2, width: '100%', paddingBottom: 20}}>
-                <Text style={{fontFamily: 'Edo', color: 'gold', fontSize: 30, textAlign: 'center'}}>
-                    Monthly subscription
+                <Text style={{fontFamily: 'Edo', color: 'white', fontSize: 30, textAlign: 'center'}}>
+                    Premium - free trial
                 </Text>
             </View>
-            <View style={{flex: 0.8, width: '100%', paddingHorizontal: 30, paddingBottom: 20}}>
+            <View style={{flex: 0.5, width: '100%', paddingHorizontal: 8, paddingBottom: 30}}>
+                <PremiumButton />       
+            </View>
+            <View style={{flex: 0.5, width: '100%', paddingHorizontal: 30, paddingBottom: 0}}>
                 <Text style={{color: 'white', fontSize: 15, textAlign: 'center'}}>
                     If you want a new and exciting gym program each month, that builds upon the previous program, you're in the right place!
                 </Text>
             </View>
-            </View>
-            <View style={{flex: 0.5, width: '100%', paddingHorizontal: 8}}>
-                <View style={{flex: 0.5, width: '100%', paddingHorizontal: 8, paddingVertical: 4}}>
-                    <Pressable onPress={() => {setDefaultPricing('subscription'), setPremiumVisible(true)}} style={{flex: 0.3, width: '100%', justifyContent: 'center'}}>
-                        <SubscriptionCard cardImage={require('@/assets/images/SubscriptionCard2day.jpg')} cardTitle="Gym plan subscription" cardDays="2 days/week" />
-                    </Pressable>
-                </View>
-                <View style={{flex: 0.5, width: '100%', paddingHorizontal: 8, paddingVertical: 4}}>
-                <Pressable onPress={() => {setDefaultPricing('subscription'), setPremiumVisible(true)}} style={{flex: 0.3, width: '100%', justifyContent: 'center'}}>
-                    <SubscriptionCard cardImage={require('@/assets/images/SubscriptionCard4day.jpg')} cardTitle="Gym plan subscription" cardDays="4 days/week" />
-                </Pressable>
-                </View>
             </View>
             <View style={{flex: 0.15}} />
             </>
@@ -232,8 +223,8 @@ export function WhatsHot({handleBackButton}: WhatsHotProps) {
                                 {/* <View style={[ShopStyles.shopHotSpacer, {flex: 1}]}/> */}
                                 <Pressable style={[ShopStyles.shopHotButton, {flex: 2}]} onPress={() => [showSubscriptions(), setisWindowVisible(true)]}>
                                     <ImageBackground source={image3} resizeMode="contain" style={{ flex: 1, width: "100%", height: "100%", justifyContent: 'center'}}>
-                                        <Text style={{color: 'white', fontSize: 22, textDecorationLine: 'underline', paddingLeft: 50}}>Monthly subscription</Text>
-                                        <Text style={{color: 'white', paddingLeft: 50}}>New programs every month</Text>
+                                        <Text style={{color: 'white', fontSize: 22, textDecorationLine: 'underline', paddingLeft: 50}}>Free trial</Text>
+                                        <Text style={{color: 'white', paddingLeft: 50}}>Try premium for one month</Text>
                                     </ImageBackground>
                                 </Pressable>
                             </View>

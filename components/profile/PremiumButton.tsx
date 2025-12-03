@@ -22,7 +22,8 @@ export function PremiumButton() {
                 });
             }} // Directly call the async function
         >
-            <SubscriptionCard cardImage={require('@/assets/images/premiumCard.jpg')} cardTitle="Upgrade to premium" cardDays="Monthly rewards" />
+            <SubscriptionCard cardImage={require('@/assets/images/premiumCard.jpg')} cardTitle="Upgrade to premium" 
+            cardDays={profile['freeTrial']['premium']? "Join the club": "Free trial"} />
         </Pressable>
     )
 }

@@ -43,9 +43,9 @@ export default function ViewModeModal({
               <Text style={styles.explanationText}>
                 Take a <Text style={{color: 'lime', fontWeight: 'bold'}}>peek</Text> at the session! 
               </Text>
-              <Text style={[styles.explanationText, {paddingTop: 4}]}>
+              {/* <Text style={[styles.explanationText, {paddingTop: 4}]}>
                 Tracking is disabled
-              </Text>
+              </Text> */}
             </View>
 
             <View style={styles.explanationBox}>
@@ -53,9 +53,9 @@ export default function ViewModeModal({
               <Text style={styles.explanationText}>
                 Start <Text style={{color: 'lime', fontWeight: 'bold'}}>tracking</Text> your session!
               </Text>
-              <Text style={[styles.explanationText, {paddingTop: 4}]}>
+              {/* <Text style={[styles.explanationText, {paddingTop: 4}]}>
                 Tracking is enabled.
-              </Text>
+              </Text> */}
             </View>
           </View>
 

@@ -1,13 +1,11 @@
 import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { S3_API_URL } from "@/components/network/apiConfig";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { WebView } from 'react-native-webview';
 import { FindPrecedingNumber } from './FindPrecedingNumber';
 import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
 import SaveSession from "./SaveSession";
@@ -287,6 +285,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           textAlignVertical="center"
                           style={{ fontSize: 20, flex: 1, color: "white"}}
                           placeholder={weightPlaceholder}
+                          placeholderTextColor={"#5b5b5bff"}
                           value={exerciseSet.userInputWeights[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
                           editable={(!completedDay || oneShot) && trackingMode}
@@ -302,6 +301,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           textAlignVertical={'center'}
                           style={{ fontSize: 20, flex: 1, width: '100%', color: "white" }}
                           placeholder={repsPlaceholder}
+                          placeholderTextColor={"#5b5b5bff"}
                           value={exerciseSet.userInputReps[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
                           editable={(!completedDay || oneShot) && trackingMode}
@@ -390,7 +390,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                             <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
                         </Pressable>
                       </View>
-                    <View style={ExerciseDescriptions.ModalGifParentBox}>
+                      {/* INSTRUCTIONS MODAL GIF, UNCOMMENT TO REINTRODUCE */}
+                    {/* <View style={ExerciseDescriptions.ModalGifParentBox}>
                       <View style={ExerciseDescriptions.ModalGifChildBox}>
                         <WebView
                           source={{ uri: `${S3_API_URL}/testgif.gif` }}
@@ -399,7 +400,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           scalesPageToFit={true}
                         />
                       </View>
-                    </View>
+                    </View> */}
                       <View style={ExerciseDescriptions.ModalSubtitleBox}>
                         <Text style={ExerciseDescriptions.ModalSubtitleText}>
                           How to perform this exercise...
