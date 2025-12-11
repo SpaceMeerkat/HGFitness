@@ -51,7 +51,6 @@ export default function MealScreen() {
 
   const [calculatorVisible, setCalculatorVisible] = useState(false);
   const [targetsModalVisible, setTargetsModalVisible] = useState(false);
-  const [calorieCalculatorClicked, setCalorieCalculatorClicked] = useState(false);
 
   const updateCalorieCalculatorStreak = async (streakBool: boolean) => {
     const updatedProfile = {
@@ -105,9 +104,9 @@ export default function MealScreen() {
         (runningProtein >= profile.calorieCalculator.protein) &&
         (runningWater >= profile.calorieCalculator.water)) {
           console.log("yes!");
-          showToast();
+          // showToast();
         }
-  }, [dictionary]);
+  }, []);
 
 
   useEffect(() => {
@@ -315,7 +314,7 @@ export default function MealScreen() {
 
                       {/* Add button */}
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
-                        <Pressable
+                        <TouchableOpacity
                           onPress={() => {
                             const currentVersion = item.activeVersion;
                             const key = activeMeal.toLowerCase();
@@ -342,11 +341,11 @@ export default function MealScreen() {
                           style={MealTrackingStyles.AddMealButton}
                         >
                           <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>Add</Text>
-                        </Pressable>
+                        </TouchableOpacity>
                       </View>
 
                       {/* Change version button */}
-                      <Pressable
+                      <TouchableOpacity
                         style={MealTrackingStyles.MealInfoButton}
                         onPress={() => {
                           const mealIndex = index + 1;
@@ -357,7 +356,7 @@ export default function MealScreen() {
                         <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>
                           <Entypo name="arrow-with-circle-up" size={22} color="lime" />
                         </Text>
-                      </Pressable>
+                      </TouchableOpacity>
                     </Pressable>
                   </View>
                 </View>
@@ -500,9 +499,9 @@ export default function MealScreen() {
 
           {removableIcons === true ? (
             <View style={{flex: 1, paddingHorizontal: 10, paddingTop: 10, justifyContent: 'center'}}>
-              <Pressable onPress={() => setRemovableIcons(false)}>
+              <TouchableOpacity onPress={() => setRemovableIcons(false)}>
                 <Text style={{color: 'cyan', textAlign: 'right', fontSize: 20}}>Done <FontAwesome6 name="circle-check" size={20} color="cyan" /></Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
           ) : null }
 
@@ -571,24 +570,22 @@ export default function MealScreen() {
                   </View>
                 </View>
               ))}
-            <Pressable onPress={() => {
+            <TouchableOpacity onPress={() => {
               const mealarg = 'water';
               handleMealPress({mealarg, setActiveMeal, setOverlayVisible})}
             }>
              <Text style={{color: 'grey', fontSize: 20, paddingTop: 8}}> <Ionicons name="add-circle-outline" size={20} color="grey" textAlignVertical='bottom' /> Add water</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </Pressable>
 
-        <Pressable onPress={() => profile.premium? setCalculatorVisible(true) : null} 
-          onPressIn={()=>setCalorieCalculatorClicked(true)} 
-          onPressOut={()=>setCalorieCalculatorClicked(false)}
+        <TouchableOpacity onPress={() => profile.premium? setCalculatorVisible(true) : null} 
           style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>
-          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: calorieCalculatorClicked? 'lime': 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
+          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
 
             <Text style={{color: 'white', fontSize: 20, textAlignVertical: 'center'}}> Calorie calculator</Text>
           </View>
-        </Pressable>
+        </TouchableOpacity>
 
       </ScrollView>
       </>
