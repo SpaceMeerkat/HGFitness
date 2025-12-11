@@ -17,17 +17,17 @@ interface NotesProps {
     const [note, setNote] = useState<string | ''>('');
     const [placeholder, setPlaceholder] = useState(String || "Enter your notes")
 
+    // Safe to index now
+    const dictItem = mutableExerciseDictionary?.[index];
+    const memItem  = memoryNotes?.[index]?.userNotes;
+
     useEffect(() => {
       // If nothing is passed in yet, just set placeholder and exit early
-      if (!mutableExerciseDictionary || !memoryNotes) {
+      if (!mutableExerciseDictionary && !memoryNotes) {
         setNote('');
         setPlaceholder("Enter your notes");
         return;
       }
-
-      // Safe to index now
-      const dictItem = mutableExerciseDictionary?.[index];
-      const memItem  = memoryNotes?.[index]?.userNotes;
 
       if (dictItem?.userNotes) {
         setNote(dictItem.userNotes);
@@ -56,7 +56,7 @@ interface NotesProps {
         <View style={TrackingNotesStyles.overlay}>
           <View style={TrackingNotesStyles.container}>
             <TouchableOpacity style={TrackingNotesStyles.backButton} onPress={handleSaveNote}>
-              <Text style={TrackingNotesStyles.backButtonText}>Back</Text>
+              <Text style={TrackingNotesStyles.backButtonText}>{note === ''? 'Back' : 'Save'}</Text>
             </TouchableOpacity>
             <Text style={TrackingNotesStyles.title}>Notes</Text>
             <TextInput

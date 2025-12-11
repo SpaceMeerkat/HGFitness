@@ -9,7 +9,7 @@ export const ExerciseDescriptions = StyleSheet.create({
     },
     ModalScrollBox: {
         backgroundColor: '#111111ff',
-        paddingHorizontal: 20,
+        paddingHorizontal: 8,
         borderRadius: 10,
         borderColor: 'grey',
         borderWidth: 2,
@@ -19,20 +19,18 @@ export const ExerciseDescriptions = StyleSheet.create({
     },
     ModalDescriptionBox: {
         backgroundColor: '#111111ff',
-        paddingVertical: 20,
+        paddingVertical: 8,
     },
     ModalTitleParentBox: {
-        flex: 0.9, 
-        flexDirection: 'row', 
-        justifyContent: 'center'
+        flex: 1, 
+        flexDirection: 'column', 
+        justifyContent: 'center',
     },
     ModalTitleBox: {
-        backgroundColor: '#000000ff',
-        paddingVertical: 15,
-        paddingHorizontal: 5,
+        backgroundColor: '#414141ff',
+        paddingVertical: 4,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: 'grey',
     },
     ModalTitle: {
         color: 'white',
@@ -43,11 +41,15 @@ export const ExerciseDescriptions = StyleSheet.create({
         textAlignVertical: 'center',
     },
     ModalSwitchBox: {
-        flex: 0.1, 
+        flex: 0.55, 
         flexDirection: 'row', 
-        paddingHorizontal: 0, 
+        paddingHorizontal: 4, 
+        paddingVertical: 4,
         justifyContent: 'center', 
-        alignItems: 'center'
+        alignItems: 'center',
+        borderColor: 'grey',
+        borderWidth: 1,
+        borderRadius: 8,
     },
     ModalSpacer: {
         flex: 0.1, 
@@ -55,12 +57,13 @@ export const ExerciseDescriptions = StyleSheet.create({
     },
     ModalSubtitleBox: {
         paddingTop: 10,
+        paddingBottom: 10
     },
     ModalSubtitleText: {
         color: 'white',
         textAlign: 'center',
         fontStyle: 'italic',
-        fontSize: 16
+        fontSize: 18
     },
     ModalText: {
         paddingVertical: 5,

@@ -206,9 +206,13 @@ export function ProgramTracker({programLevel, programID, programData, programDay
           {exerciseSet.activeStatus ? (
             <View style={ProgramStyles.trackingActive}>
               <Pressable style={ProgramStyles.trackingType} onPress={()=>handleExerciseClick(-1)}>
+                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#84848499', paddingTop: 4, paddingBottom: 4,
+                  borderRadius: 4
+                }}>
                 <Text style={[DefaultTabStyles.defaultTypeText, {textAlign: "center"}]}>
                   {exerciseSet.type}
                 </Text>
+                </View>
               </Pressable>
               <View style={ProgramStyles.trackingChildContainer}>
                 <View style={ProgramStyles.trackingExerciseHeader}>
@@ -272,16 +276,16 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
                 return (
                   <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
-                    <Pressable onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
+                    <TouchableOpacity onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
                       <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
                         {exercise}
                       </Text>
-                    </Pressable>
-                    <Pressable onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
                       <Text style={DefaultTabStyles.defaultBoldText}>
                         {exerciseSet.subsetReps[setIndex]}
                       </Text>
-                    </Pressable>
+                    </TouchableOpacity>
                     <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingExerciseInput}>
                         <TextInput
@@ -326,12 +330,18 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                     <View style={ExerciseDescriptions.ModalDescriptionBox}>
                       <View style={{flex: 1, flexDirection: 'row'}}>
                         <View style={ExerciseDescriptions.ModalTitleParentBox}>
-                          <View style={[ExerciseDescriptions.ModalTitleBox, {borderColor: alternativeIsPressed ? 'gold' : 'grey'}]}>
+                          <View style={[ExerciseDescriptions.ModalTitleBox, {borderColor: alternativeIsPressed ? 'gold' : '#414141ff'}]}>
                             <Text style={ExerciseDescriptions.ModalTitle}>
                               {modalExercise}
                             </Text>
                           </View>
                         </View>
+                      </View>
+
+                      <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 8}}/>
+
+                      <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingBottom: 20}}>
+                        
                         <Pressable style={ExerciseDescriptions.ModalSwitchBox} 
                           onPressIn={() => {
                             setAlternativeIsPressed(true);
@@ -393,7 +403,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
                         onPressOut={() => setAlternativeIsPressed(false)}
                         >
-                            <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
+                          <Text style={{color: 'white'}}>Alternative exercise   </Text>
+                          <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
                         </Pressable>
                       </View>
                       {/* INSTRUCTIONS MODAL GIF, UNCOMMENT TO REINTRODUCE */}
@@ -407,23 +418,34 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         />
                       </View>
                     </View> */}
-                      <View style={ExerciseDescriptions.ModalSubtitleBox}>
+
+                      <View style={{flex: 1, borderRadius: 100, height: 2, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#414141ff'}}/>
+
+                      {/* <View style={ExerciseDescriptions.ModalSubtitleBox}>
                         <Text style={ExerciseDescriptions.ModalSubtitleText}>
                           How to perform this exercise...
                         </Text>
+                      </View> */}
+                      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24,
+                        borderRadius: 8
+                      }}>
+                        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4,
+                          borderRadius: 8
+                        }}>
+                          {modalDescription.map((line, index) => (
+                            <>
+                              <View style={ExerciseDescriptions.ModalMappingBox}>
+                                <Text style={ExerciseDescriptions.ModalStepNumber}>
+                                    <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={22} color={ShopStyles[programLevel as ProgramLevel].color} />
+                                </Text>
+                              </View>
+                              <Text key={index} style={ExerciseDescriptions.ModalText}>
+                                {line.trim()}
+                              </Text>
+                            </>
+                          ))}
+                        </View>
                       </View>
-                      {modalDescription.map((line, index) => (
-                        <>
-                          <View style={ExerciseDescriptions.ModalMappingBox}>
-                            <Text style={ExerciseDescriptions.ModalStepNumber}>
-                                <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={20} color="lime" />
-                            </Text>
-                          </View>
-                          <Text key={index} style={ExerciseDescriptions.ModalText}>
-                            {line.trim()}
-                          </Text>
-                        </>
-                      ))}
                     </View>
                   </ScrollView>
                 </View>

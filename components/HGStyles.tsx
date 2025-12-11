@@ -451,9 +451,9 @@ export const ShopStyles = StyleSheet.create({
         flex: 0.2,
         justifyContent: 'center',
         paddingVertical: 0,
-        paddingHorizontal: 2,
-        paddingTop: 10,
-        paddingBottom: 15,
+        paddingHorizontal: 12,
+        paddingTop: 0,
+        paddingBottom: 0,
         alignItems: "center",
     },
     trackingExerciseHeader: {
