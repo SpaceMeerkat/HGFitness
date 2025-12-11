@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from 'react-native-toast-message';
 
 export default function MealScreen() {
 
@@ -85,7 +86,28 @@ export default function MealScreen() {
     }
   }, [runningMealCount, runningWater, runningCalories, runningProtein]);
 
-  // console.log(profile.calorieCalculator);
+  const showToast = () => {
+    Toast.show({
+      type: 'success',
+      text1: `Nice job ${profile.username}!`,
+      text2: "You've hit your Calorie Calculator targets for today...",
+      visibilityTime: 4000,  // Duration the toast will be visible
+      position: 'top',  // You can change this to 'bottom' if you prefer
+      props: { zIndex: 100000 },
+      text1Style: { fontSize: 16, fontWeight: 'bold' },  // Larger size for text1
+      text2Style: { fontSize: 12 },  // Larger size for text2
+    });
+  };
+
+  useEffect(() => {
+    if ((runningMealCount >= profile.calorieCalculator.meals) && 
+        (runningCalories >= profile.calorieCalculator.calories) &&
+        (runningProtein >= profile.calorieCalculator.protein) &&
+        (runningWater >= profile.calorieCalculator.water)) {
+          console.log("yes!");
+          showToast();
+        }
+  }, [dictionary]);
 
 
   useEffect(() => {
@@ -608,15 +630,19 @@ export default function MealScreen() {
 
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
+      
       <HGHeader />
+      
       <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
+
       <ScrollView 
         contentContainerStyle={{ flexGrow: 1 }} 
         keyboardShouldPersistTaps="handled"
       >
-      
+
       {renderPageContent()}
       {renderOverlay()}
+      <Toast />      
 
       </ScrollView>
       </ImageBackground>
