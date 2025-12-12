@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from 'react-native-toast-message';
 
 export default function MealScreen() {
 
@@ -50,7 +51,6 @@ export default function MealScreen() {
 
   const [calculatorVisible, setCalculatorVisible] = useState(false);
   const [targetsModalVisible, setTargetsModalVisible] = useState(false);
-  const [calorieCalculatorClicked, setCalorieCalculatorClicked] = useState(false);
 
   const updateCalorieCalculatorStreak = async (streakBool: boolean) => {
     const updatedProfile = {
@@ -85,7 +85,28 @@ export default function MealScreen() {
     }
   }, [runningMealCount, runningWater, runningCalories, runningProtein]);
 
-  // console.log(profile.calorieCalculator);
+  const showToast = () => {
+    Toast.show({
+      type: 'success',
+      text1: `Nice job ${profile.username}!`,
+      text2: "You've hit your Calorie Calculator targets for today...",
+      visibilityTime: 4000,  // Duration the toast will be visible
+      position: 'top',  // You can change this to 'bottom' if you prefer
+      props: { zIndex: 100000 },
+      text1Style: { fontSize: 16, fontWeight: 'bold' },  // Larger size for text1
+      text2Style: { fontSize: 12 },  // Larger size for text2
+    });
+  };
+
+  useEffect(() => {
+    if ((runningMealCount >= profile.calorieCalculator.meals) && 
+        (runningCalories >= profile.calorieCalculator.calories) &&
+        (runningProtein >= profile.calorieCalculator.protein) &&
+        (runningWater >= profile.calorieCalculator.water)) {
+          console.log("yes!");
+          // showToast();
+        }
+  }, []);
 
 
   useEffect(() => {
@@ -293,7 +314,7 @@ export default function MealScreen() {
 
                       {/* Add button */}
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
-                        <Pressable
+                        <TouchableOpacity
                           onPress={() => {
                             const currentVersion = item.activeVersion;
                             const key = activeMeal.toLowerCase();
@@ -320,11 +341,11 @@ export default function MealScreen() {
                           style={MealTrackingStyles.AddMealButton}
                         >
                           <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>Add</Text>
-                        </Pressable>
+                        </TouchableOpacity>
                       </View>
 
                       {/* Change version button */}
-                      <Pressable
+                      <TouchableOpacity
                         style={MealTrackingStyles.MealInfoButton}
                         onPress={() => {
                           const mealIndex = index + 1;
@@ -335,7 +356,7 @@ export default function MealScreen() {
                         <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>
                           <Entypo name="arrow-with-circle-up" size={22} color="lime" />
                         </Text>
-                      </Pressable>
+                      </TouchableOpacity>
                     </Pressable>
                   </View>
                 </View>
@@ -478,9 +499,9 @@ export default function MealScreen() {
 
           {removableIcons === true ? (
             <View style={{flex: 1, paddingHorizontal: 10, paddingTop: 10, justifyContent: 'center'}}>
-              <Pressable onPress={() => setRemovableIcons(false)}>
+              <TouchableOpacity onPress={() => setRemovableIcons(false)}>
                 <Text style={{color: 'cyan', textAlign: 'right', fontSize: 20}}>Done <FontAwesome6 name="circle-check" size={20} color="cyan" /></Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
           ) : null }
 
@@ -549,24 +570,22 @@ export default function MealScreen() {
                   </View>
                 </View>
               ))}
-            <Pressable onPress={() => {
+            <TouchableOpacity onPress={() => {
               const mealarg = 'water';
               handleMealPress({mealarg, setActiveMeal, setOverlayVisible})}
             }>
              <Text style={{color: 'grey', fontSize: 20, paddingTop: 8}}> <Ionicons name="add-circle-outline" size={20} color="grey" textAlignVertical='bottom' /> Add water</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </Pressable>
 
-        <Pressable onPress={() => profile.premium? setCalculatorVisible(true) : null} 
-          onPressIn={()=>setCalorieCalculatorClicked(true)} 
-          onPressOut={()=>setCalorieCalculatorClicked(false)}
+        <TouchableOpacity onPress={() => profile.premium? setCalculatorVisible(true) : null} 
           style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>
-          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: calorieCalculatorClicked? 'lime': 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
+          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
 
             <Text style={{color: 'white', fontSize: 20, textAlignVertical: 'center'}}> Calorie calculator</Text>
           </View>
-        </Pressable>
+        </TouchableOpacity>
 
       </ScrollView>
       </>
@@ -608,15 +627,19 @@ export default function MealScreen() {
 
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>
+      
       <HGHeader />
+      
       <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, width: '100%', height: '100%' }}>
+
       <ScrollView 
         contentContainerStyle={{ flexGrow: 1 }} 
         keyboardShouldPersistTaps="handled"
       >
-      
+
       {renderPageContent()}
       {renderOverlay()}
+      <Toast />      
 
       </ScrollView>
       </ImageBackground>

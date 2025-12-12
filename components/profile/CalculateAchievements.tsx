@@ -14,7 +14,7 @@ export const getTotalPrograms = (trackingData: {
     if (program.completed) {
       total += program.rerunNumber + 1; // scale by rerunNumber
     } else {
-    if (program.rerunNumber > 0) {
+    if ((program.rerunNumber > 0) && (!programName.toLowerCase().includes('singlesession'))) {
       total += program.rerunNumber;
     }}
   }
@@ -36,11 +36,15 @@ export const getTotalSessions = (trackingData: {
 
   for (const programName in trackingData) {
     const program = trackingData[programName];
-    if (program.memoryData) {
+    if ((program.memoryData) && (!programName.toLowerCase().includes('singlesession'))) {
         total += Object.keys(program.memoryData).length; 
     }
-    if (program.rerunNumber > 0) {
+    if ((program.rerunNumber > 0) && (!programName.toLowerCase().includes('singlesession'))) {
         total += program.rerunNumber * program.totalDaysCount;
+    } else {
+      if (programName.toLowerCase().includes('singlesession')) {
+        total += program.rerunNumber;
+      }
     }
   }
 

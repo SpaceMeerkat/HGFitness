@@ -84,9 +84,11 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   // Handle the memory keys/data for tracker placeholders
   const memoryKeys = trackingData[programID]["memoryKeys"];
   const memoryData = trackingData[programID]["memoryData"];
+  const immutableMemoryData = { ...memoryData };
   const oneShot = programID.toLowerCase().includes("singlesession");
   const completedDay = completedKeys.includes(`${programDay[0]}_${programDay[1]}`);
   const [placeholders, setPlaceHolders] = useState<Placeholders | null>(null);
+  const [immutablePlaceholders, setImmutablePlaceHolders] = useState<Placeholders | null>(null);
   // Handle the dictionary of exercises and keys from reading in
   const exercises = programData[programDay[0]][programDay[1]]["exercises"];
   const exerciseKeys = Object.keys(exercises);
@@ -168,15 +170,19 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     const result = FindPrecedingNumber(memoryKeys, programDay[0]);
 
     let newPlaceholders: Placeholders | null = null;
+    let newImmutablePlaceholders: Placeholders | null = null;
 
     if (result !== 0 && !completedDay) {
       newPlaceholders = memoryData[`week-${result}-day-${programDay[1]}`];
+      newImmutablePlaceholders = immutableMemoryData[`week-${result}-day-${programDay[1]}`];
     } else if (completedDay) {
       newPlaceholders = memoryData[`week-${programDay[0]}-day-${programDay[1]}`];
+      newImmutablePlaceholders = immutableMemoryData[`week-${programDay[0]}-day-${programDay[1]}`];
     }
 
     // set placeholders (this is async)
     setPlaceHolders(newPlaceholders);
+    setImmutablePlaceHolders(newImmutablePlaceholders);
 
     // Force a shallow update of exerciseDictionary so components that depend on it re-render.
     // This avoids any stale closures / mutated-object problems.
@@ -200,9 +206,13 @@ export function ProgramTracker({programLevel, programID, programData, programDay
           {exerciseSet.activeStatus ? (
             <View style={ProgramStyles.trackingActive}>
               <Pressable style={ProgramStyles.trackingType} onPress={()=>handleExerciseClick(-1)}>
+                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#84848499', paddingTop: 4, paddingBottom: 4,
+                  borderRadius: 4
+                }}>
                 <Text style={[DefaultTabStyles.defaultTypeText, {textAlign: "center"}]}>
                   {exerciseSet.type}
                 </Text>
+                </View>
               </Pressable>
               <View style={ProgramStyles.trackingChildContainer}>
                 <View style={ProgramStyles.trackingExerciseHeader}>
@@ -266,16 +276,16 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
                 return (
                   <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
-                    <Pressable onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
+                    <TouchableOpacity onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
                       <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
                         {exercise}
                       </Text>
-                    </Pressable>
-                    <Pressable onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
                       <Text style={DefaultTabStyles.defaultBoldText}>
                         {exerciseSet.subsetReps[setIndex]}
                       </Text>
-                    </Pressable>
+                    </TouchableOpacity>
                     <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingExerciseInput}>
                         <TextInput
@@ -320,12 +330,18 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                     <View style={ExerciseDescriptions.ModalDescriptionBox}>
                       <View style={{flex: 1, flexDirection: 'row'}}>
                         <View style={ExerciseDescriptions.ModalTitleParentBox}>
-                          <View style={[ExerciseDescriptions.ModalTitleBox, {borderColor: alternativeIsPressed ? 'gold' : 'grey'}]}>
+                          <View style={[ExerciseDescriptions.ModalTitleBox, {borderColor: alternativeIsPressed ? 'gold' : '#414141ff'}]}>
                             <Text style={ExerciseDescriptions.ModalTitle}>
                               {modalExercise}
                             </Text>
                           </View>
                         </View>
+                      </View>
+
+                      <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 8}}/>
+
+                      <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingBottom: 20}}>
+                        
                         <Pressable style={ExerciseDescriptions.ModalSwitchBox} 
                           onPressIn={() => {
                             setAlternativeIsPressed(true);
@@ -387,7 +403,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
                         onPressOut={() => setAlternativeIsPressed(false)}
                         >
-                            <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
+                          <Text style={{color: 'white'}}>Alternative exercise   </Text>
+                          <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
                         </Pressable>
                       </View>
                       {/* INSTRUCTIONS MODAL GIF, UNCOMMENT TO REINTRODUCE */}
@@ -401,23 +418,34 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         />
                       </View>
                     </View> */}
-                      <View style={ExerciseDescriptions.ModalSubtitleBox}>
+
+                      <View style={{flex: 1, borderRadius: 100, height: 2, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#414141ff'}}/>
+
+                      {/* <View style={ExerciseDescriptions.ModalSubtitleBox}>
                         <Text style={ExerciseDescriptions.ModalSubtitleText}>
                           How to perform this exercise...
                         </Text>
+                      </View> */}
+                      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24,
+                        borderRadius: 8
+                      }}>
+                        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4,
+                          borderRadius: 8
+                        }}>
+                          {modalDescription.map((line, index) => (
+                            <>
+                              <View style={ExerciseDescriptions.ModalMappingBox}>
+                                <Text style={ExerciseDescriptions.ModalStepNumber}>
+                                    <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={22} color={ShopStyles[programLevel as ProgramLevel].color} />
+                                </Text>
+                              </View>
+                              <Text key={index} style={ExerciseDescriptions.ModalText}>
+                                {line.trim()}
+                              </Text>
+                            </>
+                          ))}
+                        </View>
                       </View>
-                      {modalDescription.map((line, index) => (
-                        <>
-                          <View style={ExerciseDescriptions.ModalMappingBox}>
-                            <Text style={ExerciseDescriptions.ModalStepNumber}>
-                                <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={20} color="lime" />
-                            </Text>
-                          </View>
-                          <Text key={index} style={ExerciseDescriptions.ModalText}>
-                            {line.trim()}
-                          </Text>
-                        </>
-                      ))}
                     </View>
                   </ScrollView>
                 </View>
@@ -579,12 +607,13 @@ export function ProgramTracker({programLevel, programID, programData, programDay
           // memoryNotes={exerciseDictionary[currentExerciseIndexForNotes]?.userNotes || 
           //   placeholders?.trackingData[currentExerciseIndexForNotes]?.userNotes || 
           //   ''}
-          memoryNotes = {placeholders?.trackingData}
+          memoryNotes = {immutablePlaceholders?.trackingData}
           mutableExerciseDictionary={exerciseDictionary} 
           handleInputChange={handleInputChange}
           visible={isNotesVisible}
           onClose={() => setIsNotesVisible(false)}
           index={currentExerciseIndexForNotes}
+          mutable={trackingMode}
         />
       )}
 

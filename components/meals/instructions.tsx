@@ -148,12 +148,12 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
 
                     {/* Add the addMeal button here */}
                     <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', paddingBottom: 8}}>
-                        <Pressable onPress={() => handleAddMealClick(false)} 
+                        <TouchableOpacity onPress={() => handleAddMealClick(false)} 
                         style={{flex: 0.4, flexDirection: 'column', borderColor:'lime', borderRadius: 4, borderWidth: 1, paddingVertical: 2}}>
                             <View style={{flex: 0.1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'black'}}>
                                 <Text style={{color: "white", fontSize: 18}}> Add </Text>
                             </View>
-                        </Pressable>
+                        </TouchableOpacity>
                     </View>
 
 

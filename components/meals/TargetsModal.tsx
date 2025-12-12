@@ -81,9 +81,6 @@ const TargetsModal: React.FC<TargetsModalProps> = ({
 
   const renderContent = () => { 
 
-
-    console.log(targetState);
-
     return (
       <>
       <View style={[CalcStyles.modalContent]}>

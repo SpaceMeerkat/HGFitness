@@ -9,37 +9,34 @@ interface NotesProps {
     visible: boolean;
     onClose: () => void;
     index: number;  // Pass index for exercise
+    mutable: boolean;
   }
 
-  export default function TrackingNotes({ memoryNotes, mutableExerciseDictionary, handleInputChange, visible, onClose, index }: NotesProps) {
+  export default function TrackingNotes({ memoryNotes, mutableExerciseDictionary, handleInputChange, visible, onClose, index, mutable }: NotesProps) {
 
     const [note, setNote] = useState<string | ''>('');
     const [placeholder, setPlaceholder] = useState(String || "Enter your notes")
 
-    // console.log("INSIDE: memoryNotes:",memoryNotes);
-    // console.log("INSIDE: mutableExerciseDictionary:",mutableExerciseDictionary);
-    // console.log("INSIDE: index:",index);
-
+    // Safe to index now
+    const dictItem = mutableExerciseDictionary?.[index];
+    const memItem  = memoryNotes?.[index]?.userNotes;
 
     useEffect(() => {
-      if (index === -1) {
-        setNote('');
-        setPlaceholder("Enter your notes");
-      }
-      if (mutableExerciseDictionary[index]?.userNotes) {
-        setNote(mutableExerciseDictionary[index]?.userNotes);
-      }
-      if (!memoryNotes) {
+      // If nothing is passed in yet, just set placeholder and exit early
+      if (!mutableExerciseDictionary && !memoryNotes) {
         setNote('');
         setPlaceholder("Enter your notes");
         return;
       }
-      if (memoryNotes[index]?.userNotes) {
-        setPlaceholder(memoryNotes[index]?.userNotes);
-      }
-      if (!memoryNotes[index]?.userNotes) {
-        setNote('');
+
+      if (dictItem?.userNotes) {
+        setNote(dictItem.userNotes);
+      } else if (memItem) {
+        setPlaceholder(`Previous note: ${memItem}`);
+        setNote('')
+      } else {
         setPlaceholder("Enter your notes");
+        setNote('');
       }
     }, [index, mutableExerciseDictionary, memoryNotes]);
 
@@ -59,7 +56,7 @@ interface NotesProps {
         <View style={TrackingNotesStyles.overlay}>
           <View style={TrackingNotesStyles.container}>
             <TouchableOpacity style={TrackingNotesStyles.backButton} onPress={handleSaveNote}>
-              <Text style={TrackingNotesStyles.backButtonText}>Back</Text>
+              <Text style={TrackingNotesStyles.backButtonText}>{note === ''? 'Back' : 'Save'}</Text>
             </TouchableOpacity>
             <Text style={TrackingNotesStyles.title}>Notes</Text>
             <TextInput
@@ -69,10 +66,20 @@ interface NotesProps {
               placeholder={placeholder}
               placeholderTextColor="#999"
               multiline={true}
+              editable={mutable}
             />
-            {/* <Pressable style={TrackingNotesStyles.saveButton} onPress={handleSaveNote}>
-              <Text style={TrackingNotesStyles.saveButtonText}>Save Note</Text>
-            </Pressable> */}
+            {(memoryNotes?.[index]?.userNotes && mutable === true) ? (
+              <TouchableOpacity onPress={() => {
+                  if (memoryNotes?.[index]?.userNotes) {
+                    setNote(memoryNotes[index].userNotes);
+                  }
+                }}
+                style={{backgroundColor: 'grey', justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 16,
+                borderRadius: 16, borderColor: 'white', borderWidth: 1, alignItems: 'center'
+              }}>
+                <Text style={{color: 'white', textAlign: 'center', textAlignVertical: 'center', fontSize: 12}}>Copy/repeat</Text>
+              </TouchableOpacity>
+            ) : null}            
           </View>
         </View>
       </Modal>

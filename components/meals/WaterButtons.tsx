@@ -1,8 +1,8 @@
-import { View, Text, Pressable, TextInput, } from "react-native";
-import { useState } from "react";
-import Ionicons from '@expo/vector-icons/Ionicons';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { MealTrackingStyles } from "@/components/HGMealStyles";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useState } from "react";
+import { Text, TextInput, TouchableOpacity, View, } from "react-native";
 
 type HandleWaterClickProps = {
     handleWaterClick: (amount: any) => void;
@@ -14,14 +14,14 @@ export function Water250({ handleWaterClick }: HandleWaterClickProps) {
         <View key={'250mlContainer'} style={MealTrackingStyles.WaterOptionOuterContainer}>
             <View style={MealTrackingStyles.WaterOptionLayoutContainer}>
             <View style={{flex: 1, flexDirection: 'row'}}>
-                <Pressable
+                <TouchableOpacity
                 key={'250mlButton'}
                 onPress={() => handleWaterClick(amount)}
                 style={MealTrackingStyles.AddWaterButton}
                 >
                 <Text style={{ color: "white", fontSize: 16, justifyContent: 'center' }}>
                 <Ionicons name="add-circle-outline" size={20} color="lime" /> Add</Text>
-                </Pressable>
+                </TouchableOpacity>
                 <View style={MealTrackingStyles.WaterAmountBlock}>
                 <Text style={MealTrackingStyles.WaterAmountText}>0.25<Text style={{fontSize: 15}}> L</Text></Text>
                 </View>
@@ -55,14 +55,14 @@ export function Water500({ handleWaterClick }: HandleWaterClickProps) {
         <View key={'500mlContainer'} style={MealTrackingStyles.WaterOptionOuterContainer}>
             <View style={MealTrackingStyles.WaterOptionLayoutContainer}>
             <View style={{flex: 1, flexDirection: 'row'}}>
-                <Pressable
+                <TouchableOpacity
                 key={'500mlButton'}
                 onPress={() => handleWaterClick(amount)}
                 style={MealTrackingStyles.AddWaterButton}
                 >
                 <Text style={{ color: "white", fontSize: 16, justifyContent: 'center' }}>
                 <Ionicons name="add-circle-outline" size={20} color="lime" /> Add</Text>
-                </Pressable>
+                </TouchableOpacity>
                 <View style={MealTrackingStyles.WaterAmountBlock}>
                 <Text style={MealTrackingStyles.WaterAmountText}>0.5<Text style={{fontSize: 15}}> L</Text></Text>
                 </View>
@@ -96,14 +96,14 @@ export function Water1000({ handleWaterClick }: HandleWaterClickProps) {
         <View key={'1000mlContainer'} style={MealTrackingStyles.WaterOptionOuterContainer}>
             <View style={MealTrackingStyles.WaterOptionLayoutContainer}>
             <View style={{flex: 1, flexDirection: 'row'}}>
-                <Pressable
+                <TouchableOpacity
                 key={'1000mlButton'}
                 onPress={() => handleWaterClick(amount)}
                 style={MealTrackingStyles.AddWaterButton}
                 >
                 <Text style={{ color: "white", fontSize: 16, justifyContent: 'center' }}>
                 <Ionicons name="add-circle-outline" size={20} color="lime" /> Add</Text>
-                </Pressable>
+                </TouchableOpacity>
                 <View style={MealTrackingStyles.WaterAmountBlock}>
                 <Text style={MealTrackingStyles.WaterAmountText}>1<Text style={{fontSize: 15}}> L</Text></Text>
                 </View>
@@ -143,14 +143,14 @@ export function WaterCustom({ handleWaterClick }: HandleWaterClickProps) {
         <View key={'CustomContainer'} style={MealTrackingStyles.WaterOptionOuterContainer}>
             <View style={MealTrackingStyles.WaterOptionLayoutContainer}>
             <View style={{flex: 1, flexDirection: 'row'}}>
-                <Pressable
+                <TouchableOpacity
                 key={'CustomButton'}
                 onPress={handlePress}
                 style={MealTrackingStyles.AddWaterButton}
                 >
                 <Text style={{ color: "white", fontSize: 16, justifyContent: 'center' }}>
                 <Ionicons name="add-circle-outline" size={20} color="lime" /> Add</Text>
-                </Pressable>
+                </TouchableOpacity>
                 <View style={MealTrackingStyles.WaterCustomBlock}>
                     <TextInput
                         keyboardType="number-pad"
