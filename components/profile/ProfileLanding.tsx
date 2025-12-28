@@ -1,7 +1,6 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
 import { BASE_API_URL } from "@/components/network/apiConfig";
-import { PremiumButton } from "@/components/profile/PremiumButton";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
@@ -137,7 +136,7 @@ export function ProfileOverview() {
     <View style={{ flex: 1, width: '100%', zIndex: 9}}>
       <ScrollView style={[{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 20 }]}>
 
-        <PremiumButton />
+        {/* <PremiumButton /> */}
 
         <Wrapper
           {...(premium
