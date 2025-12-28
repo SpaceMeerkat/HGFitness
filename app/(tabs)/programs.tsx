@@ -119,9 +119,22 @@ export default function MyPrograms() {
       return 'intermediate';
     } else if (beginnerPrograms.hasOwnProperty(selectedProgramID)) {
       return 'beginner';
-    } else {
+    }
+    if (advancedPrograms.hasOwnProperty(selectedProgramID)) {
+      return 'advanced';
+    } else if (intermediatePrograms.hasOwnProperty(selectedProgramID)) {
+      return 'intermediate';
+    } else if (beginnerPrograms.hasOwnProperty(selectedProgramID)) {
       return 'beginner';
     }
+    const lower = selectedProgramID.toLowerCase();
+    if (lower.includes("singlesession")) {
+      const level = selectedProgramID.split('-')[1]?.toLowerCase();
+      if (level === 'advanced' || level === 'intermediate' || level === 'beginner') {
+        return level;
+      }
+    }
+    return 'beginner';
   };
 
   const handleChildPage = (
