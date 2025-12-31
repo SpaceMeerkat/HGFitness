@@ -75,8 +75,6 @@ const TargetsModal: React.FC<TargetsModalProps> = ({
   onClose,
 }) => {
 
-  console.log(streak);
-
   const handleClose = () => {
       onClose();
   };

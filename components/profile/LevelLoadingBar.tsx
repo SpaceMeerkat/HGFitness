@@ -1,7 +1,8 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface ProgressBarWithDotsProps {
+  level?: number;
   /** Horizontal padding in pixels */
   horizontalPadding?: number;
   /** Two dot positions as percentages of the total line width (0–100) */
@@ -11,6 +12,7 @@ interface ProgressBarWithDotsProps {
 }
 
 const ProgressBarWithDots: React.FC<ProgressBarWithDotsProps> = ({
+  level=0,
   horizontalPadding = 20,
   dotPositions = [25, 75],
   fillPercentage = 40,
@@ -18,7 +20,17 @@ const ProgressBarWithDots: React.FC<ProgressBarWithDotsProps> = ({
   return (
     <View style={[styles.container, { paddingHorizontal: horizontalPadding }]}>
       {/* Background white line */}
+      <View style={styles.textContainer}>
+
+        <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'flex-start'}}>
+          <Text style={{color: 'white', fontSize:12, textAlignVertical: 'top'}}>{`Lv.${level}`}</Text>
+        </View>
+        <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'flex-end'}}>
+          <Text style={{color: 'white', fontSize:12, textAlignVertical: 'top'}}>{`Lv.${level + 1}`}</Text>
+        </View>
+      </View>
       <View style={styles.lineContainer}>
+        
         <View style={styles.whiteLine} />
 
         {/* Red overlay line */}
@@ -49,6 +61,13 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 12
   },
+  textContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    position: "relative",
+    height: 25, // gives enough height to render dots
+    justifyContent: "center",
+  },
   lineContainer: {
     position: "relative",
     height: 5, // gives enough height to render dots
@@ -64,7 +83,7 @@ const styles = StyleSheet.create({
   redLine: {
     position: "absolute",
     height: 4,
-    backgroundColor: "white",
+    backgroundColor: "lime",
     borderRadius: 100,
   },
   dot: {

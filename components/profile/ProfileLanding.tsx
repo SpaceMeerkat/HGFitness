@@ -26,7 +26,7 @@ export function ProfileOverview() {
     if (profile?.premium) {
       setPremium(true);
       setAccountLevel('premium');
-    } if (profile?.gymSubscription) {
+    } else if (profile?.gymSubscription) {
       setPremium(false);
       setAccountLevel('subscription');
     } else {
@@ -77,23 +77,12 @@ export function ProfileOverview() {
             {
                 text: 'Confirm',
                 onPress: async () => {
-
-                    setProfileAvatar(url);
-
-                    // Update profile avatar
-                    const updatedProfile = { ...profile, avatar: url };
-                    setProfile(updatedProfile); // Update context
-                    
-
-                    // // Update AsyncStorage
-                    await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
-
                     // // Get JWT token
                     const retrievedToken = await SecureStore.getItemAsync('jwtToken');
 
                     // Send POST request to the Flask API
                     try {
-                        const response = await fetch(`${BASE_API_URL}/updateProfile`, {
+                        const response = await fetch(`${BASE_API_URL}/updateProfileAvatar`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -106,6 +95,12 @@ export function ProfileOverview() {
 
                         if (response.ok) {
                           setIsImagePickerVisible(false);
+                          setProfileAvatar(url);
+                          // Update profile avatar
+                          const updatedProfile = { ...profile, avatar: url };
+                          setProfile(updatedProfile); // Update context
+                          // // Update AsyncStorage
+                          await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
                         } else {
                             console.error('Failed to update profile:', response.status);
                             // Handle error response
@@ -231,9 +226,10 @@ export function ProfileOverview() {
         </View> */}
 
         <ProgressBarWithDots
+          level={achievements[1]}
           horizontalPadding={30}
-          dotPositions={[20, 80]}
-          fillPercentage={60}
+          dotPositions={[0, 100]}
+          fillPercentage={20}
         />
 
         </Wrapper>

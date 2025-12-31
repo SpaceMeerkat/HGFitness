@@ -342,7 +342,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
                       <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingBottom: 20}}>
                         
-                        <Pressable style={ExerciseDescriptions.ModalSwitchBox} 
+                        <TouchableOpacity style={ExerciseDescriptions.ModalSwitchBox} 
                           onPressIn={() => {
                             setAlternativeIsPressed(true);
                             setExerciseDictionary(prevDict => {
@@ -405,7 +405,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         >
                           <Text style={{color: 'white'}}>Alternative exercise   </Text>
                           <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
-                        </Pressable>
+                        </TouchableOpacity>
                       </View>
                       {/* INSTRUCTIONS MODAL GIF, UNCOMMENT TO REINTRODUCE */}
                     {/* <View style={ExerciseDescriptions.ModalGifParentBox}>
