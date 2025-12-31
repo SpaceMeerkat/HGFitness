@@ -103,7 +103,6 @@ export default function MealScreen() {
         (runningCalories >= profile.calorieCalculator.calories) &&
         (runningProtein >= profile.calorieCalculator.protein) &&
         (runningWater >= profile.calorieCalculator.water)) {
-          console.log("yes!");
           // showToast();
         }
   }, []);
@@ -396,7 +395,7 @@ export default function MealScreen() {
                 : "premium")
             : "free"
         }
-        streak={profile.calorieCalculator.streakCounter}
+        streak={profile.calorieCalculator.streak? profile.calorieCalculator.streakCounter + 1 : profile.calorieCalculator.streakCounter}
         meals={runningMealCount}
         mealsTarget={profile.calorieCalculator.meals}
         calories={runningCalories}
