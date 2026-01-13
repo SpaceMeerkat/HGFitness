@@ -66,8 +66,8 @@ export default function MealScreen() {
   };
 
   useEffect(() => {
-    // Guard against empty dictionary as streak should be false by default
-    if (!dictionary) return;
+    // Guard against null profile or empty dictionary
+    if (!profile || !dictionary) return;
     // If all targets are met, update the streak boolean in profile to true
     if (runningMealCount > 0 || runningWater > 0) {
       updateCalorieCalculatorStreak(true)
@@ -99,7 +99,8 @@ export default function MealScreen() {
   };
 
   useEffect(() => {
-    if ((runningMealCount >= profile.calorieCalculator.meals) && 
+    if (!profile?.calorieCalculator) return;
+    if ((runningMealCount >= profile.calorieCalculator.meals) &&
         (runningCalories >= profile.calorieCalculator.calories) &&
         (runningProtein >= profile.calorieCalculator.protein) &&
         (runningWater >= profile.calorieCalculator.water)) {

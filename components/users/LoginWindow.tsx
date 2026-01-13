@@ -5,7 +5,7 @@ import { LoginStyles } from "@/components/users/LoginStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
-import { ImageBackground, Pressable, Text, TextInput, View } from "react-native";
+import { ImageBackground, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import PasswordResetModal from "./ForgottenPasswordModal";
 
 type LoginWindowProps = {
@@ -128,8 +128,17 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
   };
 
     return (
-      <View style={LoginStyles.ParentContainer}>
-        <PasswordResetModal
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={LoginStyles.ParentContainer}>
+            <PasswordResetModal
           visible={open}
           onClose={() => setOpen(false)}
           submitting={submitting}
@@ -267,7 +276,9 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
             </Pressable>
 
 
+            </View>
           </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
 }  

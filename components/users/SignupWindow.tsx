@@ -3,7 +3,7 @@ import LoadingModal from "@/components/users/LoadingModal";
 import { LoginStyles } from "@/components/users/LoginStyles";
 import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
-import { ImageBackground, Pressable, Text, TextInput, View } from "react-native";
+import { ImageBackground, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 type SignupWindowProps = {
     handleChildPage: (loggedIn: boolean, loginSignup: boolean, login: boolean, signup: boolean) => void;
@@ -124,9 +124,18 @@ export function SignupWindow({ handleChildPage }: SignupWindowProps) {
   };
 
   return (
-      <View style={LoginStyles.ParentContainer}>
-        <LoadingModal visible={submitting} />
-        <View style={LoginStyles.ChildContainer}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={LoginStyles.ParentContainer}>
+            <LoadingModal visible={submitting} />
+            <View style={LoginStyles.ChildContainer}>
             <View style={LoginStyles.ImageParentContainer}>
                 <View style={LoginStyles.ImageChildContainer}>
                   <ImageBackground source={image} resizeMode="contain" style={{ flex: 1, width: '100%', height: '100%' }}/>
@@ -266,8 +275,9 @@ export function SignupWindow({ handleChildPage }: SignupWindowProps) {
                     <Text style={[LoginStyles.ButtonText, {color: loginIsPressed ? 'white' : 'black'}]}>Login</Text>
                 </Pressable>
             </View>
+            </View>
           </View>
-      </View>
-      
+        </ScrollView>
+      </KeyboardAvoidingView>
   );
 }
