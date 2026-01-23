@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 
 
 import { AppContextProvider, useAppContext } from "@/components/appContext";
+import { NoInternetScreen } from "@/components/network/NoInternetScreen";
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -33,7 +34,7 @@ const styles = StyleSheet.create({
 
 function AppContent() {
   const colorScheme = useColorScheme();
-  const { loading } = useAppContext();
+  const { loading, isConnected } = useAppContext();
   const [minDurationReached, setMinDurationReached] = useState(false);
   const videoRef = useRef(null);
 
@@ -69,6 +70,10 @@ function AppContent() {
         />
       </View>
     );
+  }
+
+  if (isConnected === false) {
+    return <NoInternetScreen />;
   }
 
   return (

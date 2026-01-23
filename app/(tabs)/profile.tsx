@@ -8,14 +8,46 @@ import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { useAppContext } from "@/components/appContext";
+import { runPaymentStatus } from "@/components/network/PollPurchase";
+import { runSubscriptionPolling } from "@/components/network/PollSubscription";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
 
-  const { profile, trackingData } = useAppContext();
+  const { profile, myPrograms, trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms } = useAppContext();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!profile?.purchaseQueue || Object.keys(profile?.purchaseQueue).length === 0) return;
+
+      const processQueue = async () => {
+        await runPaymentStatus(profile.purchaseQueue, {
+          profile,
+          myPrograms,
+          trackingData,
+          setProfile,
+          setMyPrograms,
+          setTrackingData,
+        });
+
+        await runSubscriptionPolling(profile.purchaseQueue, {
+          profile,
+          myPrograms,
+          trackingData,
+          setProfile,
+          setMyPrograms,
+          setTrackingData,
+          setMealPrograms,
+        });
+      };
+
+      processQueue();
+    }, [profile?.purchaseQueue])
+  );
 
   const image = require("@/assets/images/HGBackground.png");
 

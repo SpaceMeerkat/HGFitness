@@ -73,7 +73,7 @@ export default function MyPrograms() {
       };
 
       processQueue();
-    }, [profile?.purchaseQueue]) // 👈 no purchaseQueue dependency
+    }, [profile?.purchaseQueue]) 
   );
 
   console.log("purchase queue: ", profile?.purchaseQueue);
