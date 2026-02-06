@@ -50,6 +50,23 @@ interface Placeholders {
 
 type GymProgramEntry = [string, string, string, string];
 
+// Helper function to compute placeholders synchronously
+const computePlaceholders = (
+  memoryKeys: string[],
+  programDay: [number, number],
+  memoryData: any,
+  completedDay: boolean
+): Placeholders | null => {
+  const result = FindPrecedingNumber(memoryKeys, String(programDay[0]));
+
+  if (result !== 0 && !completedDay) {
+    return memoryData[`week-${result}-day-${programDay[1]}`] || null;
+  } else if (completedDay) {
+    return memoryData[`week-${programDay[0]}-day-${programDay[1]}`] || null;
+  }
+  return null;
+};
+
 export const getDescriptionByExerciseName = (
   exerciseName: string,
   masterGymProgramsDictionary: GymProgramEntry[]
@@ -87,8 +104,12 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const immutableMemoryData = { ...memoryData };
   const oneShot = programID.toLowerCase().includes("singlesession");
   const completedDay = completedKeys.includes(`${programDay[0]}_${programDay[1]}`);
-  const [placeholders, setPlaceHolders] = useState<Placeholders | null>(null);
-  const [immutablePlaceholders, setImmutablePlaceHolders] = useState<Placeholders | null>(null);
+  const [placeholders, setPlaceHolders] = useState<Placeholders | null>(() =>
+    computePlaceholders(memoryKeys, programDay, memoryData, completedDay)
+  );
+  const [immutablePlaceholders, setImmutablePlaceHolders] = useState<Placeholders | null>(() =>
+    computePlaceholders(memoryKeys, programDay, immutableMemoryData, completedDay)
+  );
   // Handle the dictionary of exercises and keys from reading in
   const exercises = programData[programDay[0]][programDay[1]]["exercises"];
   const exerciseKeys = Object.keys(exercises);
@@ -167,31 +188,13 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   };
 
   useEffect(() => {
-    const result = FindPrecedingNumber(memoryKeys, programDay[0]);
+    // Update placeholders when dependencies change after initial render
+    const newPlaceholders = computePlaceholders(memoryKeys, programDay, memoryData, completedDay);
+    const newImmutablePlaceholders = computePlaceholders(memoryKeys, programDay, immutableMemoryData, completedDay);
 
-    let newPlaceholders: Placeholders | null = null;
-    let newImmutablePlaceholders: Placeholders | null = null;
-
-    if (result !== 0 && !completedDay) {
-      newPlaceholders = memoryData[`week-${result}-day-${programDay[1]}`];
-      newImmutablePlaceholders = immutableMemoryData[`week-${result}-day-${programDay[1]}`];
-    } else if (completedDay) {
-      newPlaceholders = memoryData[`week-${programDay[0]}-day-${programDay[1]}`];
-      newImmutablePlaceholders = immutableMemoryData[`week-${programDay[0]}-day-${programDay[1]}`];
-    }
-
-    // set placeholders (this is async)
     setPlaceHolders(newPlaceholders);
     setImmutablePlaceHolders(newImmutablePlaceholders);
-
-    // Force a shallow update of exerciseDictionary so components that depend on it re-render.
-    // This avoids any stale closures / mutated-object problems.
-    setExerciseDictionary(prev => {
-      if (!prev) return prev;
-      return { ...prev };
-    });
-
-  }, [memoryKeys, programDay, memoryData]);
+  }, [memoryKeys, programDay, memoryData, completedDay]);
 
   // console.log(trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]);
 
@@ -342,7 +345,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
                       <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingBottom: 20}}>
                         
-                        <Pressable style={ExerciseDescriptions.ModalSwitchBox} 
+                        <TouchableOpacity style={ExerciseDescriptions.ModalSwitchBox} 
                           onPressIn={() => {
                             setAlternativeIsPressed(true);
                             setExerciseDictionary(prevDict => {
@@ -405,7 +408,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                         >
                           <Text style={{color: 'white'}}>Alternative exercise   </Text>
                           <FontAwesome5 name="exchange-alt" size={20} color={alternativeIsPressed ? 'gold' : 'white'} />
-                        </Pressable>
+                        </TouchableOpacity>
                       </View>
                       {/* INSTRUCTIONS MODAL GIF, UNCOMMENT TO REINTRODUCE */}
                     {/* <View style={ExerciseDescriptions.ModalGifParentBox}>

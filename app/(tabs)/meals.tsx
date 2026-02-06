@@ -8,6 +8,8 @@ import TargetsModal from "@/components/meals/TargetsModal";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
 import { addMealItem, getMealNames, getWaterNames, handleMealPress, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
+import { runPaymentStatus } from "@/components/network/PollPurchase";
+import { runSubscriptionPolling } from "@/components/network/PollSubscription";
 import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
@@ -17,7 +19,8 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useState } from 'react';
 import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
@@ -27,7 +30,36 @@ export default function MealScreen() {
   const image = require("@/assets/images/HGBackground.png");
   const premiumImage = require("@/assets/images/OfficialLogo.jpg");
 
-  const { profile, mealPrograms, trackingData, setProfile, setTrackingData } = useAppContext(); 
+  const { profile, myPrograms, mealPrograms, trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms } = useAppContext();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!profile?.purchaseQueue || Object.keys(profile?.purchaseQueue).length === 0) return;
+
+      const processQueue = async () => {
+        await runPaymentStatus(profile.purchaseQueue, {
+          profile,
+          myPrograms,
+          trackingData,
+          setProfile,
+          setMyPrograms,
+          setTrackingData,
+        });
+
+        await runSubscriptionPolling(profile.purchaseQueue, {
+          profile,
+          myPrograms,
+          trackingData,
+          setProfile,
+          setMyPrograms,
+          setTrackingData,
+          setMealPrograms,
+        });
+      };
+
+      processQueue();
+    }, [profile?.purchaseQueue])
+  );
 
   const [loginSignupActive, setLoginSignupActive] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -66,8 +98,8 @@ export default function MealScreen() {
   };
 
   useEffect(() => {
-    // Guard against empty dictionary as streak should be false by default
-    if (!dictionary) return;
+    // Guard against null profile or empty dictionary
+    if (!profile || !dictionary) return;
     // If all targets are met, update the streak boolean in profile to true
     if (runningMealCount > 0 || runningWater > 0) {
       updateCalorieCalculatorStreak(true)
@@ -99,11 +131,11 @@ export default function MealScreen() {
   };
 
   useEffect(() => {
-    if ((runningMealCount >= profile.calorieCalculator.meals) && 
+    if (!profile?.calorieCalculator) return;
+    if ((runningMealCount >= profile.calorieCalculator.meals) &&
         (runningCalories >= profile.calorieCalculator.calories) &&
         (runningProtein >= profile.calorieCalculator.protein) &&
         (runningWater >= profile.calorieCalculator.water)) {
-          console.log("yes!");
           // showToast();
         }
   }, []);
@@ -396,7 +428,7 @@ export default function MealScreen() {
                 : "premium")
             : "free"
         }
-        streak={profile.calorieCalculator.streakCounter}
+        streak={profile.calorieCalculator.streak? profile.calorieCalculator.streakCounter + 1 : profile.calorieCalculator.streakCounter}
         meals={runningMealCount}
         mealsTarget={profile.calorieCalculator.meals}
         calories={runningCalories}

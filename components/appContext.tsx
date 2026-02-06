@@ -1,5 +1,6 @@
 import { BASE_API_URL } from "@/components/network/apiConfig"; // AppContextProvider.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Network from 'expo-network';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
@@ -18,6 +19,7 @@ interface AppContextType {
   profileImagePaths: {[key: string]: string};
   bestSellers: any | null;
   loading: boolean | null;
+  isConnected: boolean | null;
   setProfile: (profile: any | null) => void; // Add setProfile function;
   setMasterGymProgramsDictionary: (masterGymProgramsDictionary: any | null) => void;
   setMealPrograms: (mealPrograms: any | null) => void;
@@ -30,6 +32,7 @@ interface AppContextType {
   setIntermediatePrograms: (intermediatePrograms: any | null) => void;
   setAdvancedPrograms: (advancedPrograms: any | null) => void;
   updateData: () => void;
+  recheckConnectivity: () => Promise<void>;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -38,7 +41,7 @@ interface AppContextProviderProps {
   children: ReactNode;
 }
 
-const LAST_UPDATE_KEY = 'lastUpdateDate'; // Key to store the date of last update
+export const LAST_UPDATE_KEY = 'lastUpdateDate'; // Key to store the date of last update
 
 export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children }) => {
 
@@ -74,8 +77,10 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
   const [profileImagePaths, setprofileImagePaths] = useState<any | null>(null);
   const [bestSellers, setBestSellers] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean | null>(true);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
   // Helper function to check if the last request was made not-today
+  // Note: Also exported as standalone function below for use in LoginWindow
   const isToday = (dateString: string) => {
     const lastUpdate = new Date(dateString);
     const today = new Date();
@@ -84,8 +89,38 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
            lastUpdate.getFullYear() === today.getFullYear();
   };
 
+  // Helper function to check internet connectivity
+  const checkConnectivity = async (): Promise<boolean> => {
+    try {
+      const networkState = await Network.getNetworkStateAsync();
+      return (networkState.isConnected && networkState.isInternetReachable) ?? false;
+    } catch {
+      return false;
+    }
+  };
+
+  // Function to recheck connectivity and retry loading data
+  const recheckConnectivity = async () => {
+    setLoading(true);
+    const connected = await checkConnectivity();
+    setIsConnected(connected);
+    if (connected) {
+      await updateData();
+    } else {
+      setLoading(false);
+    }
+  };
+
   // Function to update profile, programs, and tracking data
   const updateData = async () => {
+
+    // Check internet connectivity first
+    const connected = await checkConnectivity();
+    setIsConnected(connected);
+    if (!connected) {
+      setLoading(false);
+      return;
+    }
 
     try {
       // Check if data is present in AsyncStorage
@@ -100,15 +135,6 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       const storedProfileImagePaths = await AsyncStorage.getItem('profileImagePaths');
       const bestSellers = await AsyncStorage.getItem('bestSellers');
       const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
-
-      // console.log("storedProfile ", storedProfile);
-      // console.log("storedMasterGymProgramsDictionary ", storedMasterGymProgramsDictionary);
-      // console.log("storedMealPrograms ", storedMealPrograms);
-      // console.log("storedMyPrograms ", storedMyPrograms);
-      // console.log("storedTrackingData ", storedTrackingData);
-      // console.log("storedProfileImagePaths ", storedProfileImagePaths);
-      // console.log("bestSellers ", bestSellers);
-      // console.log("lastUpdateDate ", lastUpdateDate);
 
       if (storedMasterGymProgramsDictionary && storedMealPrograms && bestSellers && storedProfileImagePaths && storedProfile && storedMyPrograms && storedBeginnerPrograms && storedIntermediatePrograms && storedAdvancedPrograms && storedTrackingData && lastUpdateDate && isToday(lastUpdateDate)) {
         // If the data is present and is from today, load it from AsyncStorage
@@ -244,8 +270,8 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
   }, []);
 
   return (
-    <AppContext.Provider value={{ profile, masterGymProgramsDictionary, mealPrograms, myPrograms, beginnerPrograms, intermediatePrograms, advancedPrograms, trackingData, profileImagePaths, bestSellers, loading,
-    updateData, setMasterGymProgramsDictionary, setProfile, setMealPrograms, setMyPrograms, setTrackingData, setprofileImagePaths, setBeginnerPrograms, setIntermediatePrograms, setBestSellers,
+    <AppContext.Provider value={{ profile, masterGymProgramsDictionary, mealPrograms, myPrograms, beginnerPrograms, intermediatePrograms, advancedPrograms, trackingData, profileImagePaths, bestSellers, loading, isConnected,
+    updateData, recheckConnectivity, setMasterGymProgramsDictionary, setProfile, setMealPrograms, setMyPrograms, setTrackingData, setprofileImagePaths, setBeginnerPrograms, setIntermediatePrograms, setBestSellers,
     setAdvancedPrograms }}>
       {children}
     </AppContext.Provider>
@@ -259,4 +285,13 @@ export const useAppContext = () => {
     throw new Error('useAppContext must be used within an AppContextProvider');
   }
   return context;
+};
+
+// Exported helper function for use in LoginWindow
+export const isToday = (dateString: string) => {
+  const lastUpdate = new Date(dateString);
+  const today = new Date();
+  return lastUpdate.getDate() === today.getDate() &&
+         lastUpdate.getMonth() === today.getMonth() &&
+         lastUpdate.getFullYear() === today.getFullYear();
 };

@@ -1,11 +1,11 @@
-import { useAppContext } from "@/components/appContext";
+import { isToday, LAST_UPDATE_KEY, useAppContext } from "@/components/appContext";
 import { BASE_API_URL } from "@/components/network/apiConfig";
 import LoadingModal from "@/components/users/LoadingModal";
 import { LoginStyles } from "@/components/users/LoginStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
-import { ImageBackground, Pressable, Text, TextInput, View } from "react-native";
+import { ImageBackground, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import PasswordResetModal from "./ForgottenPasswordModal";
 
 type LoginWindowProps = {
@@ -14,7 +14,7 @@ type LoginWindowProps = {
 
 export function LoginWindow({ handleChildPage }: LoginWindowProps) {
 
-  const { setProfile, setTrackingData, setMyPrograms, setBestSellers, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary } = useAppContext();
+  const { setProfile, setTrackingData, setMyPrograms, setBestSellers, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary, updateData } = useAppContext();
 
   const image = require("@/assets/images/BlackTransparentLogo.png");
 
@@ -98,23 +98,36 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
         if (responseMessage === "success") {
           // Store the JWT (using AsyncStorage or any state management you prefer)
           await SecureStore.setItemAsync('jwtToken', jsonResponse.token);
-          await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
-          await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));
-          await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
-          await AsyncStorage.setItem('masterGymProgramsDictionary', JSON.stringify(jsonResponse.gymMasterDictionary));
-          await AsyncStorage.setItem('bestSellers', JSON.stringify(jsonResponse.bestSellers));
-          await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
-          await AsyncStorage.setItem('profileImagePaths', JSON.stringify(jsonResponse.profileImagePaths));
-          await AsyncStorage.setItem('lastUpdateDate', new Date().toISOString());
-          setProfile(jsonResponse.profile);
-          setMyPrograms(jsonResponse.myPrograms);
-          setTrackingData(jsonResponse.trackingData);
-          setMasterGymProgramsDictionary(jsonResponse.gymMasterDictionary);
-          setBestSellers(jsonResponse.bestSellers);
-          setMealPrograms(jsonResponse.mealPrograms);
-          setprofileImagePaths(jsonResponse.profileImagePaths);
-          setSubmitting(false);
-          handleChildPage(true, false, false, false);
+
+          // Check if last update was today
+          const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
+
+          if (lastUpdateDate && isToday(lastUpdateDate)) {
+            // Last update was today, use login response data
+            await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
+            await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));
+            await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
+            await AsyncStorage.setItem('masterGymProgramsDictionary', JSON.stringify(jsonResponse.gymMasterDictionary));
+            await AsyncStorage.setItem('bestSellers', JSON.stringify(jsonResponse.bestSellers));
+            await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
+            await AsyncStorage.setItem('profileImagePaths', JSON.stringify(jsonResponse.profileImagePaths));
+            await AsyncStorage.setItem(LAST_UPDATE_KEY, new Date().toISOString());
+            setProfile(jsonResponse.profile);
+            setMyPrograms(jsonResponse.myPrograms);
+            setTrackingData(jsonResponse.trackingData);
+            setMasterGymProgramsDictionary(jsonResponse.gymMasterDictionary);
+            setBestSellers(jsonResponse.bestSellers);
+            setMealPrograms(jsonResponse.mealPrograms);
+            setprofileImagePaths(jsonResponse.profileImagePaths);
+            setSubmitting(false);
+            handleChildPage(true, false, false, false);
+          } else {
+            // Last update was not today, run full context request to sync data
+            console.log("running full context from Login date check.");
+            await updateData();
+            setSubmitting(false);
+            handleChildPage(true, false, false, false);
+          }
         };
       } else {
         setSubmitting(false)
@@ -128,8 +141,17 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
   };
 
     return (
-      <View style={LoginStyles.ParentContainer}>
-        <PasswordResetModal
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={LoginStyles.ParentContainer}>
+            <PasswordResetModal
           visible={open}
           onClose={() => setOpen(false)}
           submitting={submitting}
@@ -267,7 +289,9 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
             </Pressable>
 
 
+            </View>
           </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
 }  

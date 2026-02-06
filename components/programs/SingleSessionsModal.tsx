@@ -113,12 +113,15 @@ export default function SingleSessionsModal({
 
   return (
     <Modal transparent animationType="fade" visible={visible}>
-      <KeyboardAvoidingView style={styles.center} enabled={false}>
+      <KeyboardAvoidingView
+        style={styles.center}
+        behavior="padding"
+      >
         <View style={styles.card}>
           <Text style={styles.title}>Choose your session</Text>
 
           {/* Search Bar */}
-          <View style={{ flex: 0.15, flexDirection: 'row', paddingRight: 8 }}>
+          <View style={{ height: 50, flexDirection: 'row', paddingRight: 8 }}>
             <View style={{ flex: 0.9, flexDirection: 'column', justifyContent: 'center', paddingRight: 8 }}>
               <TextInput
                 cursorColor={'black'}
@@ -149,12 +152,12 @@ export default function SingleSessionsModal({
             </View>
           </View>
 
-          <View style={{ flex: 0.05, justifyContent: 'center' }}>
+          <View style={{ height: 20, justifyContent: 'center' }}>
             <View style={{ height: 3, backgroundColor: "grey", borderRadius: 100, borderWidth: 1 }} />
           </View>
 
           {/* Level Selectors */}
-          <View style={{ flex: 0.1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ height: 40, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
             {["beginner", "intermediate", "advanced"].map(level => (
               <Pressable
                 key={level}
@@ -270,7 +273,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "94%",
-    height: "90%",
+    height: "96%",
     padding: 10,
     backgroundColor: "black",
     borderRadius: 12,
@@ -311,10 +314,9 @@ const styles = StyleSheet.create({
   },
   buttons: { flexDirection: "row", justifyContent: "center" },
   btn: {
-    paddingTop: 4,
+    paddingVertical: 4,
     paddingHorizontal: 14,
     borderRadius: 8,
-    marginLeft: 8,
   },
   closeBtn: { backgroundColor: "black" },
 });

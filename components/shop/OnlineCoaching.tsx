@@ -1,23 +1,75 @@
-import { TrackingNotesStyles } from "@/components/HGStyles";
-import { Text, TouchableOpacity, View } from "react-native";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type OnlineCoachingProps = {
     handleBackButton: () => boolean;
-  };
+};
 
-export function OnlineCoachingShop({handleBackButton}: OnlineCoachingProps) {
-    const emptyText = "Coming soon...";
+const ACCENT_COLOR = '#00D9FF';
 
+export function OnlineCoachingShop({ handleBackButton }: OnlineCoachingProps) {
     return (
-        <View style={{height: "100%", backgroundColor: "black"}}>
-            <TouchableOpacity style={{flex: 0.05, paddingLeft: 18, paddingTop: 20, paddingBottom: 0, justifyContent: 'center'}} onPress={handleBackButton}>
-                <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+        <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBackButton}>
+                <Ionicons name="arrow-back" size={24} color="white" />
+                <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
-            <View style={{flex: 1, justifyContent: 'center', paddingBottom: 30}}>
-                <Text style={{color: "white",  textAlign: 'center', textAlignVertical: "center"}}>
-                    {emptyText}
+
+            <View style={styles.content}>
+                <View style={[styles.iconBadge, { backgroundColor: 'rgba(0,217,255,0.15)' }]}>
+                    <Ionicons name="people" size={48} color={ACCENT_COLOR} />
+                </View>
+                <Text style={[styles.title, { color: ACCENT_COLOR }]}>Online Coaching</Text>
+                <Text style={styles.subtitle}>
+                    Coming soon! Personal coaching to help you reach your fitness goals.
                 </Text>
             </View>
         </View>
-    )
+    );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#111',
+    },
+    backButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        paddingTop: 20,
+    },
+    backButtonText: {
+        color: 'white',
+        fontSize: 16,
+        marginLeft: 6,
+        fontWeight: '500',
+    },
+    content: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+        paddingBottom: 60,
+    },
+    iconBadge: {
+        width: 100,
+        height: 100,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    title: {
+        fontFamily: 'Edo',
+        fontSize: 32,
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    subtitle: {
+        fontSize: 15,
+        color: 'rgba(255,255,255,0.75)',
+        textAlign: 'center',
+        marginTop: 12,
+        lineHeight: 22,
+    },
+});
