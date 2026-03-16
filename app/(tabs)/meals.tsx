@@ -83,6 +83,7 @@ export default function MealScreen() {
 
   const [calculatorVisible, setCalculatorVisible] = useState(false);
   const [targetsModalVisible, setTargetsModalVisible] = useState(false);
+  const [premiumAlertVisible, setPremiumAlertVisible] = useState(false);
 
   const updateCalorieCalculatorStreak = async (streakBool: boolean) => {
     const updatedProfile = {
@@ -413,10 +414,32 @@ export default function MealScreen() {
     return (
       <>
       {/* Calorie Calculator modal */}
-      <CalorieCalculatorModal 
+      <CalorieCalculatorModal
         visible={calculatorVisible}
         onClose={() => setCalculatorVisible(false)}
       />
+
+      {/* Premium feature alert */}
+      <Modal visible={premiumAlertVisible} transparent animationType="fade">
+        <Pressable
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center' }}
+          onPress={() => setPremiumAlertVisible(false)}>
+          <Pressable
+            style={{ backgroundColor: '#1a1a1a', borderRadius: 16, borderWidth: 1, borderColor: '#444', paddingHorizontal: 28, paddingVertical: 24, width: '78%', alignItems: 'center' }}
+            onPress={() => {}}>
+            <Ionicons name="lock-closed" size={32} color="white" style={{ marginBottom: 12 }} />
+            <Text style={{ color: '#ccc', fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 8 }}>
+              <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold', fontStyle: 'italic' }}>Calorie Calculator</Text>
+              {' '}is a Premium feature, please upgrade your account to use it.
+            </Text>
+            <TouchableOpacity
+              onPress={() => setPremiumAlertVisible(false)}
+              style={{ marginTop: 20, paddingHorizontal: 32, paddingVertical: 10, backgroundColor: 'white', borderRadius: 100 }}>
+              <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>OK</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Calorie Calculator modal */}
       <TargetsModal 
@@ -611,11 +634,24 @@ export default function MealScreen() {
           </View>
         </Pressable>
 
-        <TouchableOpacity onPress={() => profile.premium? setCalculatorVisible(true) : null} 
+        <TouchableOpacity
+          onPress={() => {
+            if (profile?.premium) {
+              setCalculatorVisible(true);
+            } else {
+              setPremiumAlertVisible(true);
+            }
+          }}
           style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>
-          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
-
-            <Text style={{color: 'white', fontSize: 20, textAlignVertical: 'center'}}> Calorie calculator</Text>
+          <View style={{position: 'relative'}}>
+            <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center', opacity: profile?.premium ? 1 : 0.5}}>
+              <Text style={{color: 'white', fontSize: 20, textAlignVertical: 'center'}}> Calorie calculator</Text>
+            </View>
+            {!profile?.premium && (
+              <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center'}}>
+                <Ionicons name="lock-closed" size={22} color="white" />
+              </View>
+            )}
           </View>
         </TouchableOpacity>
 

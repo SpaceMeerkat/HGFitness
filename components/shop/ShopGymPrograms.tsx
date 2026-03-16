@@ -1,4 +1,6 @@
 import { DefaultTabStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
+import { SuggestProgramModal } from "@/components/shop/SuggestProgramModal";
+import React, { useState } from "react";
 import { Image, ImageBackground, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 type GymProgramProps = {
@@ -8,10 +10,12 @@ type GymProgramProps = {
 
 export function GymPrograms({ handleChildPage, handleBackButton }: GymProgramProps) {
 
+    const [suggestModalVisible, setSuggestModalVisible] = useState(false);
     const image = require("@/assets/images/HGBackground.png");
 
     return(
         <ImageBackground source={image} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
+        <SuggestProgramModal visible={suggestModalVisible} onClose={() => setSuggestModalVisible(false)} />
         <ScrollView style={ShopStyles.shopScrollContainer}>
           {/* Back button */}
           <TouchableOpacity style={{flex: 0.15, width: "20%", paddingLeft: 8, paddingTop: 10, paddingBottom: 20, justifyContent: 'center'}} onPress={handleBackButton}>
@@ -60,16 +64,16 @@ export function GymPrograms({ handleChildPage, handleBackButton }: GymProgramPro
           </View>
           </Pressable>
           </View>
-          {/* Free Programs */}
+          {/* Suggest a program */}
           <View style={{flex: 0.25, paddingVertical: 4}}>
-          <Pressable style={{flex: 0.25}} onPress={() => console.log("pressed")}>
+          <Pressable style={{flex: 0.25}} onPress={() => setSuggestModalVisible(true)}>
             <View style={[ShopStyles.shopLevelContainer]}>
               <View style={{flex:0.5}}>
-                  <Image source={require("@/assets/images/cards/FreeCard.jpg")} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
+                  <Image source={require("@/assets/images/cards/suggest.jpg")} style={{ flex: 1, width: "100%", resizeMode: "cover" }} />
               </View>
               <View style={{flex:0.6, paddingLeft: 30}}>
-                <Text style={[DefaultTabStyles.defaultBoldText, {color:'white'}]}>Padel programs</Text>
-                <Text style={DefaultTabStyles.defaultBodyText}>Cheap skate...</Text>
+                <Text style={[DefaultTabStyles.defaultBoldText, {color:'white'}]}>Suggest a program</Text>
+                <Text style={DefaultTabStyles.defaultBodyText}>Got an idea? Let us know!</Text>
               </View>
             </View>
           </Pressable>
