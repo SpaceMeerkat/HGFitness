@@ -1,18 +1,27 @@
 import { useAppContext } from "@/components/appContext";
-import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+const { width } = Dimensions.get('window');
 
 export const NoInternetScreen: React.FC = () => {
   const { recheckConnectivity, loading } = useAppContext();
 
   return (
     <View style={styles.container}>
-      <MaterialIcons name="wifi-off" size={80} color="white" />
-      <Text style={styles.title}>No Internet Connection</Text>
+
+      <Text style={styles.title}>Oops!</Text>
       <Text style={styles.subtitle}>
-        An internet connection is required to use this app.
+        It looks like we can't connect to the internet.{'\n'}
+        Please check your connection and try again.
       </Text>
+
+      <Image
+        source={require('@/assets/images/noInternet.jpg')}
+        style={styles.image}
+        resizeMode="contain"
+      />
+
       <TouchableOpacity
         style={styles.retryButton}
         onPress={recheckConnectivity}
@@ -21,9 +30,10 @@ export const NoInternetScreen: React.FC = () => {
         {loading ? (
           <ActivityIndicator size="small" color="black" />
         ) : (
-          <Text style={styles.retryButtonText}>Retry</Text>
+          <Text style={styles.retryButtonText}>Try again</Text>
         )}
       </TouchableOpacity>
+
     </View>
   );
 };
@@ -31,36 +41,41 @@ export const NoInternetScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "black",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   title: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginTop: 20,
-    textAlign: "center",
+    color: 'white',
+    fontSize: 32,
+    fontFamily: 'Edo',
+    textAlign: 'center',
+    marginBottom: 12,
   },
   subtitle: {
-    color: "grey",
-    fontSize: 16,
-    marginTop: 10,
-    textAlign: "center",
+    color: 'grey',
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  image: {
+    width: width,
+    height: width,
   },
   retryButton: {
-    marginTop: 30,
-    backgroundColor: "white",
+    marginTop: 24,
+    backgroundColor: 'white',
     paddingVertical: 12,
     paddingHorizontal: 40,
-    borderRadius: 25,
+    borderRadius: 100,
     minWidth: 120,
-    alignItems: "center",
+    alignItems: 'center',
   },
   retryButtonText: {
-    color: "black",
+    color: 'black',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });
