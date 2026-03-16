@@ -5,7 +5,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { ActivityIndicator, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
 import ProgressBarWithDots from "./LevelLoadingBar";
 
@@ -20,6 +21,13 @@ export function ProfileOverview() {
   const [premium, setPremium] = useState(false);
   const [accountLevel, setAccountLevel] = useState('free tier');
   const [achievements, setAchievements] = useState<number[]>([0,0,0]);
+  const [changeUsernameVisible, setChangeUsernameVisible] = useState(false);
+  const [changeAvatarConfirmVisible, setChangeAvatarConfirmVisible] = useState(false);
+  const [pendingAvatarUrl, setPendingAvatarUrl] = useState<any>(null);
+  const [confirmAvatarVisible, setConfirmAvatarVisible] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [usernameLoading, setUsernameLoading] = useState(false);
+  const [usernameResult, setUsernameResult] = useState<'success' | 'error' | null>(null);
 
   useEffect(() => {
     if (profile?.premium) {
@@ -54,65 +62,36 @@ export function ProfileOverview() {
   }, [profile, profileImagePaths]);
 
   const handleProfileImageClick = () => {
-    Alert.alert(
-      "Change profile picture?",
-      "",
-      [
-        { text: "Cancel", onPress: () => console.log("Cancel Pressed"), style: "cancel" },
-        { text: "Yes", onPress: () => setIsImagePickerVisible(true) }
-      ]
-    );
+    setChangeAvatarConfirmVisible(true);
   };
 
-  const handleImagePress = async (url?: any) => {
-    Alert.alert(
-        'Confirm Avatar Change',
-        'Are you sure you want to change your avatar?',
-        [
-            {
-                text: 'Cancel',
-                style: 'cancel',
-            },
-            {
-                text: 'Confirm',
-                onPress: async () => {
-                    // // Get JWT token
-                    const retrievedToken = await SecureStore.getItemAsync('jwtToken');
+  const handleImagePress = (url?: any) => {
+    setPendingAvatarUrl(url);
+    setConfirmAvatarVisible(true);
+  };
 
-                    // Send POST request to the Flask API
-                    try {
-                        const response = await fetch(`${BASE_API_URL}/updateProfileAvatar`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ 
-                              avatarURL: url,
-                              token: retrievedToken
-                             }),
-                        });
-
-                        if (response.ok) {
-                          setIsImagePickerVisible(false);
-                          setProfileAvatar(url);
-                          // Update profile avatar
-                          const updatedProfile = { ...profile, avatar: url };
-                          setProfile(updatedProfile); // Update context
-                          // // Update AsyncStorage
-                          await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
-                        } else {
-                            console.error('Failed to update profile:', response.status);
-                            // Handle error response
-                        }
-                    } catch (error) {
-                        console.error('Error updating profile:', error);
-                        // Handle fetch error
-                    }
-                },
-            },
-        ],
-        { cancelable: false }
-    );
+  const confirmAvatarChange = async () => {
+    setConfirmAvatarVisible(false);
+    const retrievedToken = await SecureStore.getItemAsync('jwtToken');
+    try {
+      const response = await fetch(`${BASE_API_URL}/updateProfileAvatar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarURL: pendingAvatarUrl, token: retrievedToken }),
+      });
+      if (response.ok) {
+        setIsImagePickerVisible(false);
+        setProfileAvatar(pendingAvatarUrl);
+        const updatedProfile = { ...profile, avatar: pendingAvatarUrl };
+        setProfile(updatedProfile);
+        await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
+      } else {
+        console.error('Failed to update profile:', response.status);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+    setPendingAvatarUrl(null);
   };
 
   // Values to help the meal stats plots take props depending on meals/calories/protein/water
@@ -123,6 +102,45 @@ export function ProfileOverview() {
     { label: "Meals", color: ['70','195','0'], prefix: "", decimal: 0 },
   ];
 
+  const handleUsernameSubmit = async () => {
+    if (!newUsername.trim() || newUsername.trim() === profile.username) return;
+    setUsernameLoading(true);
+    try {
+      // SKIP: simulate API call — replace with real fetch when endpoint is ready
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const status = 200;
+      // END SKIP
+
+      // Real call (uncomment when endpoint is ready):
+      // const retrievedToken = await SecureStore.getItemAsync('jwtToken');
+      // const response = await fetch(`${BASE_API_URL}/changeUsername`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ newUsername: newUsername.trim(), token: retrievedToken }),
+      // });
+      // const status = response.status;
+
+      if (status === 200) {
+        const updatedProfile = { ...profile, username: newUsername.trim() };
+        await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
+        setProfile(updatedProfile);
+        setUsernameResult('success');
+      } else {
+        setUsernameResult('error');
+      }
+    } catch {
+      setUsernameResult('error');
+    } finally {
+      setUsernameLoading(false);
+    }
+  };
+
+  const handleUsernameClose = () => {
+    setChangeUsernameVisible(false);
+    setNewUsername('');
+    setUsernameResult(null);
+  };
+
   if (!profile) return <Text style={{color:'cyan'}}>Loading profile...</Text>;
 
   const Wrapper = premium ? ImageBackground : View;
@@ -132,6 +150,133 @@ export function ProfileOverview() {
       <ScrollView style={[{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 20 }]}>
 
         {/* <PremiumButton /> */}
+
+        {/* Confirm avatar change modal */}
+        <Modal visible={confirmAvatarVisible} transparent animationType="fade">
+          <Pressable
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center' }}
+            onPress={() => setConfirmAvatarVisible(false)}>
+            <Pressable
+              style={{ width: '88%', backgroundColor: 'black', borderWidth: 2, borderColor: 'grey', borderRadius: 8, padding: 24, alignItems: 'center' }}
+              onPress={() => {}}>
+              <Ionicons name="person-circle-outline" size={36} color="white" style={{ marginBottom: 12 }} />
+              <Text style={{ fontFamily: 'Edo', fontSize: 22, color: 'white', marginBottom: 6 }}>Confirm Avatar Change</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, textAlign: 'center', marginBottom: 4 }}>Are you sure you want to change your avatar?</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, width: '100%' }}>
+                <TouchableOpacity
+                  onPress={() => setConfirmAvatarVisible(false)}
+                  style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, borderWidth: 2, borderColor: 'grey', alignItems: 'center' }}>
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={confirmAvatarChange}
+                  style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, backgroundColor: 'white', alignItems: 'center' }}>
+                  <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
+        {/* Change profile picture confirm modal */}
+        <Modal visible={changeAvatarConfirmVisible} transparent animationType="fade">
+          <Pressable
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center' }}
+            onPress={() => setChangeAvatarConfirmVisible(false)}>
+            <Pressable
+              style={{ width: '88%', backgroundColor: 'black', borderWidth: 2, borderColor: 'grey', borderRadius: 8, padding: 24, alignItems: 'center' }}
+              onPress={() => {}}>
+              <Ionicons name="image-outline" size={36} color="white" style={{ marginBottom: 12 }} />
+              <Text style={{ fontFamily: 'Edo', fontSize: 22, color: 'white', marginBottom: 8 }}>Change Profile Picture?</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, width: '100%' }}>
+                <TouchableOpacity
+                  onPress={() => setChangeAvatarConfirmVisible(false)}
+                  style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, borderWidth: 2, borderColor: 'grey', alignItems: 'center' }}>
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => { setChangeAvatarConfirmVisible(false); setIsImagePickerVisible(true); }}
+                  style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, backgroundColor: 'white', alignItems: 'center' }}>
+                  <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>Yes</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
+        {/* Change Username modal */}
+        <Modal visible={changeUsernameVisible} transparent animationType="fade">
+          <Pressable
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center' }}
+            onPress={handleUsernameClose}>
+            <Pressable
+              style={{ width: '88%', backgroundColor: 'black', borderWidth: 2, borderColor: 'grey', borderRadius: 8, padding: 24 }}
+              onPress={() => {}}>
+
+              {/* Spinner overlay */}
+              {usernameLoading && (
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(128,128,128,0.4)', borderRadius: 8, justifyContent: 'center', alignItems: 'center', zIndex: 10 }}>
+                  <ActivityIndicator size="large" color="white" />
+                </View>
+              )}
+
+              <Text style={{ fontFamily: 'Edo', fontSize: 24, color: 'white', marginBottom: 16 }}>Change Username</Text>
+
+              {usernameResult === 'success' ? (
+                <View style={{ alignItems: 'center', paddingVertical: 12 }}>
+                  <Ionicons name="checkmark-circle-outline" size={48} color="lime" style={{ marginBottom: 12 }} />
+                  <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>Username changed successfully!</Text>
+                  <TouchableOpacity
+                    onPress={handleUsernameClose}
+                    style={{ marginTop: 20, paddingHorizontal: 32, paddingVertical: 10, backgroundColor: 'white', borderRadius: 100 }}>
+                    <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : usernameResult === 'error' ? (
+                <View style={{ alignItems: 'center', paddingVertical: 12 }}>
+                  <Ionicons name="close-circle-outline" size={48} color="red" style={{ marginBottom: 12 }} />
+                  <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>Unable to change username right now.</Text>
+                  <TouchableOpacity
+                    onPress={handleUsernameClose}
+                    style={{ marginTop: 20, paddingHorizontal: 32, paddingVertical: 10, backgroundColor: 'white', borderRadius: 100 }}>
+                    <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View>
+                  <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 12 }}>Current: {profile.username}</Text>
+                  <TextInput
+                    value={newUsername}
+                    onChangeText={setNewUsername}
+                    placeholder="New username..."
+                    placeholderTextColor="rgba(255,255,255,0.3)"
+                    style={{ backgroundColor: '#111', borderWidth: 1, borderColor: 'grey', borderRadius: 8, color: 'white', fontSize: 15, padding: 12 }}
+                  />
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
+                    <TouchableOpacity
+                      onPress={handleUsernameClose}
+                      style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, borderWidth: 2, borderColor: 'grey', alignItems: 'center' }}>
+                      <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleUsernameSubmit}
+                      disabled={!newUsername.trim() || newUsername.trim() === profile.username}
+                      style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, backgroundColor: 'white', alignItems: 'center', opacity: (!newUsername.trim() || newUsername.trim() === profile.username) ? 0.4 : 1 }}>
+                      <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>Submit</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </Pressable>
+          </Pressable>
+        </Modal>
+
+        <View style={{ position: 'relative' }}>
+          <TouchableOpacity
+            onPress={() => setChangeUsernameVisible(true)}
+            style={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }}>
+            <Ionicons name="pencil-outline" size={20} color="white" />
+          </TouchableOpacity>
 
         <Wrapper
           {...(premium
@@ -232,9 +377,23 @@ export function ProfileOverview() {
         />
 
         </Wrapper>
+        </View>
 
         {/* Gap between the Profile header and the stats */}
         <View style={ProfileStyles.ProfileSpacer}/>
+
+        {/* Personal exercise stats coming soon */}
+        <View style={{ backgroundColor: 'black', borderWidth: 1, borderColor: 'grey', borderRadius: 4, paddingVertical: 36, paddingHorizontal: 24, alignItems: 'center' }}>
+          <View style={{ width: 90, height: 90, borderRadius: 12, backgroundColor: 'rgba(150,150,150,0.15)', justifyContent: 'center', alignItems: 'center' }}>
+            <Ionicons name="stats-chart" size={46} color="white" />
+          </View>
+          <Text style={{ fontFamily: 'Edo', fontSize: 28, color: 'white', textAlign: 'center', marginTop: 18 }}>
+            Exercise Stats
+          </Text>
+          <Text style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginTop: 10, lineHeight: 22 }}>
+            Coming soon! Track your personal exercise stats and monitor your progress over time.
+          </Text>
+        </View>
 
         {/* <View style={ProfileStyles.MealStatsParentContanier}>
           <View style={ProfileStyles.StatsHeaderContainer}>

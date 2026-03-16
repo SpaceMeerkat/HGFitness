@@ -4,7 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
-import { ActivityIndicator, Image, ImageBackground, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { BASE_API_URL } from "../network/apiConfig";
 
 type CardLevel = 'beginner' | 'advanced' | 'intermediate';
@@ -32,12 +32,11 @@ export function MyProgramCard({ imgUri, cardLevel, cardTitle, cardInfo, rerunNum
     const imageSource = typeof imgUri === 'string' ? { uri: imgUri } : imgUri;
     const shortCardTitle = cardTitle.split('-')[0];
     const [loading, setLoading] = useState(false);
-   
 
     const handlePress = async () => {
         const programRawData = trackingData[cardTitle]
         if (programRawData !== null && programRawData !== undefined) {
-            handleChildPage('programOverview', cardTitle, programRawData["data"], null, programRawData["memoryKeys"], programRawData["memoryData"]); 
+            handleChildPage('programOverview', cardTitle, programRawData["data"], null, programRawData["memoryKeys"], programRawData["memoryData"]);
         } else {
             console.log("woops!!!");
         }
@@ -233,7 +232,9 @@ interface CompletedGymCardProps {
 
 export function CompletedGymCard({ imgUri, cardLevel, cardTitle, cardInfo }: CompletedGymCardProps) {
     const [modalVisible, setModalVisible] = useState(false);
+    const [premiumAlertVisible, setPremiumAlertVisible] = useState(false);
     const { profile } = useAppContext();
+    const isPremium = profile?.premium === true;
 
     const imageSource = typeof imgUri === "string" ? { uri: imgUri } : imgUri;
     const shortCardTitle = cardTitle.split("-")[0];
@@ -268,7 +269,10 @@ export function CompletedGymCard({ imgUri, cardLevel, cardTitle, cardInfo }: Com
             </View>
 
             {/* Overlay pressable that opens modal */}
-            <Pressable onPress={profile.premium !== true ? undefined : () => setModalVisible(true)} style={styles.pressableCover} />
+            <Pressable
+                onPress={() => isPremium ? setModalVisible(true) : setPremiumAlertVisible(true)}
+                style={styles.pressableCover}
+            />
 
             {/* Rerun modal */}
             <RerunProgramModal
@@ -276,6 +280,28 @@ export function CompletedGymCard({ imgUri, cardLevel, cardTitle, cardInfo }: Com
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
             />
+
+            {/* Premium gate alert */}
+            <Modal visible={premiumAlertVisible} transparent animationType="fade">
+                <Pressable
+                    style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center' }}
+                    onPress={() => setPremiumAlertVisible(false)}>
+                    <Pressable
+                        style={{ backgroundColor: 'black', borderRadius: 16, borderWidth: 1, borderColor: 'grey', paddingHorizontal: 28, paddingVertical: 24, width: '78%', alignItems: 'center' }}
+                        onPress={() => {}}>
+                        <Ionicons name="lock-closed" size={32} color="white" style={{ marginBottom: 12 }} />
+                        <Text style={{ color: '#ccc', fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 8 }}>
+                            <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold', fontStyle: 'italic' }}>Rerun Program</Text>
+                            {' '}is a Premium feature, upgrade your account to rerun all completed programs and keep progressing!
+                        </Text>
+                        <TouchableOpacity
+                            onPress={() => setPremiumAlertVisible(false)}
+                            style={{ marginTop: 20, paddingHorizontal: 32, paddingVertical: 10, backgroundColor: 'white', borderRadius: 100 }}>
+                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>OK</Text>
+                        </TouchableOpacity>
+                    </Pressable>
+                </Pressable>
+            </Modal>
         </View>
     );
 }
