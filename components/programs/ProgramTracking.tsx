@@ -131,11 +131,12 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [modalExercise, setModalExercise] = useState<string | ''>('');
   const [modalDescription, setModalDescription] = useState<string[]>([]);
   const [alternativeIsPressed, setAlternativeIsPressed] = useState(false);
+  const [pressedKey, setPressedKey] = useState<string | null>(null);
+  const pressFlashTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   // State to hold the index of the exercise for which notes are being edited
   const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(0);
 
   const showExerciseModal = (exercise: string) => {
-    // For showing the exercise descriptions step by step guides
     const description = getDescriptionByExerciseName(exercise, masterGymProgramsDictionary);
     if (description) {
       const splitDescription = description.split('/');
@@ -143,6 +144,41 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       setModalDescription(splitDescription);
       setModalVisible(true);
     }
+  };
+
+  const swapExercise = (exercise: string, exerciseSet: any) => {
+    setExerciseDictionary(prevDict => {
+      const newDict = { ...prevDict };
+      const idx = parseInt(exerciseSet.uniqueSetKey);
+      const currentSet = { ...newDict[idx] };
+      const newSubsetExercises = [...currentSet.subsetExercises];
+      const newAlternativeExercises = [...currentSet.alternativeExercises];
+      const alternativeIDs = currentSet.alternativeIDs;
+
+      let targetID: string | null = null;
+      for (let i = 0; i < newSubsetExercises.length; i++) {
+        if (
+          newSubsetExercises[i].trim() === exercise.trim() ||
+          newAlternativeExercises[i].trim() === exercise.trim()
+        ) {
+          targetID = alternativeIDs[i];
+          break;
+        }
+      }
+      if (!targetID) return newDict;
+
+      for (let i = 0; i < newSubsetExercises.length; i++) {
+        if (alternativeIDs[i] === targetID) {
+          const temp = newSubsetExercises[i];
+          newSubsetExercises[i] = newAlternativeExercises[i];
+          newAlternativeExercises[i] = temp;
+        }
+      }
+      currentSet.subsetExercises = newSubsetExercises;
+      currentSet.alternativeExercises = newAlternativeExercises;
+      newDict[idx] = currentSet;
+      return newDict;
+    });
   };
 
   useEffect(() => {
@@ -277,18 +313,69 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   repsPlaceholder = '';   // Default to an empty string
                 }
 
+                const exercisePressKey = `${exerciseSet.uniqueSetKey}-${exerciseSet.alternativeIDs[setIndex]}`;
+                const levelColor = ShopStyles[programLevel as ProgramLevel].color;
+                const isFlashing = pressedKey === exercisePressKey;
                 return (
-                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour}]}>
-                    <TouchableOpacity onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingExercise, {backgroundColor: rowColour}]}>
-                      <Text style={[DefaultTabStyles.defaultTrackingExerciseText, { textAlign: 'right' }]}>
-                        {exercise}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => showExerciseModal(exercise)} style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
+                  <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour, overflow: 'visible'}]}>
+                    <View style={{ flex: 0.25, position: 'relative', marginLeft: 8, marginVertical: 6 }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (pressFlashTimer.current) clearTimeout(pressFlashTimer.current);
+                          setPressedKey(exercisePressKey);
+                          swapExercise(exercise, exerciseSet);
+                          pressFlashTimer.current = setTimeout(() => setPressedKey(null), 150);
+                        }}
+                        onLongPress={() => showExerciseModal(exercise)}
+                        style={{
+                          flex: 1,
+                          flexDirection: 'row',
+                          justifyContent: 'flex-end',
+                          alignItems: 'center',
+                          paddingHorizontal: 6,
+                          paddingVertical: 4,
+                          borderRadius: 4,
+                          backgroundColor: '#1e1e1e',
+                          borderTopColor: '#505050',
+                          borderLeftColor: '#505050',
+                          borderBottomColor: '#000',
+                          borderRightColor: '#000',
+                          borderTopWidth: 1,
+                          borderLeftWidth: 1,
+                          borderBottomWidth: 2,
+                          borderRightWidth: 2,
+                        }}
+                      >
+                        <Text style={[DefaultTabStyles.defaultTrackingExerciseText, {
+                          textAlign: 'right',
+                          color: isFlashing ? levelColor : 'white',
+                        }]}>
+                          {exercise}
+                        </Text>
+                      </TouchableOpacity>
+                      {/* Swap icon circle overlapping upper-left corner */}
+                      <View style={{
+                        position: 'absolute',
+                        top: -8,
+                        left: -8,
+                        width: 16,
+                        height: 16,
+                        borderRadius: 8,
+                        backgroundColor: '#111',
+                        borderWidth: 1,
+                        borderColor: isFlashing ? levelColor : '#606060',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10,
+                      }}>
+                        <FontAwesome5 name="exchange-alt" size={7} color={isFlashing ? levelColor : '#909090'} />
+                      </View>
+                    </View>
+                    <View style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
                       <Text style={DefaultTabStyles.defaultBoldText}>
                         {exerciseSet.subsetReps[setIndex]}
                       </Text>
-                    </TouchableOpacity>
+                    </View>
                     <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
                       <View style={ProgramStyles.trackingExerciseInput}>
                         <TextInput
@@ -324,6 +411,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   </View>
                 );
               }))}
+              {/* Exercise information modal */}
               <Modal visible={modalVisible} animationType="slide" transparent={true} onRequestClose={() => setModalVisible(false)}>
                 <View style={ExerciseDescriptions.ModalBackground}>
                   <TouchableOpacity onPress={() => setModalVisible(false)} style={{paddingVertical: 20 }}>
@@ -436,16 +524,16 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           borderRadius: 8
                         }}>
                           {modalDescription.map((line, index) => (
-                            <>
+                            <React.Fragment key={index}>
                               <View style={ExerciseDescriptions.ModalMappingBox}>
                                 <Text style={ExerciseDescriptions.ModalStepNumber}>
                                     <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={22} color={ShopStyles[programLevel as ProgramLevel].color} />
                                 </Text>
                               </View>
-                              <Text key={index} style={ExerciseDescriptions.ModalText}>
+                              <Text style={ExerciseDescriptions.ModalText}>
                                 {line.trim()}
                               </Text>
-                            </>
+                            </React.Fragment>
                           ))}
                         </View>
                       </View>

@@ -27,7 +27,7 @@ interface GymCardProps {
 
 export function MyProgramCard({ imgUri, cardLevel, cardTitle, cardInfo, rerunNumber, newStatus, handleChildPage }: GymCardProps) {
 
-    const { trackingData } = useAppContext(); 
+    const { trackingData } = useAppContext();
 
     const imageSource = typeof imgUri === 'string' ? { uri: imgUri } : imgUri;
     const shortCardTitle = cardTitle.split('-')[0];
@@ -131,47 +131,6 @@ const UpdateBackendRerun = async (
 };
 
 
-const stylesModal = StyleSheet.create({
-    modalBackground: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    modalContainer: {
-        backgroundColor: "white",
-        borderRadius: 12,
-        padding: 20,
-        width: "85%",
-    },
-    modalText: {
-        fontSize: 16,
-        marginBottom: 20,
-        textAlign: "center",
-    },
-    buttonRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
-    button: {
-        flex: 1,
-        marginHorizontal: 5,
-        paddingVertical: 10,
-        borderRadius: 8,
-        alignItems: "center",
-    },
-    cancelButton: {
-        backgroundColor: "grey",
-    },
-    rerunButton: {
-        backgroundColor: "limegreen",
-    },
-    buttonText: {
-        color: "white",
-        fontWeight: "bold",
-        fontSize: 16,
-    },
-});
 
 
 interface RerunProgramModalProps {
@@ -181,7 +140,7 @@ interface RerunProgramModalProps {
 }
 
 export function RerunProgramModal({ cardTitle, visible, onClose }: RerunProgramModalProps) {
-    const { profile, trackingData, setTrackingData } = useAppContext();
+    const { trackingData, setTrackingData } = useAppContext();
 
     return (
         <Modal
@@ -190,35 +149,39 @@ export function RerunProgramModal({ cardTitle, visible, onClose }: RerunProgramM
             animationType="fade"
             onRequestClose={onClose}
         >
-            <View style={stylesModal.modalBackground}>
-                <View style={stylesModal.modalContainer}>
-                    <Text style={stylesModal.modalText}>
-                        Would you like to rerun this program? {"\n\n"}
-                        Clicking "Rerun" will allow you to rerun the program with a fresh start!
-                        But don't worry, all previously tracked gym progress will remain in your
-                        profile and stats.
+            <Pressable
+                style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center' }}
+                onPress={onClose}
+            >
+                <Pressable
+                    style={{ width: '88%', backgroundColor: 'black', borderWidth: 2, borderColor: 'grey', borderRadius: 8, padding: 24, alignItems: 'center' }}
+                    onPress={() => {}}
+                >
+                    <Ionicons name="repeat-outline" size={36} color="white" style={{ marginBottom: 12 }} />
+                    <Text style={{ fontFamily: 'Edo', fontSize: 22, color: 'white', marginBottom: 10 }}>Rerun Program</Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 4 }}>
+                        Clicking <Text style={{ color: 'white', fontWeight: 'bold' }}>"Rerun"</Text> will give you a fresh start on this program.{'\n\n'}
+                        Don't worry — all previously tracked gym progress will remain in your profile and stats.
                     </Text>
-
-                    <View style={stylesModal.buttonRow}>
-                        <Pressable
-                            style={[stylesModal.button, stylesModal.cancelButton]}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, width: '100%' }}>
+                        <TouchableOpacity
                             onPress={onClose}
+                            style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, borderWidth: 2, borderColor: 'grey', alignItems: 'center' }}
                         >
-                            <Text style={stylesModal.buttonText}>Cancel</Text>
-                        </Pressable>
-
-                        <Pressable
-                            style={[stylesModal.button, stylesModal.rerunButton]}
+                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>Cancel</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
                             onPress={async () => {
                                 await UpdateBackendRerun(cardTitle, trackingData, setTrackingData);
                                 onClose();
                             }}
+                            style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, backgroundColor: 'white', alignItems: 'center' }}
                         >
-                            <Text style={stylesModal.buttonText}>Rerun</Text>
-                        </Pressable>
+                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>Rerun</Text>
+                        </TouchableOpacity>
                     </View>
-                </View>
-            </View>
+                </Pressable>
+            </Pressable>
         </Modal>
     );
 }
