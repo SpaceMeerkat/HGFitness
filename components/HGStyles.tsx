@@ -459,7 +459,7 @@ export const ShopStyles = StyleSheet.create({
     trackingExerciseHeader: {
         backgroundColor: "black",
         flexDirection: "row",
-        flex: 0.25,
+        flex: 0.3,
         justifyContent: 'flex-end',
         paddingVertical: 10,
         alignItems: "center",
@@ -484,7 +484,7 @@ export const ShopStyles = StyleSheet.create({
     trackingWeight: {
         backgroundColor: "black",
         flexDirection: "row",
-        flex: 0.3,
+        flex: 0.25,
         justifyContent: 'center',
         paddingVertical: 0,
         alignItems: "center",
@@ -516,8 +516,7 @@ export const ShopStyles = StyleSheet.create({
     trackingExerciseInput: {
         backgroundColor: "grey",
         flex: 0.75,
-        borderColor: 'black',
-        borderWidth: 0,
+        borderColor: 'grey',
         borderRadius: 4,
         height: 45,
     },
