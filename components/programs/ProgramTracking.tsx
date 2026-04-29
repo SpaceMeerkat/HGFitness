@@ -3,6 +3,7 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -95,6 +96,15 @@ export const getAlternativeByExerciseName = (
   return alternativeMatch ? alternativeMatch[1] : '';
 };
 
+const levelColorRgba = (color: string, opacity: number): string => {
+  const map: Record<string, string> = {
+    cyan:    `rgba(0, 255, 255, ${opacity})`,
+    gold:    `rgba(255, 215, 0, ${opacity})`,
+    magenta: `rgba(255, 0, 255, ${opacity})`,
+  };
+  return map[color] ?? `rgba(128, 128, 128, ${opacity})`;
+};
+
 export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage, trackingMode, setSingleSessionsVisible }: ProgramTrackerProps) {
 
   const { setTrackingData, trackingData, masterGymProgramsDictionary } = useAppContext();
@@ -121,6 +131,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [isPressed, setIsPressed] = useState(false);
   // state for the save session button being pressed for color changes etc.
   const [saveIsPressed, setSaveIsPressed] = useState(false);
+  const [sessionProgress, setSessionProgress] = useState(0);
   const [isSaveVisible, setIsSaveVisible] = useState(false);
   // Handle any saving overlays
   const [saving, setSaving] = useState(false);
@@ -132,11 +143,14 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [modalDescription, setModalDescription] = useState<string[]>([]);
   const [alternativeIsPressed, setAlternativeIsPressed] = useState(false);
   const [pressedKey, setPressedKey] = useState<string | null>(null);
+  const [infoHeldKey, setInfoHeldKey] = useState<string | null>(null);
   const pressFlashTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const infoHoldTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   // State to hold the index of the exercise for which notes are being edited
   const [currentExerciseIndexForNotes, setCurrentExerciseIndexForNotes] = useState<number | null>(0);
 
   const showExerciseModal = (exercise: string) => {
+    setInfoHeldKey(null);
     const description = getDescriptionByExerciseName(exercise, masterGymProgramsDictionary);
     if (description) {
       const splitDescription = description.split('/');
@@ -232,6 +246,20 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     setImmutablePlaceHolders(newImmutablePlaceholders);
   }, [memoryKeys, programDay, memoryData, completedDay]);
 
+  useEffect(() => {
+    let totalRows = 0;
+    let filledRows = 0;
+    Object.values(exerciseDictionary).forEach(set => {
+      set.subsetExercises.forEach((_: any, i: number) => {
+        totalRows++;
+        if (set.userInputWeights[i] && set.userInputReps[i]) {
+          filledRows++;
+        }
+      });
+    });
+    setSessionProgress(totalRows > 0 ? Math.round((filledRows / totalRows) * 100) : 0);
+  }, [exerciseDictionary]);
+
   // console.log(trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]);
 
   const renderExercises = () => {
@@ -245,41 +273,46 @@ export function ProgramTracker({programLevel, programID, programData, programDay
           {exerciseSet.activeStatus ? (
             <View style={ProgramStyles.trackingActive}>
               <Pressable style={ProgramStyles.trackingType} onPress={()=>handleExerciseClick(-1)}>
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#84848499', paddingTop: 4, paddingBottom: 4,
-                  borderRadius: 4
-                }}>
-                <Text style={[DefaultTabStyles.defaultTypeText, {textAlign: "center"}]}>
-                  {exerciseSet.type}
-                </Text>
-                </View>
+                {/* Set title e.g. TRICEPS */}
+                <LinearGradient
+                  colors={[levelColorRgba(ShopStyles[programLevel as ProgramLevel].color, 0.25), 'rgba(20, 20, 20, 0.85)', levelColorRgba(ShopStyles[programLevel as ProgramLevel].color, 0.25)]}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 4, paddingBottom: 4, borderRadius: 6, borderWidth: 1, borderColor: ShopStyles[programLevel as ProgramLevel].color}}
+                >
+                  <Text style={[DefaultTabStyles.defaultTypeText, {textAlign: "left"}]}>
+                    {exerciseSet.type}
+                  </Text>
+                </LinearGradient>
               </Pressable>
+              {/* sub headers 'Exercise', 'Rep range'... */}
               <View style={ProgramStyles.trackingChildContainer}>
                 <View style={ProgramStyles.trackingExerciseHeader}>
-                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, {color: 'white'}]}>
                     Exercise
                   </Text>
                 </View>
                 <View style={ProgramStyles.trackingWeight}>
-                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, {color: 'white'}]}>
                     Rep range
                   </Text>
                 </View>
                 <View style={ProgramStyles.trackingInputHeader}>
                   <View style={{flexDirection: "row", justifyContent: "center", alignContent: "center", alignItems: "flex-end"}}>
                     <View>
-                      <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
+                      <Text style={[DefaultTabStyles.defaultTrackingText, {color: 'white'}]}>
                         Weight
                       </Text>
                     </View>
-                    <View style={{paddingLeft:3}}>
-                      <Text style={[DefaultTabStyles.defaultTrackingText, {fontSize:9}, ShopStyles[(programLevel) as ProgramLevel]]}>
+                    {/* <View style={{paddingLeft:3}}>
+                      <Text style={[DefaultTabStyles.defaultTrackingText, {color: 'white'}]}>
                         (kg)
                       </Text>
-                    </View>
+                    </View> */}
                   </View>
                 </View>
                 <View style={ProgramStyles.trackingInputHeader}>
-                  <Text style={[DefaultTabStyles.defaultTrackingText, ShopStyles[(programLevel) as ProgramLevel]]}>
+                  <Text style={[DefaultTabStyles.defaultTrackingText, {color: 'white'}]}>
                     Reps
                   </Text>
                 </View>
@@ -316,9 +349,10 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                 const exercisePressKey = `${exerciseSet.uniqueSetKey}-${exerciseSet.alternativeIDs[setIndex]}`;
                 const levelColor = ShopStyles[programLevel as ProgramLevel].color;
                 const isFlashing = pressedKey === exercisePressKey;
+                const isInfoHeld = infoHeldKey === exercisePressKey;
                 return (
                   <View key={`${exerciseSet.uniqueSetKey}-${setIndex}`} style={[ProgramStyles.trackingChildContainer, {backgroundColor: rowColour, overflow: 'visible'}]}>
-                    <View style={{ flex: 0.25, position: 'relative', marginLeft: 8, marginVertical: 6 }}>
+                    <View style={{ flex: 0.3, position: 'relative', marginLeft: 4, marginVertical: 6 }}>
                       <TouchableOpacity
                         onPress={() => {
                           if (pressFlashTimer.current) clearTimeout(pressFlashTimer.current);
@@ -326,37 +360,49 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           swapExercise(exercise, exerciseSet);
                           pressFlashTimer.current = setTimeout(() => setPressedKey(null), 150);
                         }}
+                        onPressIn={() => {
+                          if (infoHoldTimer.current) clearTimeout(infoHoldTimer.current);
+                          infoHoldTimer.current = setTimeout(() => setInfoHeldKey(exercisePressKey), 400);
+                        }}
+                        onPressOut={() => {
+                          if (infoHoldTimer.current) clearTimeout(infoHoldTimer.current);
+                          setInfoHeldKey(null);
+                        }}
                         onLongPress={() => showExerciseModal(exercise)}
                         style={{
                           flex: 1,
-                          flexDirection: 'row',
-                          justifyContent: 'flex-end',
-                          alignItems: 'center',
-                          paddingHorizontal: 6,
-                          paddingVertical: 4,
                           borderRadius: 4,
-                          backgroundColor: '#1e1e1e',
-                          borderTopColor: '#505050',
-                          borderLeftColor: '#505050',
-                          borderBottomColor: '#000',
-                          borderRightColor: '#000',
-                          borderTopWidth: 1,
-                          borderLeftWidth: 1,
-                          borderBottomWidth: 2,
-                          borderRightWidth: 2,
+                          borderColor: levelColor,
+                          borderWidth: 1,
+                          overflow: 'hidden',
                         }}
                       >
-                        <Text style={[DefaultTabStyles.defaultTrackingExerciseText, {
-                          textAlign: 'right',
-                          color: isFlashing ? levelColor : 'white',
-                        }]}>
-                          {exercise}
-                        </Text>
+                        <LinearGradient
+                          colors={[levelColorRgba(levelColor, 0.18), '#0d0d0d', levelColorRgba(levelColor, 0.18)]}
+                          start={{ x: 0, y: 0.5 }}
+                          end={{ x: 1, y: 0.5 }}
+                          style={{
+                            flex: 1,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            paddingHorizontal: 6,
+                            paddingVertical: 4,
+                          }}
+                        >
+                          <Text style={[DefaultTabStyles.defaultTrackingExerciseText, {
+                            textAlign: 'center',
+                            color: 'white',
+                          }]}>
+                            {exercise}
+                          </Text>
+                        </LinearGradient>
                       </TouchableOpacity>
-                      {/* Swap icon circle overlapping upper-left corner */}
+                      {/* Swap icon circle overlapping left edge */}
                       <View style={{
                         position: 'absolute',
-                        top: -8,
+                        top: '50%',
+                        marginTop: -8,
                         left: -8,
                         width: 16,
                         height: 16,
@@ -370,14 +416,38 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                       }}>
                         <FontAwesome5 name="exchange-alt" size={7} color={isFlashing ? levelColor : '#909090'} />
                       </View>
+                      {/* Info icon circle overlapping right edge */}
+                      <View style={{
+                        position: 'absolute',
+                        top: '50%',
+                        marginTop: -8,
+                        right: -8,
+                        width: 16,
+                        height: 16,
+                        borderRadius: 8,
+                        backgroundColor: '#111',
+                        borderWidth: 1,
+                        borderColor: isInfoHeld ? levelColor : '#606060',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 10,
+                      }}>
+                        <FontAwesome5 name="info" size={7} color={isInfoHeld ? levelColor : '#909090'} />
+                      </View>
                     </View>
                     <View style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
                       <Text style={DefaultTabStyles.defaultBoldText}>
                         {exerciseSet.subsetReps[setIndex]}
                       </Text>
                     </View>
+                    {/* Text input boxes */}
                     <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
-                      <View style={ProgramStyles.trackingExerciseInput}>
+                      <LinearGradient
+                        colors={['#494949', '#1b1b1b', '#494949']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={[ProgramStyles.trackingExerciseInput, { borderWidth: 0.75, borderColor: 'grey' }]}
+                      >
                         <TextInput
                           keyboardType="number-pad"
                           cursorColor={'black'}
@@ -390,10 +460,15 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
                           editable={(!completedDay || oneShot) && trackingMode}
                         />
-                      </View>
+                      </LinearGradient>
                     </View>
-                    <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
-                      <View style={ProgramStyles.trackingWeightInput}>
+                    <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour, borderColor: 'white'}]}>
+                      <LinearGradient
+                        colors={['#494949', '#1b1b1b', '#494949']}
+                        start={{ x: 0, y: 0. }}
+                        end={{ x: 1, y: 1 }}
+                        style={[ProgramStyles.trackingWeightInput, { borderWidth: 0.75, borderColor: 'grey' }]}
+                      >
                         <TextInput
                           keyboardType="number-pad"
                           cursorColor={"black"}
@@ -406,7 +481,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
                           editable={(!completedDay || oneShot) && trackingMode}
                         />
-                      </View>
+                      </LinearGradient>
                     </View>
                   </View>
                 );
@@ -589,21 +664,27 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   </TouchableOpacity>
                 </View>
                 {/* user pressable next set button */}
-                <Pressable style={{flex:0.335, 
-                flexDirection: 'row', 
-                justifyContent:"center", 
-                alignItems: "center", 
-                borderRadius:4, 
-                backgroundColor: isPressed? 'black' : 'black',
-                borderColor: isPressed ? 'lime' : 'grey',
+                <TouchableOpacity style={{flex:0.335,
+                borderRadius:16,
+                borderColor: 'lime',
                 borderWidth: 1,
-                paddingBottom:4}} 
+                overflow: 'hidden',
+                paddingBottom:0,
+                justifyContent: 'center',
+                }}
                 onPressIn={() => setIsPressed(true)}
                 onPressOut={() => setIsPressed(false)}
                 onPress={() => {handleExerciseClick(index + 1); setIsPressed(false)}}>
-                  <Text style={[DefaultTabStyles.defaultBodyText, {paddingRight: 4, paddingBottom:6, color: 'lime', fontWeight: "bold", fontSize:12}]}>NEXT</Text>
-                  <TabBarIcon name={'arrow-forward-circle-outline'} color="lime" size={20} />
-                </Pressable>
+                  <LinearGradient
+                    colors={['rgba(0, 255, 0, 0.18)', '#0d0d0d', 'rgba(0, 255, 0, 0.18)']}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}
+                  >
+                    <Text style={[{paddingRight: 4, color: 'lime', fontWeight: "bold", fontSize:12}]}>NEXT</Text>
+                    <TabBarIcon name={'arrow-forward-circle-outline'} color="lime" size={20} />
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
             </View>
           ) : (
@@ -618,11 +699,11 @@ export function ProgramTracker({programLevel, programID, programData, programDay
             exerciseDictionary[index].userInputWeights.every((val: any) => val !== null) ? 
             (
               <Pressable onPress={() => handleExerciseClick(index)} style={{borderColor: 'lime'}}>
-                <Ionicons 
-                  name="checkmark-circle" 
-                  size={24} 
-                  color="lime" 
-                  style={[ProgramStyles.completedTickIcon, { position: 'absolute', right: -10, top: -4, zIndex: 100 }]} 
+                <Ionicons
+                  name="checkmark-circle"
+                  size={24}
+                  color="lime"
+                  style={[ProgramStyles.completedTickIcon, { position: 'absolute', right: -10, top: -4, zIndex: 100 }]}
                 />
                 <View style={[ProgramStyles.trackingInactive, {borderColor: 'lime'}]}>
                       <Text style={[DefaultTabStyles.defaultMediumText, {color: 'black'}]}>{exerciseSet.type}</Text>
@@ -673,6 +754,10 @@ export function ProgramTracker({programLevel, programID, programData, programDay
               <Text style={{color: 'white', textAlign: 'center', paddingRight: 0, fontFamily: 'Edo', fontSize: 20}}>
                 {oneShot ? programID.split('-')[2] : trackingData[programID]["data"][programDay[0]][programDay[1]]["type"]}
               </Text>
+              <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingTop: 2}}>
+                <Text style={{color: 'white', fontSize: 11}}>Session progress: </Text>
+                <Text style={{color: 'lime', fontSize: 11}}>{sessionProgress}%</Text>
+              </View>
           </View>
         )
         } 
