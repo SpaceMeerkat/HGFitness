@@ -78,8 +78,8 @@ export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
                 await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
                 // ----------------------------------------------------------------------------------------------
                 const urlParams = new URLSearchParams(query).toString();
-                // const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
-                const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
+                const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
+                // const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
                 console.log('Opening URL: ', url);
                 const supported = await Linking.canOpenURL(url);
                 if (supported) {
