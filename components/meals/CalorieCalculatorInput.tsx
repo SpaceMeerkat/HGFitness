@@ -99,10 +99,10 @@ const CalorieCalculatorModal: React.FC<CalorieCalculatorModalProps> = ({
                 <Text style={CalcStyles.inputTitleText}>{userCalorieCount} calories / day</Text>
               </View>
               <View style={CalcStyles.inputTitle}>
-                <Text style={CalcStyles.inputTitleText}>{userProteinCount} grams / day</Text>
+                <Text style={CalcStyles.inputTitleText}>{userProteinCount}g protein / day</Text>
               </View>
               <View style={CalcStyles.inputTitle}>
-                <Text style={CalcStyles.inputTitleText}>{userWaterCount} litres / day</Text>
+                <Text style={CalcStyles.inputTitleText}>{userWaterCount} litres water / day</Text>
               </View>
             </View>
             {/* Use recommendations */}

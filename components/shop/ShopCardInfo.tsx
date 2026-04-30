@@ -3,7 +3,7 @@ import { ShopStyles } from "@/components/HGStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from "react";
-import { ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, ImageBackground, Pressable, ScrollView, Text, View } from "react-native";
 import { BASE_API_URL } from "../network/apiConfig";
 // import { Linking } from 'react-native';
 import * as Linking from 'expo-linking';
@@ -40,9 +40,11 @@ export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
     const image = require("@/assets/images/HGBackground.png");
 
     useEffect(() => {
-        const keys = Object.keys(myPrograms);
-        const found = keys.some((key) => key === cardFullName);
-        setIsPurchased(found);
+        if (myPrograms) {
+            const keys = Object.keys(myPrograms);
+            const found = keys.some((key) => key === cardFullName);
+            setIsPurchased(found);
+        }
     }, [cardFullName, myPrograms]);  
 
     const SubmitPayFastQuery = async (programName: String, programPrice: Number, profile: any) => { 
@@ -95,8 +97,7 @@ export function CardInfo({ cardFullName, cardInfo }: CardInfoProps) {
              return null; 
           }
         } else {
-            console.log("User is not currently logged in")
-            // Replace with user warning (attention)
+            Alert.alert('Login Required', 'User login required.', [{ text: 'OK' }]);
         }
       }
 
