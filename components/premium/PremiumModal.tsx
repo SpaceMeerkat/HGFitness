@@ -1,7 +1,7 @@
 import { PricingStyles } from '@/components/premium/PricingStyles';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
-import { ImageBackground, Pressable, Text, View } from 'react-native';
+import { Alert, ImageBackground, Pressable, Text, View } from 'react-native';
 import { useAppContext } from "../appContext";
 import { SubscriptionPayment } from "../premium/PremiumPayment";
 
@@ -148,7 +148,13 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
         </View>
 
         {/* Purchase Button */}
-        <Pressable onPress={itemCategory === "free"? () => {} : async () =>  await SubscriptionPayment({itemCategory, profile, setProfile})} 
+        <Pressable onPress={itemCategory === "free" ? () => {} : async () => {
+          if (!profile) {
+            Alert.alert('Login Required', 'User login required.', [{ text: 'OK' }]);
+            return;
+          }
+          await SubscriptionPayment({ itemCategory, profile, setProfile });
+        }}
         style={[PricingStyles.purchaseButton, itemCategory === "free"? {opacity: 0.3}: {}]}>
             <Text style={PricingStyles.purchaseText}>PURCHASE</Text>
         </Pressable>

@@ -42,8 +42,8 @@ export async function SubscriptionPayment({itemCategory, profile, setProfile}: S
             await AsyncStorage.setItem("profile", JSON.stringify(updatedProfile));
             // ----------------------------------------------------------------------------------------------
             const urlParams = new URLSearchParams(query).toString();
-            // const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
-            const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
+            const url = `https://sandbox.payfast.co.za/eng/process?${urlParams}`;
+            // const url = `https://www.payfast.co.za/eng/process?${urlParams}`;
             const supported = await Linking.canOpenURL(url);
             if (supported) {
                 await Linking.openURL(url);
