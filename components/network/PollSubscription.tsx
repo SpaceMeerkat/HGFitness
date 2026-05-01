@@ -76,8 +76,6 @@ export async function runSubscriptionPolling(
       continue; // Only poll if today === scheduled billingDate
     }
 
-    
-
     // For CANCELLATIONs, check which is active in profile and then toggle it and continue on in the transaction queue
     if (paymentId === 'CANCELLED' && isTodayOrAfter(billingDate)) {
       // delete updatedQueue[paymentId];

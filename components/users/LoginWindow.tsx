@@ -103,6 +103,7 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
           const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
 
           if (lastUpdateDate && isToday(lastUpdateDate)) {
+            console.log("running option A.")
             // Last update was today, use login response data
             await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
             await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));
@@ -122,7 +123,11 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
             setSubmitting(false);
             handleChildPage(true, false, false, false);
           } else {
-            // Last update was not today, run full context request to sync data
+            // Seed profile and trackingData so updateData() can make the authenticated POST request.
+            // Without this, updateData() falls to the GET-only path and never restores user-specific
+            // data like myPrograms (premium subscription programs would be lost after logout + re-login).
+            await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
+            await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
             console.log("running full context from Login date check.");
             await updateData();
             setSubmitting(false);

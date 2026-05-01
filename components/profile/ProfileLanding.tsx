@@ -2,18 +2,18 @@ import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
 import { BASE_API_URL } from "@/components/network/apiConfig";
 import { PremiumButton } from "@/components/profile/PremiumButton";
+import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { ActivityIndicator, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
 import ProgressBarWithDots from "./LevelLoadingBar";
 
 export function ProfileOverview() {
 
-  const { profileImagePaths, profile, trackingData, setProfile } = useAppContext();
+  const { profileImagePaths, profile, trackingData, setProfile, myPrograms } = useAppContext();
 
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const [profileAvatar, setProfileAvatar] = useState(profileImagePaths["avatarDefault"]);
@@ -42,6 +42,8 @@ export function ProfileOverview() {
       setAccountLevel('free tier');
     }
   }, [profile]);
+
+  // console.log(myPrograms); 
 
   useEffect(() => {
     if (trackingData?.profileStats) { 
