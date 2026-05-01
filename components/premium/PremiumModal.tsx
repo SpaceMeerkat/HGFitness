@@ -21,8 +21,8 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
 
     const price_category_dict: Record<"free" | "subscription" | "premium", string> = {
       free: "0",
-      subscription: "70",
-      premium: "100",
+      subscription: "59",
+      premium: "79",
     };
 
     const itemCategory = item_category_dict[typeString];
