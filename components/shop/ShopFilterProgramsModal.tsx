@@ -15,17 +15,13 @@ export default function FilterSortModal({
   programs,
   setFilteredPrograms,
 }: FilterSortModalProps) {
-  const [days, setDays] = useState<number>(7); // default max days
   const [sex, setSex] = useState<"Men" | "Women" | "All">("All");
-  const [sortOption, setSortOption] = useState<string>("alphabetical");
+  const [sortOption, setSortOption] = useState<string>("priceAscending");
 
-  const applyFilters = (updatedSex = sex, updatedDays = days, updatedSort = sortOption) => {
+  const applyFilters = (updatedSex = sex, updatedSort = sortOption) => {
     const sortFlags = {
-      alphabetical: false,
       priceAscending: false,
-      priceDescending: false,
       daysAscending: false,
-      daysDescending: false,
     };
 
     (sortFlags as any)[updatedSort] = true;
@@ -33,7 +29,6 @@ export default function FilterSortModal({
     const results = filterAndSortPrograms(programs, {
       ...sortFlags,
       sex: updatedSex,
-      days: updatedDays,
     });
 
     setFilteredPrograms(results);
@@ -41,17 +36,12 @@ export default function FilterSortModal({
 
   const handleSort = (sortType: string) => {
     setSortOption(sortType);
-    applyFilters(sex, days, sortType);
-  };
-
-  const handleFilterDays = (dayCount: number) => {
-    setDays(dayCount);
-    applyFilters(sex, dayCount, sortOption);
+    applyFilters(sex, sortType);
   };
 
   const handleSexSelect = (selectedSex: "Men" | "Women" | "All") => {
     setSex(selectedSex);
-    applyFilters(selectedSex, days, sortOption);
+    applyFilters(selectedSex, sortOption);
   };
 
   return (
@@ -64,7 +54,7 @@ export default function FilterSortModal({
             </Text>
 
             {/* Sex Selection */}
-            <Text style={{ fontSize: 16, marginBottom: 8 }}>Select Sex:</Text>
+            <Text style={{ fontSize: 16, marginBottom: 8 }}>Select Program Type:</Text>
             <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 16 }}>
               {["All", "Men", "Women"].map((option) => (
                 <Pressable
@@ -84,11 +74,8 @@ export default function FilterSortModal({
             {/* Sort options */}
             <Text style={{ fontSize: 16, marginBottom: 8 }}>Sort by:</Text>
             {[
-              { key: "alphabetical", label: "Alphabetical" },
-              { key: "priceAscending", label: "Price Ascending" },
-              { key: "priceDescending", label: "Price Descending" },
-              { key: "daysAscending", label: "Days Ascending" },
-              { key: "daysDescending", label: "Days Descending" },
+              { key: "priceAscending", label: "Price: low to high" },
+              { key: "daysAscending", label: "Days per week: low to high" },
             ].map((option) => (
               <Pressable
                 key={option.key}
@@ -103,24 +90,6 @@ export default function FilterSortModal({
                 <Text style={{ textAlign: "center", color: sortOption === option.key ? "white" : "black" }}>{option.label}</Text>
               </Pressable>
             ))}
-
-            {/* Filter by days */}
-            <Text style={{ fontSize: 16, paddingTop: 20, paddingBottom: 8 }}>Filter by days per week:</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center" }}>
-              {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                <Pressable
-                  key={day}
-                  style={{
-                    backgroundColor: days === day ? "black" : "#eee",
-                    padding: 10,
-                    borderRadius: 8,
-                  }}
-                  onPress={() => handleFilterDays(day)}
-                >
-                  <Text style={{color: days === day ? "white": "black"}}>&lt; {day}</Text>
-                </Pressable>
-              ))}
-            </View>
 
             {/* Close button */}
             <Pressable
