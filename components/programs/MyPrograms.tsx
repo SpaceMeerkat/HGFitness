@@ -30,6 +30,9 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
 
   // console.log(myPrograms);
 
+  console.log(trackingData['Subscription2Day-2026_5_4-1-Men']); 
+  // console.log(trackingData); 
+
   const image = require("@/assets/images/HGBackground.png");
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
   const [trackingDataSoft, setTrackingDataSoft] = useState<any>({}); // Store API response as an object

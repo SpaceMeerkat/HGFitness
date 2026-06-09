@@ -345,6 +345,17 @@ export default function MealScreen() {
                         </View>
                       </View>
 
+                      {/* Version size indicator - burger icons in bottom-right of card, tiny gap between each */}
+                      {Array.from({ length: item.activeVersion + 2 }).map((_, i) => (
+                        <MaterialCommunityIcons
+                          key={`burger_${i}`}
+                          name="food-apple"
+                          size={12}
+                          color="white"
+                          style={{ position: 'absolute', bottom: 8, right: 4 + i * 10, zIndex: i }}
+                        />
+                      ))}
+
                       {/* Add button */}
                       <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
                         <TouchableOpacity
@@ -570,7 +581,7 @@ export default function MealScreen() {
             <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 4, borderColor: 'grey', paddingHorizontal: 10, paddingVertical: 4}}>
               <Text style={{textAlign: 'left', color: 'white', fontSize: 22}}>{iconDict[meal]} {meal}</Text>
               <View style={{height: 1, backgroundColor: 'white'}} />
-              {getMealNames(meal, dictionary, mealPrograms).map(({ mealName, calorieValue, proteinValue }, index) => (
+              {getMealNames(meal, dictionary, mealPrograms).map(({ mealName, calorieValue, proteinValue, mealProgramIndex, storedVersion }, index) => (
                 <View key={`${meal}_${index}`} style={{ paddingVertical: 8, paddingHorizontal: 5, flexDirection: 'row' }}>
                   {removableIcons === true ? (
                   <Pressable onPress={() => {
@@ -582,14 +593,29 @@ export default function MealScreen() {
                     <Ionicons name="remove-circle-outline" size={24} color="red" />
                   </Pressable>
                   ) : null }
-                  <View style={{flex:1, flexDirection:'row'}}>
+                  <TouchableOpacity
+                    style={{flex:1, flexDirection:'row'}}
+                    onLongPress={() => setRemovableIcons(true)}
+                    onPress={() => {
+                      if (removableIcons) return;
+                      const currentMealIndex = mealProgramIndex - 1;
+                      const mealItem = mealProgramsState[meal][mealProgramIndex];
+                      setActiveMeal(meal);
+                      updateActiveVersion({ activeMeal: meal, mealIndex: mealProgramIndex, newVersion: storedVersion, setMealProgramsState });
+                      setMealIndex(currentMealIndex);
+                      setVersionLength(mealItem.version.length);
+                      setCurrentInstructions(mealItem.how[storedVersion].split('/'));
+                      setCurrentIngredients(mealItem.ingredients[storedVersion]);
+                      setInstructionsVisible(true);
+                    }}
+                  >
                     <View style={{flex:0.7, flexDirection:'column'}}>
                       <Text style={{ color: "white", fontSize: 18 }}>{mealName}</Text>
                     </View>
                     <View style={{flex:0.3, flexDirection:'column'}}>
                       <Text style={{ color: "white", fontSize: 18, textAlign: 'right'}}>{calorieValue} <FontAwesome6 name="fire" size={14} color="orange" /></Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 </View>
               ))}
               <TouchableOpacity onPress={() => {

@@ -45,9 +45,9 @@ export const getMealNames = (meal: string, dictionary: TrackingData, mealProgram
     const calorieValue = mealPrograms[meal][index].calories[version - 1];
     const proteinValue = mealPrograms[meal][index].protein[version - 1];
     const mealItem = mealCategory[index]; // Find the meal item by ID (convert id to integer)
-    return mealItem ? { mealName: mealItem.name, calorieValue, proteinValue } : null;
+    return mealItem ? { mealName: mealItem.name, calorieValue, proteinValue, mealProgramIndex: index, storedVersion: version - 1 } : null;
     })
-    .filter(Boolean) as { mealName: string; calorieValue: number; proteinValue: number }[]; // Type assertion here
+    .filter(Boolean) as { mealName: string; calorieValue: number; proteinValue: number; mealProgramIndex: number; storedVersion: number }[]; // Type assertion here
 };
 
 type MealType = 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' | 'Water';

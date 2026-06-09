@@ -19,9 +19,10 @@ interface SaveSessionProps {
     setSaving: (saving: boolean) => void,
     handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking') => void;
     setSingleSessionsVisible: any;
+    sessionProgress: number;
   }
 
-  export default function SaveSession({ visible, onClose, programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving, handleChildPage, setSingleSessionsVisible}: SaveSessionProps) {
+  export default function SaveSession({ visible, onClose, programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving, handleChildPage, setSingleSessionsVisible, sessionProgress}: SaveSessionProps) {
 
     const { profile } = useAppContext();
 
@@ -76,7 +77,11 @@ interface SaveSessionProps {
             <Pressable style={TrackingNotesStyles.backButton} onPress={onClose}>
             <Text style={TrackingNotesStyles.backButtonText}>Back</Text>
             </Pressable>
-            <Text style={TrackingNotesStyles.title}>End session?</Text>
+            <Text style={TrackingNotesStyles.saveTitle}>End session?</Text>
+            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingBottom: 10}}>
+              <Text style={{color: 'white', fontSize: 11}}>Session progress: </Text>
+              <Text style={{color: 'lime', fontSize: 11}}>{sessionProgress}%</Text>
+            </View>
             <Text style={TrackingNotesStyles.body}>Tracking data will be stored and this session will be marked as complete...</Text>
             <Pressable style={TrackingNotesStyles.saveButton} onPress={handleSaveSession}>
             <Text style={TrackingNotesStyles.saveButtonText}>Save tracking info</Text>

@@ -146,9 +146,23 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                         <Text style={{textAlign: 'center', textAlignVertical: 'center', fontSize: 18, color: 'grey'}}>{mealTitle}</Text>
                     </View>
 
+                    {/* Version size indicator - centered apple icons */}
+                    <View style={{flexDirection: 'row', justifyContent: 'center', paddingBottom: 8}}>
+                        {Array.from({ length: activeVersion + 1 }).map((_, i) => (
+                            <MaterialCommunityIcons
+                                key={`apple_${i}`}
+                                name="food-apple"
+                                size={12}
+                                color="white"
+                                style={{ position: 'absolute', top: 0, left: '50%' as any, marginLeft: -((activeVersion + 1) * 12.5) / 2 + i * 12.5, zIndex: i }}
+                            />
+                        ))}
+                        <View style={{ height: 18, width: (activeVersion + 1) * 18.5 }} />
+                    </View>
+
                     {/* Add the addMeal button here */}
                     <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', paddingBottom: 8}}>
-                        <TouchableOpacity onPress={() => handleAddMealClick(false)} 
+                        <TouchableOpacity onPress={() => handleAddMealClick(false)}
                         style={{flex: 0.4, flexDirection: 'column', borderColor:'lime', borderRadius: 4, borderWidth: 1, paddingVertical: 2}}>
                             <View style={{flex: 0.1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'black'}}>
                                 <Text style={{color: "white", fontSize: 18}}> Add </Text>

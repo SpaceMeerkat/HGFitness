@@ -106,7 +106,7 @@ const levelColorRgba = (color: string, opacity: number): string => {
 };
 
 export function ProgramTracker({programLevel, programID, programData, programDay, completedKeys, handleChildPage, trackingMode, setSingleSessionsVisible }: ProgramTrackerProps) {
-
+  
   const { setTrackingData, trackingData, masterGymProgramsDictionary } = useAppContext();
   // Handle the memory keys/data for tracker placeholders
   const memoryKeys = trackingData[programID]["memoryKeys"];
@@ -133,6 +133,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [saveIsPressed, setSaveIsPressed] = useState(false);
   const [sessionProgress, setSessionProgress] = useState(0);
   const [isSaveVisible, setIsSaveVisible] = useState(false);
+  const [isTrackingInfoVisible, setIsTrackingInfoVisible] = useState(trackingMode);
   // Handle any saving overlays
   const [saving, setSaving] = useState(false);
   // Styling
@@ -280,7 +281,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                   end={{ x: 1, y: 0.5 }}
                   style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 4, paddingBottom: 4, borderRadius: 6, borderWidth: 1, borderColor: ShopStyles[programLevel as ProgramLevel].color}}
                 >
-                  <Text style={[DefaultTabStyles.defaultTypeText, {textAlign: "left"}]}>
+                  <Text style={[DefaultTabStyles.defaultTypeText, {textAlign: "center"}]}>
                     {exerciseSet.type}
                   </Text>
                 </LinearGradient>
@@ -436,9 +437,16 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                       </View>
                     </View>
                     <View style={[ProgramStyles.trackingWeight, {backgroundColor: rowColour}]}>
-                      <Text style={DefaultTabStyles.defaultBoldText}>
-                        {exerciseSet.subsetReps[setIndex]}
-                      </Text>
+                      {String(exerciseSet.subsetReps[setIndex]).endsWith('min ') ? (
+                        <Text style={DefaultTabStyles.defaultBoldText}>
+                          {String(exerciseSet.subsetReps[setIndex]).slice(0, -4)}
+                          <Text style={{fontSize: 10}}> min</Text>
+                        </Text>
+                      ) : (
+                        <Text style={DefaultTabStyles.defaultBoldText}>
+                          {exerciseSet.subsetReps[setIndex]}
+                        </Text>
+                      )}
                     </View>
                     {/* Text input boxes */}
                     <View style={[ProgramStyles.trackingContainer, {backgroundColor: rowColour}]}>
@@ -806,7 +814,50 @@ export function ProgramTracker({programLevel, programID, programData, programDay
         setSaving = {setSaving}
         handleChildPage={handleChildPage}
         setSingleSessionsVisible={setSingleSessionsVisible}
+        sessionProgress={sessionProgress}
       />
+
+      {/* Tracking mode info modal */}
+      <Modal
+        visible={isTrackingInfoVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsTrackingInfoVisible(false)}
+      >
+        <View style={[TrackingNotesStyles.overlay, { zIndex: 1 }]}>
+          <View style={[TrackingNotesStyles.container, { zIndex: 1 }]}>
+            <Text style={[TrackingNotesStyles.title, { paddingBottom: 8 }]}>Tracking Mode</Text>
+
+            {/* Swap exercise row */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14 }}>
+              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#111', borderWidth: 1, borderColor: '#606060', justifyContent: 'center', alignItems: 'center', marginRight: 16 }}>
+                <FontAwesome5 name="exchange-alt" size={14} color="white" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: 'lime', fontSize: 11, fontWeight: '600', paddingBottom: 3 }}>PRESS</Text>
+                <Text style={{ color: 'white', fontSize: 13 }}>Press an exercise to switch to an alternative exercise</Text>
+              </View>
+            </View>
+
+            {/* Info / instructions row */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderTopWidth: 1, borderTopColor: '#2a2a2a' }}>
+              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#111', borderWidth: 1, borderColor: '#606060', justifyContent: 'center', alignItems: 'center', marginRight: 16 }}>
+                <FontAwesome5 name="info" size={14} color="white" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: 'lime', fontSize: 11, fontWeight: '600', paddingBottom: 3 }}>HOLD</Text>
+                <Text style={{ color: 'white', fontSize: 13 }}>Hold an exercise to see instructions on how to perform it</Text>
+              </View>
+            </View>
+
+            <View style={{ paddingTop: 14 }}>
+              <TouchableOpacity style={{ backgroundColor: 'white', borderRadius: 999, paddingVertical: 14, paddingHorizontal: 24 }} onPress={() => setIsTrackingInfoVisible(false)}>
+                <Text style={{ color: 'black', textAlign: 'center', fontWeight: '600', fontSize: 15 }}>Let's go!</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       </>
   );
 }

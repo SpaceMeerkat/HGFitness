@@ -582,6 +582,12 @@ export const ShopStyles = StyleSheet.create({
         marginBottom: 20,
         color: "white",
     },
+    saveTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 2,
+        color: "white",
+    },
     body: {
         fontSize: 16,
         marginBottom: 20,

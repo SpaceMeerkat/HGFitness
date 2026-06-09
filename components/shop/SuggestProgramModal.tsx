@@ -90,7 +90,7 @@ export function SuggestProgramModal({ visible, onClose }: SuggestProgramModalPro
                                 </Text>
                                 <TouchableOpacity
                                     onPress={handleClose}
-                                    style={{ marginTop: 24, paddingHorizontal: 32, paddingVertical: 10, borderRadius: 100, borderWidth: 2, borderColor: 'grey' }}>
+                                    style={{ marginTop: 24, paddingHorizontal: 32, paddingVertical: 10, borderRadius: 500, borderWidth: 2, borderColor: 'grey' }}>
                                     <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>Close</Text>
                                 </TouchableOpacity>
                             </View>
@@ -102,11 +102,12 @@ export function SuggestProgramModal({ visible, onClose }: SuggestProgramModalPro
                                 </Text>
                                 <TextInput
                                     value={suggestion}
-                                    onChangeText={setSuggestion}
+                                    onChangeText={(text) => setSuggestion(text.slice(0, 500))}
                                     placeholder="Describe your program idea..."
                                     placeholderTextColor="rgba(255,255,255,0.3)"
                                     multiline
                                     numberOfLines={5}
+                                    maxLength={500}
                                     style={{
                                         backgroundColor: '#111',
                                         borderWidth: 1,
@@ -119,15 +120,18 @@ export function SuggestProgramModal({ visible, onClose }: SuggestProgramModalPro
                                         textAlignVertical: 'top',
                                     }}
                                 />
+                                <Text style={{ color: suggestion.length >= 500 ? 'white' : 'grey', fontSize: 12, textAlign: 'right', marginTop: 4 }}>
+                                    {suggestion.length}/500
+                                </Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
                                     <TouchableOpacity
                                         onPress={handleClose}
-                                        style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, borderWidth: 2, borderColor: 'grey', alignItems: 'center' }}>
+                                        style={{ flex: 0.45, paddingVertical: 10, borderRadius: 500, borderWidth: 2, borderColor: 'grey', alignItems: 'center' }}>
                                         <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>Cancel</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={handleSubmit}
-                                        style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, backgroundColor: 'white', alignItems: 'center', opacity: suggestion.trim() ? 1 : 0.4 }}
+                                        style={{ flex: 0.45, paddingVertical: 10, borderRadius: 500, backgroundColor: 'white', alignItems: 'center', opacity: suggestion.trim() ? 1 : 0.4 }}
                                         disabled={!suggestion.trim()}>
                                         <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>Submit</Text>
                                     </TouchableOpacity>
@@ -146,7 +150,7 @@ export function SuggestProgramModal({ visible, onClose }: SuggestProgramModalPro
                             </Text>
                             <TouchableOpacity
                                 onPress={handleClose}
-                                style={{ marginTop: 24, paddingHorizontal: 32, paddingVertical: 10, borderRadius: 100, borderWidth: 2, borderColor: 'grey' }}>
+                                style={{ marginTop: 24, paddingHorizontal: 32, paddingVertical: 10, borderRadius: 500, borderWidth: 2, borderColor: 'grey' }}>
                                 <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>Close</Text>
                             </TouchableOpacity>
                         </View>

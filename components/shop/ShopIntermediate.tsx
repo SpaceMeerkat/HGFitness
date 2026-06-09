@@ -59,9 +59,9 @@ export function IntermediatePrograms({handleBackButton}: ShopProgramProps) {
                 <View style = {{flex: 0.8}}>
                     <Text style={[DefaultTabStyles.defaultBoldText, {textAlignVertical: 'center'}]}>Intermediate Programs</Text>
                 </View>
-                <Pressable onPress={() => setFilterModalVisible(true)} style={{flex:0.2, justifyContent: 'center', alignItems: 'flex-end'}}>
+                <TouchableOpacity onPress={() => setFilterModalVisible(true)} style={{flex:0.2, justifyContent: 'center', alignItems: 'flex-end'}}>
                     <Ionicons name="filter" size={24} color="white" />
-                </Pressable>
+                </TouchableOpacity>
                 </View>
                 <FilterSortModal visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} programs={intermediatePrograms} setFilteredPrograms={setFilteredPrograms}/>
                 <View style={ShopStyles.cardBlockContainer}>
