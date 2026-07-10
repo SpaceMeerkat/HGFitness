@@ -2,7 +2,7 @@ import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Calendar from "./StreakCalendar";
 import ViewModeModal from "./ViewModeModal";
 
@@ -45,6 +45,7 @@ export function ProgramOverview({ programLevel, programData, programDay, program
   const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [triggerRedirect, setTriggerRedirect] = useState(false);
+  const [premiumAlertVisible, setPremiumAlertVisible] = useState(false);
 
   const calendarBoolean = programID.toLowerCase().includes("subscription");
   let streakThreshold = 0;
@@ -94,7 +95,7 @@ export function ProgramOverview({ programLevel, programData, programDay, program
           <Pressable
             onPress={() => isPremium
               ? setViewModeTrue(weekNumber, day)
-              : Alert.alert('Premium Feature', 'Upgrade to premium to enjoy monthly gym subscription plans!')}
+              : setPremiumAlertVisible(true)}
             // onPress={() => handleChildPage('programTracking', programID, programData, [weekNumber, day])}
           >
             <View style={[ProgramStyles.programOverviewDay, { height: 50, opacity }]}>
@@ -154,6 +155,29 @@ export function ProgramOverview({ programLevel, programData, programDay, program
   return (
       <ScrollView contentContainerStyle={{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 16 }}>
         <ViewModeModal setTrackingMode={setTrackingMode} setTriggerRedirect={setTriggerRedirect} visible={viewModeVisible} onClose={() => setViewModeVisible(false)}/>
+
+        {/* Premium gate alert */}
+        <Modal visible={premiumAlertVisible} transparent animationType="fade">
+          <Pressable
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center' }}
+            onPress={() => setPremiumAlertVisible(false)}>
+            <Pressable
+              style={{ backgroundColor: 'black', borderRadius: 16, borderWidth: 1, borderColor: 'grey', paddingHorizontal: 28, paddingVertical: 24, width: '78%', alignItems: 'center' }}
+              onPress={() => {}}>
+              <Ionicons name="lock-closed" size={32} color="white" style={{ marginBottom: 12 }} />
+              <Text style={{ color: '#ccc', fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 8 }}>
+                Upgrade to{' '}
+                <Text style={{ color: 'white', fontSize: 17, fontWeight: 'bold', fontStyle: 'italic' }}>premium</Text>
+                {' '}to enjoy monthly gym subscription plans!
+              </Text>
+              <TouchableOpacity
+                onPress={() => setPremiumAlertVisible(false)}
+                style={{ marginTop: 20, paddingHorizontal: 32, paddingVertical: 10, backgroundColor: 'white', borderRadius: 100 }}>
+                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 14 }}>OK</Text>
+              </TouchableOpacity>
+            </Pressable>
+          </Pressable>
+        </Modal>
         <TouchableOpacity style={{flex: 0.15, width: "20%", paddingLeft: 2, paddingTop: 10, paddingBottom: 28, justifyContent: 'center'}} onPress={() => handleChildPage('programs')}>
             <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
         </TouchableOpacity>
