@@ -1,6 +1,7 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
 import { BASE_API_URL } from "@/components/network/apiConfig";
+import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
 import * as SecureStore from 'expo-secure-store';
@@ -8,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
 import ProgressBarWithDots from "./LevelLoadingBar";
+import { PremiumButton } from "./PremiumButton";
 
 export function ProfileOverview() {
 
@@ -40,8 +42,6 @@ export function ProfileOverview() {
       setAccountLevel('free tier');
     }
   }, [profile]);
-
-  // console.log(myPrograms); 
 
   useEffect(() => {
     if (trackingData?.profileStats) { 
@@ -150,7 +150,7 @@ export function ProfileOverview() {
     <View style={{ flex: 1, width: '100%', zIndex: 9}}>
       <ScrollView style={[{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 20 }]}>
 
-        {/* <PremiumButton /> */}
+        <PremiumButton />
 
         {/* Confirm avatar change modal */}
         <Modal visible={confirmAvatarVisible} transparent animationType="fade">

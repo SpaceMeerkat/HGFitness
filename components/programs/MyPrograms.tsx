@@ -1,6 +1,6 @@
 import { useAppContext } from "@/components/appContext";
 import { ShopStyles } from "@/components/HGStyles";
-import { CompletedGymCard, FreeSessionsCard, MyProgramCard, SubscriptionOptionsCard, SubscriptionProgramCard } from "@/components/programs/MyProgramsCard";
+import { CompletedGymCard, FreeSessionsCard, MyProgramCard, SubscriptionProgramCard } from "@/components/programs/MyProgramsCard";
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { S3_API_URL } from "../network/apiConfig";
@@ -99,7 +99,7 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
           setViewModeVisible={setViewModeVisible}/>
         )}
 
-        {profile?.premium || profile?.gymSubscription ? (
+        {console.log(myPrograms)}
           <>
             {Object.keys(myPrograms)
               .filter(key =>
@@ -127,15 +127,6 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
                 );
               })}
           </>
-        ) : (
-          <SubscriptionOptionsCard
-            key={'subscription4'}
-            cardImage={require('@/assets/images/SubscriptionCard4day.jpg')}
-            cardTitle={"NotPremium"}
-            cardInfo={`4`}
-            setSubscriptionsVisible={setSubscriptionOptionsVisible}
-          />
-        )}
 
         {/* Section Header Free Sessions */}
         <View style={{flexDirection: "row", paddingVertical: 10, alignItems: "center", justifyContent: "center"}}>
