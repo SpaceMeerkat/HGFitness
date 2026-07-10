@@ -99,7 +99,7 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
           setViewModeVisible={setViewModeVisible}/>
         )}
 
-        {console.log(myPrograms)}
+        {/* {console.log(myPrograms)} */}
           <>
             {Object.keys(myPrograms)
               .filter(key =>
