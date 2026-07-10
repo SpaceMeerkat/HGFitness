@@ -1,7 +1,8 @@
+import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Calendar from "./StreakCalendar";
 import ViewModeModal from "./ViewModeModal";
 
@@ -36,6 +37,9 @@ type ProgramOverviewProps = {
 };
 
 export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage, streakDates, setTrackingMode}: ProgramOverviewProps) {
+
+  const { profile } = useAppContext();
+  const isPremium = profile?.premium === true || profile?.gymSubscription === true;
 
   const [viewModeVisible, setViewModeVisible] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
@@ -87,8 +91,10 @@ export function ProgramOverview({ programLevel, programData, programDay, program
   
       return (
         <View key={key} style={{ position: "relative" }}>
-          <Pressable 
-            onPress={() => setViewModeTrue(weekNumber, day)}
+          <Pressable
+            onPress={() => isPremium
+              ? setViewModeTrue(weekNumber, day)
+              : Alert.alert('Premium Feature', 'Upgrade to premium to enjoy monthly gym subscription plans!')}
             // onPress={() => handleChildPage('programTracking', programID, programData, [weekNumber, day])}
           >
             <View style={[ProgramStyles.programOverviewDay, { height: 50, opacity }]}>
@@ -97,13 +103,32 @@ export function ProgramOverview({ programLevel, programData, programDay, program
               </Text>
             </View>
           </Pressable>
-  
+
+          {/* Locked overlay for non-premium / non-subscribed users, touches pass through to the Pressable above */}
+          {!isPremium && (
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="lock-closed" size={22} color="white" />
+            </View>
+          )}
+
           {/* Tick mark placed separately so it is NOT affected by Pressable's opacity */}
-          <Ionicons 
-            name="checkmark-circle" 
-            size={24} 
-            color="lime" 
-            style={[ProgramStyles.completedTickIcon, { opacity: iconOpacity }]} 
+          <Ionicons
+            name="checkmark-circle"
+            size={24}
+            color="lime"
+            style={[ProgramStyles.completedTickIcon, { opacity: iconOpacity }]}
           />
         </View>
       );

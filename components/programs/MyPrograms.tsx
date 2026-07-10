@@ -29,8 +29,6 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
   // const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
   // console.log(myPrograms);
-
-  console.log(trackingData['Subscription2Day-2026_5_4-1-Men']); 
   // console.log(trackingData); 
 
   const image = require("@/assets/images/HGBackground.png");
