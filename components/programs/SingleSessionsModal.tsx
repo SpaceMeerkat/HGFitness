@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import React, { useEffect, useState } from "react";
+import Fuse from "fuse.js";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ImageBackground, KeyboardAvoidingView,
   Modal,
@@ -64,20 +65,34 @@ export default function SingleSessionsModal({
     return () => clearTimeout(handler);
   }, [searchText]);
 
+  // --- Searchable index + fuzzy matcher, rebuilt only when programsInfo changes ---
+  const searchIndex = useMemo(
+    () => Object.entries(programsInfo).map(([fullName, info]) => ({ fullName, ...info })),
+    [programsInfo]
+  );
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(searchIndex, {
+        keys: ["name", "type"],
+        threshold: 0.35,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+      }),
+    [searchIndex]
+  );
+
   // --- Filtering effect (runs when debounce finishes or level changes) ---
   useEffect(() => {
-    const lowerSearch = debouncedText.toLowerCase();
+    const trimmedSearch = debouncedText.trim();
 
-    const newFiltered = Object.entries(programsInfo).filter(([_, info]) => {
-      const matchesText =
-        info.name.toLowerCase().includes(lowerSearch) ||
-        info.type.toLowerCase().includes(lowerSearch);
+    const textMatches = trimmedSearch
+      ? fuse.search(trimmedSearch).map(result => result.item)
+      : searchIndex;
 
-      const matchesLevel =
-        !selectedLevel || info.level.toLowerCase() === selectedLevel.toLowerCase();
-
-      return matchesText && matchesLevel;
-    });
+    const newFiltered = textMatches
+      .filter(info => !selectedLevel || info.level.toLowerCase() === selectedLevel.toLowerCase())
+      .map(({ fullName, ...info }) => [fullName, info] as [string, typeof info]);
 
     // Always sort beginner → intermediate → advanced
     const levelOrder: Record<string, number> = {
@@ -91,7 +106,7 @@ export default function SingleSessionsModal({
     });
 
     setFilteredPrograms(newFiltered);
-  }, [debouncedText, selectedLevel, programsInfo]);
+  }, [debouncedText, selectedLevel, fuse, searchIndex]);
 
 
   if (!programsInfo || !trackingData) return null;
