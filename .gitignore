@@ -40,3 +40,7 @@ app-example
 
 # assets
 assets/images/cards/programCards
+
+# API config across differing branches
+
+components/network/apiConfig.tsx
