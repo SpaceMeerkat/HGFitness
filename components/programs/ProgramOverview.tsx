@@ -4,6 +4,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import LinkedWeeksModal from "./LinkedWeeksModal";
 import Calendar from "./StreakCalendar";
 import ViewModeModal from "./ViewModeModal";
 
@@ -60,6 +61,8 @@ export function ProgramOverview({ programLevel, programData, programDay, program
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [triggerRedirect, setTriggerRedirect] = useState(false);
   const [premiumAlertVisible, setPremiumAlertVisible] = useState(false);
+  const [linkedWeeksModalVisible, setLinkedWeeksModalVisible] = useState(false);
+  const [selectedLinkedWeeks, setSelectedLinkedWeeks] = useState<string[]>([]);
 
   const calendarBoolean = programID.toLowerCase().includes("subscription");
   let streakThreshold = 0;
@@ -162,7 +165,13 @@ export function ProgramOverview({ programLevel, programData, programDay, program
               Week {week}
             </Text>
             {linkedWeeks && (
-              <>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'flex-end' }}
+                onPress={() => {
+                  setSelectedLinkedWeeks(linkedWeeks);
+                  setLinkedWeeksModalVisible(true);
+                }}
+              >
                 <FontAwesome5 name="link" size={14} color="grey" style={{ marginRight: 4, paddingLeft: 14 }} />
                 <Text style={{ fontSize: 14, color: 'grey' }}>
                   {linkedWeeks.map((linkedWeek, i) => (
@@ -172,7 +181,7 @@ export function ProgramOverview({ programLevel, programData, programDay, program
                     </Text>
                   ))}
                 </Text>
-              </>
+              </TouchableOpacity>
             )}
           </View>
           {renderDays(programData[week], week, completedKeys)}
@@ -186,6 +195,7 @@ export function ProgramOverview({ programLevel, programData, programDay, program
   return (
       <ScrollView contentContainerStyle={{ paddingTop: 8, paddingBottom: 20, paddingHorizontal: 16 }}>
         <ViewModeModal setTrackingMode={setTrackingMode} setTriggerRedirect={setTriggerRedirect} visible={viewModeVisible} onClose={() => setViewModeVisible(false)}/>
+        <LinkedWeeksModal linkedWeeks={selectedLinkedWeeks} visible={linkedWeeksModalVisible} onClose={() => setLinkedWeeksModalVisible(false)}/>
 
         {/* Premium gate alert */}
         <Modal visible={premiumAlertVisible} transparent animationType="fade">
