@@ -1,5 +1,6 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProgramStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -38,8 +39,21 @@ type ProgramOverviewProps = {
 
 export function ProgramOverview({ programLevel, programData, programDay, programID, completedKeys, handleChildPage, streakDates, setTrackingMode}: ProgramOverviewProps) {
 
-  const { profile } = useAppContext();
+  const { profile, trackingData } = useAppContext();
   const isPremium = profile?.premium === true || profile?.gymSubscription === true;
+
+  // memoryKeys holds groups of linked weeks (e.g. "1,3,5" / "2,4,6,8") that share
+  // tracking memory/notes with one another - see FindPrecedingNumber.
+  const memoryKeys: string[] = trackingData?.[programID]?.["memoryKeys"] || [];
+  const getLinkedWeeksGroup = (week: string): string[] | null => {
+    for (const keyString of memoryKeys) {
+      const weeksArray = keyString.split(",");
+      if (weeksArray.includes(week)) {
+        return weeksArray;
+      }
+    }
+    return null;
+  };
 
   const [viewModeVisible, setViewModeVisible] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
@@ -138,17 +152,34 @@ export function ProgramOverview({ programLevel, programData, programDay, program
 
 
   const renderWeeks = (programData?: any, completedKeys?: any) => {
-    return Object.keys(programData).map(week => (
-      <View key={`week-${week}`}>
-        <View style={ProgramStyles.programOverviewWeek}>
-          <Text style={[{fontFamily: 'Edo', fontSize: 28}, ShopStyles[(programLevel || 'beginner') as ProgramLevel]]}>
-            Week {week}
-          </Text>
+    return Object.keys(programData).map(week => {
+      const linkedWeeks = getLinkedWeeksGroup(week);
+
+      return (
+        <View key={`week-${week}`}>
+          <View style={[ProgramStyles.programOverviewWeek, { flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap' }]}>
+            <Text style={[{fontFamily: 'Edo', fontSize: 28}, ShopStyles[(programLevel || 'beginner') as ProgramLevel]]}>
+              Week {week}
+            </Text>
+            {linkedWeeks && (
+              <>
+                <FontAwesome5 name="link" size={14} color="grey" style={{ marginRight: 4, paddingLeft: 14 }} />
+                <Text style={{ fontSize: 14, color: 'grey' }}>
+                  {linkedWeeks.map((linkedWeek, i) => (
+                    <Text key={linkedWeek}>
+                      {linkedWeek}
+                      {i < linkedWeeks.length - 1 ? '-' : ''}
+                    </Text>
+                  ))}
+                </Text>
+              </>
+            )}
+          </View>
+          {renderDays(programData[week], week, completedKeys)}
+          <View style={{height: 30}}></View>
         </View>
-        {renderDays(programData[week], week, completedKeys)}
-        <View style={{height: 30}}></View>
-      </View>
-    ));
+      );
+    });
   };
 
 
