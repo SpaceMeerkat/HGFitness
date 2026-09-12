@@ -6,11 +6,15 @@ type ExerciseSet = {
     uniqueSetKey: string;
     subsetExercises: string[];
     alternativeExercises: string[];
+    // Immutable snapshots of the original/alternative names at initialization time,
+    // used to build a stable swap message regardless of how many times the user has toggled.
+    originalExercises: string[];
+    originalAlternatives: string[];
     alternativeIDs: string[];
     subsetReps: string[];
     userInputWeights: (string | null)[];
     userInputReps: (string | null)[];
-    userNotes:(string | null);
+    userNotes: string[];
   };
 
   type GymProgramEntry = [string, string, string, string];
@@ -115,8 +119,8 @@ type ExerciseSet = {
       }
   
       // Initialize the notes
-      const userNotes = null;
-  
+      const userNotes: string[] = [];
+
       // Populate the dictionary
       dictionary[setIndex] = {
         activeStatus: setIndex === 0, // Set the first exercise as active
@@ -124,6 +128,8 @@ type ExerciseSet = {
         uniqueSetKey: String(setIndex),
         subsetExercises,
         alternativeExercises,
+        originalExercises: [...subsetExercises],
+        originalAlternatives: [...alternativeExercises],
         alternativeIDs,
         subsetReps,
         userInputWeights,

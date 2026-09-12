@@ -6,9 +6,10 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { FindPrecedingNumber } from './FindPrecedingNumber';
 import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
+import { buildAlternativeTriggerNote, normalizeNotes, splitNotes } from "./NotesUtils";
 import SaveSession from "./SaveSession";
 import TrackingNotes from "./TrackingNotes";
 import { ExerciseDescriptions } from "./TrackingStyles";
@@ -39,7 +40,7 @@ interface TrackingData {
     uniqueSetKey: string;
     userInputReps: string[];
     userInputWeights: string[];
-    userNotes: string;
+    userNotes: string[];
   };
 }
 
@@ -138,7 +139,14 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const [saving, setSaving] = useState(false);
   // Styling
   const image = require("@/assets/images/HGBackground.png");
-  
+  // Tracking mode info modal images: computed in real pixels rather than percentage +
+  // aspectRatio, which doesn't reliably constrain local Image assets to their parent's
+  // laid-out width. TrackingNotesStyles.container is 80% of the window, minus its 16px padding on each side.
+  const { width: windowWidth } = useWindowDimensions();
+  const trackingInfoImageWidth = windowWidth * 0.8 - 32;
+  const infoImageDimensions = { width: trackingInfoImageWidth, height: trackingInfoImageWidth * (453 / 922) };
+  const alternativeImageDimensions = { width: trackingInfoImageWidth, height: trackingInfoImageWidth * (224 / 922) };
+
   const [modalVisible, setModalVisible] = useState(false);
   const [modalExercise, setModalExercise] = useState<string | ''>('');
   const [modalDescription, setModalDescription] = useState<string[]>([]);
@@ -161,38 +169,62 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     }
   };
 
+  // Swaps `exercise` for its alternative within `currentSet`, and keeps the
+  // set's userNotes in sync with an "AlternativeTrigger:" note describing the swap.
+  // Returns null if `exercise` isn't found in the set.
+  const applyExerciseSwap = (currentSet: any, exercise: string): { updatedSet: any; swappedToName: string } | null => {
+    const newSubsetExercises = [...currentSet.subsetExercises];
+    const newAlternativeExercises = [...currentSet.alternativeExercises];
+    const alternativeIDs = currentSet.alternativeIDs;
+    const originalExercises = currentSet.originalExercises;
+    const originalAlternatives = currentSet.originalAlternatives;
+
+    let targetID: string | null = null;
+    let originIndex = -1;
+    for (let i = 0; i < newSubsetExercises.length; i++) {
+      if (
+        newSubsetExercises[i].trim() === exercise.trim() ||
+        newAlternativeExercises[i].trim() === exercise.trim()
+      ) {
+        targetID = alternativeIDs[i];
+        originIndex = i;
+        break;
+      }
+    }
+    if (!targetID) return null;
+
+    const wasOriginal = newSubsetExercises[originIndex].trim() === originalExercises[originIndex].trim();
+    const noteText = buildAlternativeTriggerNote(originalExercises[originIndex], originalAlternatives[originIndex]);
+
+    for (let i = 0; i < newSubsetExercises.length; i++) {
+      if (alternativeIDs[i] === targetID) {
+        const temp = newSubsetExercises[i];
+        newSubsetExercises[i] = newAlternativeExercises[i];
+        newAlternativeExercises[i] = temp;
+      }
+    }
+
+    const existingNotes = normalizeNotes(currentSet.userNotes);
+    const userNotes = wasOriginal
+      ? (existingNotes.includes(noteText) ? existingNotes : [...existingNotes, noteText])
+      : existingNotes.filter(note => note !== noteText);
+
+    const updatedSet = {
+      ...currentSet,
+      subsetExercises: newSubsetExercises,
+      alternativeExercises: newAlternativeExercises,
+      userNotes,
+    };
+
+    return { updatedSet, swappedToName: newSubsetExercises[originIndex] };
+  };
+
   const swapExercise = (exercise: string, exerciseSet: any) => {
     setExerciseDictionary(prevDict => {
-      const newDict = { ...prevDict };
       const idx = parseInt(exerciseSet.uniqueSetKey);
-      const currentSet = { ...newDict[idx] };
-      const newSubsetExercises = [...currentSet.subsetExercises];
-      const newAlternativeExercises = [...currentSet.alternativeExercises];
-      const alternativeIDs = currentSet.alternativeIDs;
-
-      let targetID: string | null = null;
-      for (let i = 0; i < newSubsetExercises.length; i++) {
-        if (
-          newSubsetExercises[i].trim() === exercise.trim() ||
-          newAlternativeExercises[i].trim() === exercise.trim()
-        ) {
-          targetID = alternativeIDs[i];
-          break;
-        }
-      }
-      if (!targetID) return newDict;
-
-      for (let i = 0; i < newSubsetExercises.length; i++) {
-        if (alternativeIDs[i] === targetID) {
-          const temp = newSubsetExercises[i];
-          newSubsetExercises[i] = newAlternativeExercises[i];
-          newAlternativeExercises[i] = temp;
-        }
-      }
-      currentSet.subsetExercises = newSubsetExercises;
-      currentSet.alternativeExercises = newAlternativeExercises;
-      newDict[idx] = currentSet;
-      return newDict;
+      const result = applyExerciseSwap({ ...prevDict[idx] }, exercise);
+      if (!result) return prevDict;
+      return { ...prevDict, [idx]: result.updatedSet };
     });
   };
 
@@ -228,11 +260,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       } else if (type === 'reps') {
         newState[index].userInputReps[setIndex] = value;
       } else if (type === 'notes') {
-        if (value === '') {
-          newState[index].userNotes = null;
-        } else {
-          newState[index].userNotes = value;
-        }
+        const { triggerNotes } = splitNotes(newState[index].userNotes);
+        newState[index].userNotes = value === '' ? triggerNotes : [...triggerNotes, value];
       }
       return newState;
     });
@@ -520,58 +549,18 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           onPressIn={() => {
                             setAlternativeIsPressed(true);
                             setExerciseDictionary(prevDict => {
-                              const newDict = { ...prevDict };
                               const index = parseInt(exerciseSet.uniqueSetKey); // use uniqueSetKey as the lookup key
-                              const currentSet = { ...newDict[index] };
-
-                              const newSubsetExercises = [...currentSet.subsetExercises];
-                              const newAlternativeExercises = [...currentSet.alternativeExercises];
-                              const alternativeIDs = currentSet.alternativeIDs;
-
-                              // Find which ID matches the modalExercise (either in subset or alt)
-                              let targetID: string | null = null;
-                              for (let i = 0; i < newSubsetExercises.length; i++) {
-                                if (
-                                  newSubsetExercises[i].trim() === modalExercise.trim() ||
-                                  newAlternativeExercises[i].trim() === modalExercise.trim()
-                                ) {
-                                  targetID = alternativeIDs[i];
-                                  break;
-                                }
-                              }
-
-                              if (!targetID) return newDict; // no match found
-
-                              // Swap all entries with the matching ID
-                              for (let i = 0; i < newSubsetExercises.length; i++) {
-                                if (alternativeIDs[i] === targetID) {
-                                  const temp = newSubsetExercises[i];
-                                  newSubsetExercises[i] = newAlternativeExercises[i];
-                                  newAlternativeExercises[i] = temp;
-                                }
-                              }
-
-                              // Update the set in the dictionary
-                              currentSet.subsetExercises = newSubsetExercises;
-                              currentSet.alternativeExercises = newAlternativeExercises;
-                              newDict[index] = currentSet;
+                              const result = applyExerciseSwap({ ...prevDict[index] }, modalExercise);
+                              if (!result) return prevDict;
 
                               // Update modalExercise to the toggled version
-                              const updatedModal = newSubsetExercises.find((e, i) =>
-                                alternativeIDs[i] === targetID &&
-                                e.trim() !== modalExercise.trim()
-                              );
-
-                              if (updatedModal) {
-                                setModalExercise(updatedModal);
-                                const description = getDescriptionByExerciseName(updatedModal, masterGymProgramsDictionary);
-                                if (description) {
-                                  const splitDescription = description.split('/');
-                                  setModalDescription(splitDescription);
-                                }
+                              setModalExercise(result.swappedToName);
+                              const description = getDescriptionByExerciseName(result.swappedToName, masterGymProgramsDictionary);
+                              if (description) {
+                                setModalDescription(description.split('/'));
                               }
 
-                              return newDict;
+                              return { ...prevDict, [index]: result.updatedSet };
                             });
                           }}
 
@@ -634,24 +623,17 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                     }}
                   >
                     {(() => {
-                      let memoryNotes: string | null = null;
                       let notesIconColor = 'white';
 
                       if (placeholders !== null && exerciseSet) {
-                        try {
-                          memoryNotes = placeholders.trackingData[exerciseSet.uniqueSetKey]?.userNotes;
-                          if (memoryNotes !== null && memoryNotes !== '') { // Check for empty string too
-                            notesIconColor = 'red';
-                          }
-                        } catch (error) {
-                          memoryNotes = exerciseSet.userNotes;
+                        const memoryNotes = normalizeNotes(placeholders.trackingData[exerciseSet.uniqueSetKey]?.userNotes);
+                        if (memoryNotes.length > 0) {
+                          notesIconColor = 'red';
                         }
-                      } else {
-                        memoryNotes = exerciseSet.userNotes;
                       }
 
                       // Update icon color based on exerciseSet.userNotes as well for current session notes
-                      if (exerciseSet.userNotes && exerciseSet.userNotes !== '') {
+                      if (normalizeNotes(exerciseSet.userNotes).length > 0) {
                         notesIconColor = 'red';
                       }
 
@@ -798,6 +780,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
           onClose={() => setIsNotesVisible(false)}
           index={currentExerciseIndexForNotes}
           mutable={trackingMode}
+          levelColor={ShopStyles[programLevel as ProgramLevel].color}
         />
       )}
 
@@ -828,25 +811,23 @@ export function ProgramTracker({programLevel, programID, programData, programDay
           <View style={[TrackingNotesStyles.container, { zIndex: 1 }]}>
             <Text style={[TrackingNotesStyles.title, { paddingBottom: 8 }]}>Tracking Mode</Text>
 
-            {/* Swap exercise row */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14 }}>
-              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#111', borderWidth: 1, borderColor: '#606060', justifyContent: 'center', alignItems: 'center', marginRight: 16 }}>
-                <FontAwesome5 name="exchange-alt" size={14} color="white" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: 'lime', fontSize: 11, fontWeight: '600', paddingBottom: 3 }}>PRESS</Text>
-                <Text style={{ color: 'white', fontSize: 13 }}>Press an exercise to switch to an alternative exercise</Text>
+            {/* Info / instructions section */}
+            <View style={{ width: '100%', paddingVertical: 14 }}>
+              <Text style={{ color: 'white', fontSize: 13, paddingBottom: 10, textAlign: 'center' }}>
+                <Text style={{ color: 'lime', fontWeight: '600' }}>Hold</Text> an exercise to see instructions on how to perform it
+              </Text>
+              <View style={{ width: trackingInfoImageWidth, overflow: 'hidden', borderRadius: 8 }}>
+                <Image source={require('@/assets/images/infoImage.jpg')} style={infoImageDimensions} resizeMode="contain" />
               </View>
             </View>
 
-            {/* Info / instructions row */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderTopWidth: 1, borderTopColor: '#2a2a2a' }}>
-              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#111', borderWidth: 1, borderColor: '#606060', justifyContent: 'center', alignItems: 'center', marginRight: 16 }}>
-                <FontAwesome5 name="info" size={14} color="white" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: 'lime', fontSize: 11, fontWeight: '600', paddingBottom: 3 }}>HOLD</Text>
-                <Text style={{ color: 'white', fontSize: 13 }}>Hold an exercise to see instructions on how to perform it</Text>
+            {/* Swap exercise section */}
+            <View style={{ width: '100%', paddingVertical: 14, borderTopWidth: 1, borderTopColor: '#2a2a2a' }}>
+              <Text style={{ color: 'white', fontSize: 13, paddingBottom: 10, textAlign: 'center' }}>
+                <Text style={{ color: 'lime', fontWeight: '600' }}>Press</Text> an exercise to switch to an alternative exercise
+              </Text>
+              <View style={{ width: trackingInfoImageWidth, overflow: 'hidden', borderRadius: 8 }}>
+                <Image source={require('@/assets/images/alternativeImage.jpg')} style={alternativeImageDimensions} resizeMode="contain" />
               </View>
             </View>
 
