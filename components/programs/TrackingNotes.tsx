@@ -1,6 +1,7 @@
 import { TrackingNotesStyles } from "@/components/HGStyles";
 import React, { useEffect, useState } from 'react';
 import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { normalizeNotes, parseAlternativeTriggerNote, splitNotes } from './NotesUtils';
 
 interface NotesProps {
     memoryNotes: any;
@@ -10,16 +11,27 @@ interface NotesProps {
     onClose: () => void;
     index: number;  // Pass index for exercise
     mutable: boolean;
+    levelColor: string;
   }
 
-  export default function TrackingNotes({ memoryNotes, mutableExerciseDictionary, handleInputChange, visible, onClose, index, mutable }: NotesProps) {
+  export default function TrackingNotes({ memoryNotes, mutableExerciseDictionary, handleInputChange, visible, onClose, index, mutable, levelColor }: NotesProps) {
 
     const [note, setNote] = useState<string | ''>('');
     const [placeholder, setPlaceholder] = useState(String || "Enter your notes")
 
     // Safe to index now
     const dictItem = mutableExerciseDictionary?.[index];
-    const memItem  = memoryNotes?.[index]?.userNotes;
+    const currentNotesArr = normalizeNotes(dictItem?.userNotes);
+    const memNotesArr = normalizeNotes(memoryNotes?.[index]?.userNotes);
+    const { freeTextNote: memFreeTextNote } = splitNotes(memNotesArr);
+
+    // Nothing has happened in this viewing/tracking session yet (no swap, no typed note) -
+    // fall back to whatever was actually saved previously (or this same completed session,
+    // when viewing a finished day) so the notes remain visible instead of silently vanishing.
+    const usingMemoryFallback = currentNotesArr.length === 0 && memNotesArr.length > 0;
+    const sourceNotesArr = usingMemoryFallback ? memNotesArr : currentNotesArr;
+    const { triggerNotes: displayTriggerNotes, freeTextNote: sourceFreeTextNote } = splitNotes(sourceNotesArr);
+    const dictFreeTextNote = usingMemoryFallback ? '' : sourceFreeTextNote;
 
     useEffect(() => {
       // If nothing is passed in yet, just set placeholder and exit early
@@ -29,10 +41,10 @@ interface NotesProps {
         return;
       }
 
-      if (dictItem?.userNotes) {
-        setNote(dictItem.userNotes);
-      } else if (memItem) {
-        setPlaceholder(`Previous note: ${memItem}`);
+      if (dictFreeTextNote) {
+        setNote(dictFreeTextNote);
+      } else if (memFreeTextNote) {
+        setPlaceholder(`Previous note: ${memFreeTextNote}`);
         setNote('')
       } else {
         setPlaceholder("Enter your notes");
@@ -45,7 +57,7 @@ interface NotesProps {
         handleInputChange(index, 'notes', 0, note); // Assuming setIndex is 0 for notes
         onClose(); // Close the modal after saving
     };
-  
+
     return (
       <Modal
         visible={visible}
@@ -59,6 +71,26 @@ interface NotesProps {
               <Text style={TrackingNotesStyles.backButtonText}>{note === ''? 'Back' : 'Save'}</Text>
             </TouchableOpacity>
             <Text style={TrackingNotesStyles.title}>Notes</Text>
+            {displayTriggerNotes.length > 0 && (
+              <View style={{width: '100%', marginBottom: 12}}>
+                {displayTriggerNotes.map((triggerNote, i) => {
+                  const parsed = parseAlternativeTriggerNote(triggerNote);
+                  return (
+                    <Text key={i} style={{fontSize: 13, marginBottom: 4}}>
+                      {parsed ? (
+                        <>
+                          <Text style={{color: levelColor}}>{parsed.original}</Text>
+                          <Text style={{color: 'white'}}> was swapped for </Text>
+                          <Text style={{color: levelColor}}>{parsed.alternative}</Text>
+                        </>
+                      ) : (
+                        <Text style={{color: 'white'}}>{triggerNote}</Text>
+                      )}
+                    </Text>
+                  );
+                })}
+              </View>
+            )}
             <TextInput
               style={[TrackingNotesStyles.textInput, {color: "black"}]}
               value={note}
@@ -68,10 +100,10 @@ interface NotesProps {
               multiline={true}
               editable={mutable}
             />
-            {(memoryNotes?.[index]?.userNotes && mutable === true) ? (
+            {(memFreeTextNote && mutable === true) ? (
               <TouchableOpacity onPress={() => {
-                  if (memoryNotes?.[index]?.userNotes) {
-                    setNote(memoryNotes[index].userNotes);
+                  if (memFreeTextNote) {
+                    setNote(memFreeTextNote);
                   }
                 }}
                 style={{backgroundColor: 'grey', justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 16,
@@ -79,7 +111,7 @@ interface NotesProps {
               }}>
                 <Text style={{color: 'white', textAlign: 'center', textAlignVertical: 'center', fontSize: 12}}>Copy/repeat</Text>
               </TouchableOpacity>
-            ) : null}            
+            ) : null}
           </View>
         </View>
       </Modal>

@@ -1,5 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { LinearGradient } from 'expo-linear-gradient';
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -42,6 +44,16 @@ export default function SingleSessionsModal({
     beginner: "cyan",
     intermediate: "gold",
     advanced: "magenta",
+  };
+
+  // Matches the bordered/gradient "3D" bevel used on the exercise buttons in ProgramTracking.
+  const levelColorRgba = (color: string, opacity: number): string => {
+    const map: Record<string, string> = {
+      cyan:    `rgba(0, 255, 255, ${opacity})`,
+      gold:    `rgba(255, 215, 0, ${opacity})`,
+      magenta: `rgba(255, 0, 255, ${opacity})`,
+    };
+    return map[color] ?? `rgba(128, 128, 128, ${opacity})`;
   };
 
   const levelImages: Record<string, any> = {
@@ -173,35 +185,57 @@ export default function SingleSessionsModal({
 
           {/* Level Selectors */}
           <View style={{ height: 40, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-            {["beginner", "intermediate", "advanced"].map(level => (
-              <Pressable
-                key={level}
-                onPress={() => handleLevelPress(level)}
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginHorizontal: 4,
-                  paddingVertical: 6,
-                  borderWidth: selectedLevel === level ? 2 : 1,
-                  borderColor: selectedLevel === level ? levelColors[level] : "grey",
-                  borderRadius: 10,
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{
-                    backgroundColor: levelColors[level],
+            {["beginner", "intermediate", "advanced"].map(level => {
+              const color = levelColors[level];
+              const isSelected = selectedLevel === level;
+              return (
+                <Pressable
+                  key={level}
+                  onPress={() => handleLevelPress(level)}
+                  style={{
+                    flex: 1,
+                    marginHorizontal: 4,
                     borderRadius: 10,
-                    height: 6,
-                    width: 6
-                  }} />
-                  <Text style={{ color: "white", fontSize: 10, paddingLeft: 10 }}>
-                    {level}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
+                    borderWidth: isSelected ? 2 : 1,
+                    borderColor: color,
+                  }}
+                >
+                  <View style={{ borderRadius: 9, overflow: 'hidden' }}>
+                    <LinearGradient
+                      colors={[levelColorRgba(color, isSelected ? 0.35 : 0.18), '#0d0d0d', levelColorRgba(color, isSelected ? 0.35 : 0.18)]}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        paddingVertical: 6,
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{
+                          backgroundColor: color,
+                          borderRadius: 10,
+                          height: 6,
+                          width: 6
+                        }} />
+                        <Text style={{ color: "white", fontSize: 10, paddingLeft: 10 }}>
+                          {level}
+                        </Text>
+                      </View>
+                    </LinearGradient>
+                  </View>
+                  {level === "intermediate" && (
+                    <MaterialCommunityIcons
+                      name="gesture-tap"
+                      size={24}
+                      color="white"
+                      style={{ position: 'absolute', bottom: -10, right: -8 }}
+                    />
+                  )}
+                </Pressable>
+              );
+            })}
           </View>
 
           {/* Filtered Program List */}
