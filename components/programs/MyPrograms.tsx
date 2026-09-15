@@ -31,8 +31,6 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
   // console.log(myPrograms);
   // console.log(trackingData); 
 
-  console.log(myPrograms);
-
   const image = require("@/assets/images/HGBackground.png");
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
   const [trackingDataSoft, setTrackingDataSoft] = useState<any>({}); // Store API response as an object
