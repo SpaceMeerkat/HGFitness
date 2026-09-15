@@ -3,7 +3,9 @@ import { MealStyles } from "@/components/meals/MealStyles";
 import { addMealItem, updateActiveVersion } from "@/components/meals/mealUtils";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ImageBackground, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export type TrackingData = {
@@ -161,67 +163,60 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                     </View>
 
                     {/* Add the addMeal button here */}
-                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', paddingBottom: 8}}>
-                        <TouchableOpacity onPress={() => handleAddMealClick(false)}
-                        style={{flex: 0.4, flexDirection: 'column', borderColor:'lime', borderRadius: 4, borderWidth: 1, paddingVertical: 2}}>
-                            <View style={{flex: 0.1, flexDirection: 'row', justifyContent: 'center', backgroundColor: 'black'}}>
-                                <Text style={{color: "white", fontSize: 18}}> Add </Text>
-                            </View>
+                    <View style={{flexDirection: 'row', justifyContent: 'center', paddingBottom: 20}}>
+                        <TouchableOpacity onPress={() => handleAddMealClick(false)} activeOpacity={0.8}>
+                            <LinearGradient
+                                colors={['#1a1a1a', '#000000']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, borderWidth: 1.5, borderColor: 'lime'}}
+                            >
+                                <Ionicons name="add-circle-outline" size={18} color="lime" />
+                                <Text style={{color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 6}}>Add</Text>
+                            </LinearGradient>
                         </TouchableOpacity>
                     </View>
 
+                    {/* Ingredients card */}
+                    <LinearGradient
+                        colors={['rgba(255,255,255,0.08)', '#131313', 'rgba(255,255,255,0.02)']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={{borderRadius: 16, borderWidth: 1, borderColor: '#333', paddingVertical: 16, paddingHorizontal: 16}}
+                    >
+                        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10}}>
+                            <MaterialCommunityIcons name="basket-outline" size={18} color="lime" />
+                            <Text style={{color: 'white', fontSize: 15, fontWeight: 'bold', marginLeft: 6, letterSpacing: 0.5}}>WHAT YOU WILL NEED</Text>
+                        </View>
 
-                    <View style={{flex: 0.3, flexDirection: 'column', backgroundColor: 'rgba(68, 68, 68, 0.5)', borderRadius: 8, borderWidth: 1, paddingVertical: 10}}>
-
-                    {/* Ingredients title row */}
-                    <View style={{flex: 0.1, flexDirection: 'column', paddingTop: 0, paddingBottom: 5}}>
-                        <View style={{flex: 1, flexDirection: 'row'}}>
-                            <View style={{flex: 1}}>
-                                <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', textAlign: 'center', textDecorationLine: 'underline'}}>What You Will Need</Text>
+                        {ingredients.split('/').map((item?: any, index?: any) => (
+                            <View key={index} style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 7, borderTopWidth: index === 0 ? 0 : 1, borderTopColor: 'rgba(255,255,255,0.08)'}}>
+                                <View style={{width: 6, height: 6, borderRadius: 3, backgroundColor: 'lime', marginRight: 10}} />
+                                <Text style={{color: '#ddd', fontSize: 15, flex: 1}}>{item.trim()}</Text>
                             </View>
-                        </View>
+                        ))}
+                    </LinearGradient>
+
+                    {/* How to prepare header */}
+                    <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 24, paddingBottom: 16}}>
+                        <MaterialCommunityIcons name="chef-hat" size={20} color="lime" />
+                        <Text style={{color: 'white', fontSize: 17, fontWeight: 'bold', marginLeft: 8, letterSpacing: 0.5}}>HOW TO PREPARE</Text>
                     </View>
 
-                    {/* Ingredients bullet list */}
-                    <View style={{flex: 0.15, justifyContent: 'center'}}>
-                        <View style={{flexDirection: 'column'}}>
-                            {ingredients.split('/').map((item?: any, index?: any) => (
-                                <View key={index} style={{flexDirection: 'row'}}>
-                                    {/* <View style={{paddingHorizontal: 10}}>
-                                        <Text style={{ color: 'white', fontSize: 14, textAlign: 'center', paddingVertical: 0 }} >&#8226;</Text>
-                                    </View> */}
-
-                                    <View style={{flex: 0.95, flexDirection: 'row', justifyContent: 'center'}}>
-                                        <Text key={index} style={{ color: 'white', fontSize: 18, textAlign: 'center', paddingVertical: 4 }}>
-                                            {item.trim()}
-                                        </Text>
-                                    </View>
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-
-                    </View>
-
-                    <View style={{ flex: 0.1, paddingTop: 16, paddingBottom: 5 }}>
-                        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>
-                            How to prepare
-                        </Text>
-                    </View>
-
-                    <View style={{ flex: 0.4 }}>
+                    {/* Instruction steps timeline */}
+                    <View>
                         {instructions.map((item: string, index: number) => (
-                            <View key={index} style={{ paddingBottom: 2 }}>
-                                {/* Step Label Row */}
-                                <View style={{ alignItems: 'center', paddingTop: 10, paddingBottom: 5 }}>
-                                    <Text style={{ color: 'lime', fontSize: 14, fontWeight: 'bold', alignContent: 'center' }}>
-                                        <MaterialCommunityIcons name={`numeric-${index + 1}-circle` as any} size={20} color="lime" />
-                                    </Text>
+                            <View key={index} style={{flexDirection: 'row', paddingBottom: index === instructions.length - 1 ? 0 : 16}}>
+                                <View style={{alignItems: 'center', width: 30}}>
+                                    <View style={{width: 26, height: 26, borderRadius: 13, backgroundColor: '#111', borderWidth: 1.5, borderColor: 'lime', justifyContent: 'center', alignItems: 'center'}}>
+                                        <Text style={{color: 'lime', fontSize: 12, fontWeight: 'bold'}}>{index + 1}</Text>
+                                    </View>
+                                    {index !== instructions.length - 1 && (
+                                        <View style={{flex: 1, width: 1, backgroundColor: 'rgba(255,255,255,0.15)', marginTop: 4}} />
+                                    )}
                                 </View>
-
-                                {/* Instruction Text Row */}
-                                <View style={{ paddingHorizontal: 60, paddingTop: 4 }}>
-                                    <Text style={{ color: 'white', fontSize: 14, textAlign: 'center' }}>
+                                <View style={{flex: 1, paddingLeft: 12, paddingTop: 3}}>
+                                    <Text style={{color: 'white', fontSize: 14, lineHeight: 20}}>
                                     {item}
                                     </Text>
                                 </View>
