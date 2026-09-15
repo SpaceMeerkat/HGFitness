@@ -97,13 +97,18 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
           setViewModeVisible={setViewModeVisible}/>
         )}
 
-        {/* {console.log(myPrograms)} */}
           <>
             {Object.keys(myPrograms)
               .filter(key =>
                 key.toLowerCase().includes("subscription2day") ||
                 key.toLowerCase().includes("subscription4day")
               )
+              .sort((a, b) => {
+                const aIs2Day = a.toLowerCase().includes("subscription2day");
+                const bIs2Day = b.toLowerCase().includes("subscription2day");
+                if (aIs2Day === bIs2Day) return 0;
+                return aIs2Day ? -1 : 1;
+              })
               .map((key) => {
                 const lower = key.toLowerCase();
                 const is4Day = lower.includes("subscription4day");
