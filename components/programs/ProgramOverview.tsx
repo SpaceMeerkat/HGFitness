@@ -56,6 +56,8 @@ export function ProgramOverview({ programLevel, programData, programDay, program
     return null;
   };
 
+  console.log(programData[1][1]);
+
   const [viewModeVisible, setViewModeVisible] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -110,7 +112,7 @@ export function ProgramOverview({ programLevel, programData, programDay, program
       return (
         <View key={key} style={{ position: "relative" }}>
           <Pressable
-            onPress={() => isPremium
+            onPress={() => (!calendarBoolean || isPremium)
               ? setViewModeTrue(weekNumber, day)
               : setPremiumAlertVisible(true)}
             // onPress={() => handleChildPage('programTracking', programID, programData, [weekNumber, day])}
@@ -122,8 +124,8 @@ export function ProgramOverview({ programLevel, programData, programDay, program
             </View>
           </Pressable>
 
-          {/* Locked overlay for non-premium / non-subscribed users, touches pass through to the Pressable above */}
-          {!isPremium && (
+          {/* Locked overlay for non-premium / non-subscribed users on subscription programs only, touches pass through to the Pressable above */}
+          {calendarBoolean && !isPremium && (
             <View
               pointerEvents="none"
               style={{

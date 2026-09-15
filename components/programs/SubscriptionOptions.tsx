@@ -25,7 +25,10 @@ import { SubscriptionPayment } from "../premium/PremiumPayment";
       onClose,
     }: SubscriptionOptionsModalProps) {
 
-    const cardImage= require('@/assets/images/SubscriptionCard4day.jpg');
+    const cardImages: Record<string, any> = {
+        "4": require('@/assets/images/SubscriptionCard4day.jpg'),
+        "2": require('@/assets/images/SubscriptionCard2day.jpg'),
+    };
     const images: Record<string, any> = {
         "4": require("@/assets/images/4Days.png"),
         "2": require("@/assets/images/2Days.png"),
@@ -67,7 +70,7 @@ import { SubscriptionPayment } from "../premium/PremiumPayment";
                 </View>
             </View>
             <Pressable onPress={profile.premium? () => {} : async () =>  await SubscriptionPayment({itemCategory, profile, setProfile})} style={{flex: 0.2, width: '100%', paddingHorizontal: 8}}>
-                <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', maxHeight: 70}]}>
+                <ImageBackground source={cardImages["2"]} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', maxHeight: 70}]}>
                     <View style={{ flex: 0.25 }}>
                         <Image source={images["2"]} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
                     </View>
@@ -78,7 +81,7 @@ import { SubscriptionPayment } from "../premium/PremiumPayment";
                         <Image source={imageSource} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
                     </View>
                 </ImageBackground>
-                <ImageBackground source={cardImage} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', maxHeight: 70}]}>
+                <ImageBackground source={cardImages["4"]} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', maxHeight: 70}]}>
                     <View style={{ flex: 0.25 }}>
                         <Image source={images["4"]} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
                     </View>
