@@ -20,6 +20,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from "@react-navigation/native";
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -249,11 +250,14 @@ export default function MealScreen() {
           >
             <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingBottom: 10}}>Back</Text>
         </TouchableOpacity>
-        <View style={MealTrackingStyles.TrackingOptionsContainer}>
-          <ImageBackground source={image} resizeMode="cover" style={{flex: 1, overflow: "hidden"}}>
+        <View style={activeMeal === 'water'
+          ? [MealTrackingStyles.TrackingOptionsContainer, { height: 'auto' as const, maxHeight: '75%' as const }]
+          : MealTrackingStyles.TrackingOptionsContainer}
+        >
+          <ImageBackground source={image} resizeMode="cover" style={activeMeal === 'water' ? { overflow: "hidden" } : {flex: 1, overflow: "hidden"}}>
 
           {/* Map over activeMeal to create Pressable components */}
-          <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
+          <ScrollView contentContainerStyle={{ paddingTop: 10, paddingBottom: activeMeal === 'water' ? 14 : 0 }}>
             {activeMeal === 'water' ? (
               <>
                 <Water250 handleWaterClick={handleWaterClick} />
@@ -478,100 +482,76 @@ export default function MealScreen() {
 
         {/* Meals header component */}
 
-        <Pressable style={{flex: 0.15}} onPress={()=>setTargetsModalVisible(true)}>
+        {(() => {
+          const active = profile.calorieCalculator.active;
+          const streakValue = profile.calorieCalculator.streak ? profile.calorieCalculator.streakCounter + 1 : profile.calorieCalculator.streakCounter;
 
-          <View style={MealTrackingStyles.HeaderContainer}>
+          const statDisplay = (value: number, target: number) => (active && value === 0) ? target : value;
+          const statColor = (value: number, target: number, accent: string) => {
+            if (!active) return 'white';
+            if (value === 0) return '#666';
+            return value >= target ? accent : 'white';
+          };
 
-            {/* Column 1 */}
-            <View style={MealTrackingStyles.HeaderStackedColumn}>
-              <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Meals</Text>
-              </View>
-              <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', 
-                  color: profile.calorieCalculator.active? runningMealCount === 0? 'grey': runningMealCount >= profile.calorieCalculator.meals? 'lime': 'white': 'white', 
-                  fontSize: 22}}>{ profile.calorieCalculator.active? runningMealCount === 0? profile.calorieCalculator.meals : runningMealCount : runningMealCount}</Text>
-              </View>
-            </View>
-            {/* {profile.calorieCalculator.active ? `/${profile.calorieCalculator.meals}` : ""} */}
+          const stats: { label: string; icon: React.ReactNode; value: number; target: number; accent: string; suffix?: string }[] = [
+            { label: 'Meals', icon: <MaterialCommunityIcons name="food-apple" size={14} color="#7CFF6B" />, value: runningMealCount, target: profile.calorieCalculator.meals, accent: '#7CFF6B' },
+            { label: 'Calories', icon: <FontAwesome6 name="fire" size={13} color="#FFA53D" />, value: runningCalories, target: profile.calorieCalculator.calories, accent: '#FFA53D' },
+            { label: 'Protein', icon: <MaterialCommunityIcons name="food-drumstick" size={13} color="#FF7A59" />, value: runningProtein, target: profile.calorieCalculator.protein, accent: '#FF7A59', suffix: 'g' },
+            { label: 'Water', icon: <FontAwesome6 name="bottle-water" size={13} color="#4DD0E1" />, value: runningWater, target: profile.calorieCalculator.water, accent: '#4DD0E1', suffix: 'L' },
+          ];
 
-            {/* Separator 1 */}
-            <View style={MealTrackingStyles.HeaderSeparator} />
+          return (
+            <Pressable style={{flex: 0.15, marginHorizontal: 10, marginTop: 8, marginBottom: 26}} onPress={()=>setTargetsModalVisible(true)}>
 
-            {/* Column 2 */}
-            <View style={MealTrackingStyles.HeaderStackedColumn}>
-              <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Calories</Text>
-              </View>
-              <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', 
-                  color: profile.calorieCalculator.active? runningCalories === 0? 'grey': runningCalories >= profile.calorieCalculator.calories? 'lime': 'white': 'white', 
-                  fontSize: 22}}>{ profile.calorieCalculator.active? runningCalories === 0? profile.calorieCalculator.calories : runningCalories : runningCalories}</Text>
-              </View>
-            </View>
-
-            {/* Separator 2 */}
-            <View style={MealTrackingStyles.HeaderSeparator} />
-
-            {/* Column 3 */}
-            <View style={MealTrackingStyles.HeaderStackedColumn}>
-              <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Protein</Text>
-              </View>
-              <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', 
-                  color: profile.calorieCalculator.active? runningProtein === 0? 'grey': runningProtein >= profile.calorieCalculator.protein? 'lime': 'white': 'white', 
-                  fontSize: 22}}>{ profile.calorieCalculator.active? runningProtein === 0? profile.calorieCalculator.protein : runningProtein : runningProtein}g</Text>
-              </View>
-            </View>
-
-            {/* Separator 3 */}
-            <View style={MealTrackingStyles.HeaderSeparator} />
-
-            {/* Column 4 */}
-            <View style={MealTrackingStyles.HeaderStackedColumn}>
-              <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', color: 'white', fontSize: 22, paddingBottom: 10}}>Water</Text>
-              </View>
-              <View style={MealTrackingStyles.HeaderBox}>
-                <Text style={{textAlign: 'center', 
-                  color: profile.calorieCalculator.active? runningWater === 0? 'grey': runningWater >= profile.calorieCalculator.water? 'lime': 'white': 'white', 
-                  fontSize: 22}}>{ profile.calorieCalculator.active? runningWater === 0? profile.calorieCalculator.water : runningWater : runningWater}L</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Divider */}
-          <View style={{paddingTop:8, paddingBottom: 24}}>
-            {/* Lightening bolt component for streaks */}
-            <View style={{flex: 1, flexDirection: 'row'}}>
-              <View style={{flex: 0.1, flexDirection: 'row', justifyContent: 'center',
-                position: "absolute",
-                        left: 0,
-                        right: 0,
-                        top: -24,
-                        zIndex: 1000,
-              }}>
-                <View style={{flexDirection: 'row', justifyContent: 'center', backgroundColor: 'black',
-                  borderColor: 'white', borderWidth: 2, borderRadius: 200, height: 50, width: 50 
-                }}>
-                    <FontAwesome name="bolt" size={30} color="orange" style= {{textAlign: 'center', textAlignVertical: 'center'}}/>
-                    <Text style={{color: 'orange', fontSize: 12, textAlignVertical: 'center', paddingTop: 8}}>{profile.calorieCalculator.streak? profile.calorieCalculator.streakCounter + 1 : profile.calorieCalculator.streakCounter}</Text>
+              <View style={{borderRadius: 18, borderWidth: 1.5, borderColor: 'white', padding: 1.5}}>
+                <View style={{backgroundColor: '#0a0a0aff', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 8}}>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    {stats.map((stat, index) => (
+                      <React.Fragment key={stat.label}>
+                        {index > 0 && <View style={{width: 1, height: 34, backgroundColor: 'rgba(255,255,255,0.12)'}} />}
+                        <View style={{flex: 1, alignItems: 'center'}}>
+                          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 6}}>
+                            {stat.icon}
+                            <Text style={{color: '#888', fontSize: 10, fontWeight: '700', letterSpacing: 0.5, marginLeft: 4}}>
+                              {stat.label.toUpperCase()}
+                            </Text>
+                          </View>
+                          <Text style={{color: statColor(stat.value, stat.target, stat.accent), fontSize: 20, fontWeight: 'bold'}}>
+                            {statDisplay(stat.value, stat.target)}{stat.suffix || ''}
+                          </Text>
+                        </View>
+                      </React.Fragment>
+                    ))}
+                  </View>
                 </View>
               </View>
-            </View> 
-            <View style={{height: 1, backgroundColor: 'white'}} />
-          </View>    
 
-          {removableIcons === true ? (
-            <View style={{flex: 1, paddingHorizontal: 10, paddingTop: 10, justifyContent: 'center'}}>
-              <TouchableOpacity onPress={() => setRemovableIcons(false)}>
-                <Text style={{color: 'cyan', textAlign: 'right', fontSize: 20}}>Done <FontAwesome6 name="circle-check" size={20} color="cyan" /></Text>
-              </TouchableOpacity>
-            </View>
-          ) : null }
+              {/* Streak badge overlapping the bottom edge of the card */}
+              <View style={{position: 'absolute', bottom: -22, left: 0, right: 0, alignItems: 'center'}}>
+                <LinearGradient
+                  colors={['#ff9a3d', '#ff5f1f', '#c23f00']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{width: 46, height: 46, borderRadius: 23, padding: 2.5, justifyContent: 'center', alignItems: 'center'}}
+                >
+                  <View style={{flex: 1, width: '100%', borderRadius: 21, backgroundColor: '#0a0a0a', justifyContent: 'center', alignItems: 'center'}}>
+                    <FontAwesome name="bolt" size={16} color="#ffb454" />
+                    <Text style={{color: '#ffb454', fontSize: 10, fontWeight: 'bold', marginTop: 1}}>{streakValue}</Text>
+                  </View>
+                </LinearGradient>
+              </View>
 
-        </Pressable>
+              {removableIcons === true ? (
+                <View style={{paddingHorizontal: 4, paddingTop: 10, alignItems: 'flex-end'}}>
+                  <TouchableOpacity onPress={() => setRemovableIcons(false)}>
+                    <Text style={{color: 'cyan', textAlign: 'right', fontSize: 18}}>Done <FontAwesome6 name="circle-check" size={18} color="cyan" /></Text>
+                  </TouchableOpacity>
+                </View>
+              ) : null }
+
+            </Pressable>
+          );
+        })()}
 
         {/* Meals section */}
 
@@ -660,26 +640,29 @@ export default function MealScreen() {
           </View>
         </Pressable>
 
-        <TouchableOpacity
-          onPress={() => {
-            if (profile?.premium) {
-              setCalculatorVisible(true);
-            } else {
-              setPremiumAlertVisible(true);
-            }
-          }}
-          style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 60, paddingVertical: 6}}>
-          <View style={{position: 'relative'}}>
+        <View style={{flex: 0.16, flexDirection: 'row', width: '100%', paddingHorizontal: 20, paddingVertical: 6}}>
+          <TouchableOpacity
+            onPress={() => {
+              if (profile?.premium) {
+                setCalculatorVisible(true);
+              } else {
+                setPremiumAlertVisible(true);
+              }
+            }}
+            style={{flex: 1, marginRight: 5}}>
             <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center', opacity: profile?.premium ? 1 : 0.5}}>
-              <Text style={{color: 'white', fontSize: 20, textAlignVertical: 'center'}}> Calorie calculator</Text>
+              <Text style={{color: 'white', fontSize: 16, textAlignVertical: 'center'}}> Calorie Calculator</Text>
             </View>
-            {!profile?.premium && (
-              <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center'}}>
-                <Ionicons name="lock-closed" size={22} color="white" />
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setTargetsModalVisible(true)}
+            style={{flex: 1, marginLeft: 5}}>
+            <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 100, borderColor: 'white', paddingHorizontal: 10, paddingVertical: 8, alignItems: 'center'}}>
+              <Text style={{color: 'white', fontSize: 16, textAlignVertical: 'center'}}>Calorie Goals</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
 
       </ScrollView>
       </>
