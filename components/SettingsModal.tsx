@@ -216,7 +216,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Text style={[styles.title, !isSubscriber? {opacity: 0.3, color: 'black'} : {color: 'coral'}, !profile? {opacity: 0.3, color: 'black'} : {}]}>Cancel subscription</Text>
             </Pressable>  
 
-            <Pressable onPress={profile? () => {onClose; logout();} : () => console.log('pressed!')} style={[styles.row]}>
+            <Pressable onPress={profile? () => {onClose(); logout();} : () => console.log('pressed!')} style={[styles.row]}>
                 <Text style={[styles.title, !profile? {opacity: 0.3, color: 'black'} : {color: 'coral'}]}>Logout</Text>
             </Pressable>
             

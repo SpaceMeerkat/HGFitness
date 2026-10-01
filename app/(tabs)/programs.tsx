@@ -81,6 +81,13 @@ export default function MyPrograms() {
       setLoginSignupActive(true);
       setLoggedIn(false);
       setLoginActive(false);
+      // Logout clears profile and trackingData, so close any open program and return to the landing page
+      setUserProfile(null);
+      setSelectedProgramID(null);
+      setSelectedProgram(null);
+      setMyProgramsOpen(true);
+      setProgramOverviewOpen(false);
+      setProgramTrackingOpen(false);
     } else if (myPrograms !== null) {
       setLoginSignupActive(false);
       setLoggedIn(true);
@@ -178,14 +185,14 @@ export default function MyPrograms() {
       return renderLoginSignup();
     } else if (signupActive) {
       return renderSignup();
-    } else if (loggedIn && userProfile) {
+    } else if (loggedIn && userProfile && profile && trackingData) {
       if (myProgramsOpen) {
         return <MyProgramsLanding handleChildPage={handleChildPage} setTrackingMode={setTrackingMode}
                 singleSessionsVisible={singleSessionsVisible} setSingleSessionsVisible={setSingleSessionsVisible}/>;
       }
       if (selectedProgramID) {
         // Find the Week_Day IDs to keep track of tracked sets 
-        const completedIDs = Object.keys(trackingData[selectedProgramID]?.memoryData || {}).map(key => {
+        const completedIDs = Object.keys(trackingData?.[selectedProgramID]?.memoryData || {}).map(key => {
           const match = key.match(/week-(\d+)-day-(\d+)/);
           return match ? `${match[1]}_${match[2]}` : null;
         }).filter(Boolean);
@@ -194,7 +201,7 @@ export default function MyPrograms() {
   
         if (programOverviewOpen && selectedProgram) {
           const selectedLevel = getProgramLevel(selectedProgramID);
-          const streakDates = trackingData[selectedProgramID]?.streakDates;
+          const streakDates = trackingData?.[selectedProgramID]?.streakDates;
           return <ProgramOverview programLevel={selectedLevel} programID={selectedProgramID} programData={selectedProgram} 
             programDay={selectedDay} completedKeys={completedIDs} handleChildPage={handleChildPage} streakDates={streakDates}
             setTrackingMode={setTrackingMode}/>
