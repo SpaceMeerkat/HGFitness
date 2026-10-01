@@ -87,6 +87,8 @@ export default function MealScreen() {
   const [premiumAlertVisible, setPremiumAlertVisible] = useState(false);
 
   const updateCalorieCalculatorStreak = async (streakBool: boolean) => {
+    // Guard against the profile having been cleared by a logout before this async update lands
+    if (!profile?.calorieCalculator) return;
     const updatedProfile = {
         ...profile,
         calorieCalculator: {
@@ -100,8 +102,8 @@ export default function MealScreen() {
   };
 
   useEffect(() => {
-    // Guard against null profile or empty dictionary
-    if (!profile || !dictionary) return;
+    // Guard against null/undefined profile (logout clears it) or empty dictionary
+    if (!profile?.calorieCalculator || !dictionary) return;
     // If all targets are met, update the streak boolean in profile to true
     if (runningMealCount > 0 || runningWater > 0) {
       updateCalorieCalculatorStreak(true)
@@ -164,7 +166,8 @@ export default function MealScreen() {
   
 
   useEffect(() => {
-    if (profile === null) {
+    // Logout sets profile to undefined rather than null, so check for both
+    if (!profile) {
       setLoggedIn(false);
       setLoginActive(false);
       setLoginSignupActive(true);
@@ -476,7 +479,7 @@ export default function MealScreen() {
                 : "premium")
             : "free"
         }
-        streak={profile.calorieCalculator.streak? profile.calorieCalculator.streakCounter + 1 : profile.calorieCalculator.streakCounter}
+        streak={profile.calorieCalculator?.streak ? (profile.calorieCalculator?.streakCounter ?? 0) + 1 : (profile.calorieCalculator?.streakCounter ?? 0)}
         meals={runningMealCount}
         mealsTarget={profile.calorieCalculator.meals}
         calories={runningCalories}
@@ -494,7 +497,7 @@ export default function MealScreen() {
 
         {(() => {
           const active = profile.calorieCalculator.active;
-          const streakValue = profile.calorieCalculator.streak ? profile.calorieCalculator.streakCounter + 1 : profile.calorieCalculator.streakCounter;
+          const streakValue = profile.calorieCalculator?.streak ? (profile.calorieCalculator?.streakCounter ?? 0) + 1 : (profile.calorieCalculator?.streakCounter ?? 0);
 
           const statDisplay = (value: number, target: number) => (active && value === 0) ? target : value;
           const statColor = (value: number, target: number, accent: string) => {

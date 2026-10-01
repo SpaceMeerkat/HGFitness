@@ -1,9 +1,8 @@
+import { LAST_UPDATE_KEY } from "@/components/appContext";
 import { BASE_API_URL } from "@/components/network/apiConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";
-
-const LAST_UPDATE_KEY = "lastUpdate";
 
 interface UseLogoutProps {
     profile: any,
@@ -54,7 +53,7 @@ export const useLogout = ({profile,trackingData,setProfile,setMyPrograms,setTrac
     if (retrievedToken && trackingDictionary) {
       try {
         const url = `${BASE_API_URL}/saveMealTracking`;
-        const calorieCalculator = profile.calorieCalculator;
+        const calorieCalculator = profile?.calorieCalculator;
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
