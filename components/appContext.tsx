@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Network from 'expo-network';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, AppState } from 'react-native';
 
 // Define the structure of the context
 interface AppContextType {
@@ -267,6 +267,20 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
   useEffect(() => {
     // Load data on app start
     updateData();
+  }, []);
+
+  useEffect(() => {
+    // Phones usually resume the app from the background rather than restarting it, so also check on resume
+    // whether the day has rolled over. Otherwise the new-day context request never runs, today's meals get
+    // added to yesterday's tracking and the meal streak breaks.
+    const subscription = AppState.addEventListener('change', async (nextState) => {
+      if (nextState !== 'active') return;
+      const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
+      if (lastUpdateDate && !isToday(lastUpdateDate)) {
+        updateData();
+      }
+    });
+    return () => subscription.remove();
   }, []);
 
   return (
