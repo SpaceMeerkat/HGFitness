@@ -4,7 +4,10 @@ import { S3_API_URL } from "@/components/network/apiConfig";
 import { PremiumButton } from "@/components/profile/PremiumButton";
 import { GymCard } from "@/components/shop/ShopCard";
 import { CardInfo } from "@/components/shop/ShopCardInfo";
+import { BENEFIT_DETAILS, PLAN_BENEFITS } from "@/components/premium/PlanBenefits";
+import { PricingStyles } from "@/components/premium/PricingStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useEffect, useState } from "react";
 import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -26,7 +29,7 @@ const COLORS = {
 
 export function WhatsHot({ handleBackButton }: WhatsHotProps) {
 
-    const { bestSellers, beginnerPrograms, intermediatePrograms, advancedPrograms } = useAppContext();
+    const { bestSellers, beginnerPrograms, intermediatePrograms, advancedPrograms, profile } = useAppContext();
 
     const [menCardInfoBeginners, setMenCardInfoBeginners] = useState<any | null>(null);
     const [menCardInfoIntermediate, setMenCardInfoIntermediate] = useState<any | null>(null);
@@ -43,7 +46,6 @@ export function WhatsHot({ handleBackButton }: WhatsHotProps) {
     const [womenCardNameAdvanced, setWomenCardNameAdvanced] = useState<string | ''>('');
 
     const bestSellersImage = require("@/assets/images/bestSellers.jpg");
-    const whatsHotImage = require("@/assets/images/WhatsHot2.jpg");
     const freeTrialImage = require("@/assets/images/WhatsHot4.jpg");
     const challengesImage = require("@/assets/images/challenges.jpg");
 
@@ -110,20 +112,90 @@ export function WhatsHot({ handleBackButton }: WhatsHotProps) {
         );
     };
 
-    // Subscriptions overlay content
+    // Free trial overlay content
     const showSubscriptions = async () => {
         setOverlayColor(COLORS.cyan);
+        // Premium benefits split into those the free tier lacks and those it already has
+        const premiumExclusives = PLAN_BENEFITS.premium.yes.filter(benefit => !PLAN_BENEFITS.free.yes.includes(benefit));
+        const alsoIncluded = PLAN_BENEFITS.premium.yes.filter(benefit => PLAN_BENEFITS.free.yes.includes(benefit));
+        // Same condition PremiumButton uses to decide whether to show itself
+        const isFreeTier = !profile?.premium && !profile?.gymSubscription;
         setContent(
-            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}>
-                <View style={styles.overlayHeader}>
-                    <Text style={[styles.overlayTitle, { color: COLORS.cyan }]}>Premium - Free Trial</Text>
-                    <Text style={[styles.overlaySubtitle, { marginTop: 12 }]}>
-                        If you want a new and exciting gym program each month, that builds upon the previous program, you're in the right place!
+            <ScrollView contentContainerStyle={styles.trialContent} showsVerticalScrollIndicator={false}>
+                {/* Header */}
+                <View style={styles.trialHeader}>
+                    <Text style={styles.trialEyebrow}>TRY PREMIUM FOR ONE MONTH</Text>
+                    <Text style={styles.trialTitle}>Premium free trial</Text>
+                    <LinearGradient
+                        colors={['rgba(0, 217, 255, 0)', 'rgba(0, 217, 255, 0.9)', 'rgba(0, 217, 255, 0)']}
+                        start={{ x: 0, y: 0.5 }}
+                        end={{ x: 1, y: 0.5 }}
+                        style={styles.trialRule}
+                    />
+                    <Text style={styles.trialSubtitle}>
+                        Unlock everything HG Fitness has to offer, free for your first month.
                     </Text>
                 </View>
-                <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
-                    <PremiumButton />
+
+                {/* Highlights */}
+                <View style={styles.trialHighlightsRow}>
+                    {([
+                        { icon: 'gift-outline', text: 'First month\nfree' },
+                        { icon: 'calendar-outline', text: 'New program\nevery month' },
+                        { icon: 'stats-chart-outline', text: 'Full progress\ntracking' },
+                    ] as const).map(({ icon, text }) => (
+                        <View key={icon} style={styles.trialHighlight}>
+                            <View style={styles.trialHighlightIcon}>
+                                <Ionicons name={icon} size={18} color="white" />
+                            </View>
+                            <Text style={styles.trialHighlightText}>{text}</Text>
+                        </View>
+                    ))}
                 </View>
+
+                {/* Premium-only benefits, with descriptions */}
+                <Text style={styles.trialSectionLabel}>PREMIUM EXCLUSIVES</Text>
+                <View style={styles.trialPanel}>
+                    {premiumExclusives.map((benefit, index) => (
+                        <View key={benefit} style={[styles.trialFeatureRow, index > 0 && styles.trialFeatureDivider]}>
+                            <View style={styles.trialFeatureIcon}>
+                                <Ionicons name={BENEFIT_DETAILS[benefit]?.icon ?? 'star-outline'} size={18} color={COLORS.cyan} />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.trialFeatureTitle}>{benefit}</Text>
+                                {BENEFIT_DETAILS[benefit] && (
+                                    <Text style={styles.trialFeatureDescription}>{BENEFIT_DETAILS[benefit].description}</Text>
+                                )}
+                            </View>
+                        </View>
+                    ))}
+                </View>
+
+                {/* Benefits shared with the free tier */}
+                <Text style={styles.trialSectionLabel}>ALSO INCLUDED</Text>
+                <View style={styles.trialIncludedList}>
+                    {alsoIncluded.map(benefit => (
+                        <View key={benefit} style={PricingStyles.benefitRow}>
+                            <View style={[PricingStyles.benefitIcon, PricingStyles.benefitIconYes]}>
+                                <Ionicons name="checkmark" size={14} color="lime" />
+                            </View>
+                            <Text style={PricingStyles.benefitText}>{benefit}</Text>
+                        </View>
+                    ))}
+                </View>
+
+                {/* Call to action */}
+                {isFreeTier ? (
+                    <>
+                        <Text style={styles.trialSectionLabel}>START YOUR FREE TRIAL</Text>
+                        <PremiumButton />
+                    </>
+                ) : (
+                    <View style={styles.trialMemberNote}>
+                        <Ionicons name="checkmark-circle" size={18} color="lime" />
+                        <Text style={styles.trialMemberNoteText}>You already have an active plan</Text>
+                    </View>
+                )}
             </ScrollView>
         );
     };
@@ -192,18 +264,24 @@ export function WhatsHot({ handleBackButton }: WhatsHotProps) {
 
                 {/* Hero Section */}
                 <View style={styles.heroContainer}>
-                    <ImageBackground source={whatsHotImage} style={styles.heroImage} resizeMode="cover">
-                        <View style={styles.heroOverlay}>
-                            <TouchableOpacity style={styles.backButton} onPress={handleBackButton}>
-                                <Ionicons name="arrow-back" size={24} color="white" />
-                                <Text style={styles.backButtonText}>Back</Text>
-                            </TouchableOpacity>
-                            <View style={styles.heroTextContainer}>
-                                <Text style={styles.heroTitle}>What's Hot</Text>
-                                <Text style={styles.heroSubtitle}>Discover what's trending</Text>
-                            </View>
+                    <View style={styles.heroOverlay}>
+                        <TouchableOpacity style={styles.backButton} onPress={handleBackButton}>
+                            <Ionicons name="arrow-back" size={24} color="white" />
+                            <Text style={styles.backButtonText}>Back</Text>
+                        </TouchableOpacity>
+                        <View style={styles.heroTextContainer}>
+                            <Text style={styles.heroEyebrow}>TRENDING NOW</Text>
+                            <Text style={styles.heroTitle}>{"What's Hot"}</Text>
+                            {/* Rule fades through the three tile accent colours */}
+                            <LinearGradient
+                                colors={['rgba(255, 184, 0, 0)', COLORS.gold, COLORS.cyan, COLORS.magenta, 'rgba(255, 0, 255, 0)']}
+                                start={{ x: 0, y: 0.5 }}
+                                end={{ x: 1, y: 0.5 }}
+                                style={styles.heroRule}
+                            />
+                            <Text style={styles.heroSubtitle}>Best sellers, free trials and challenges, all in one place.</Text>
                         </View>
-                    </ImageBackground>
+                    </View>
                 </View>
 
                 {/* Feature Cards */}
@@ -315,17 +393,9 @@ const styles = StyleSheet.create({
 
     // Hero Section
     heroContainer: {
-        height: 220,
-        width: '100%',
-    },
-    heroImage: {
-        flex: 1,
         width: '100%',
     },
     heroOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'space-between',
         padding: 16,
     },
     backButton: {
@@ -341,20 +411,37 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     heroTextContainer: {
-        marginBottom: 16,
+        marginTop: 8,
+        alignItems: 'center',
+        paddingHorizontal: 8,
+    },
+    heroEyebrow: {
+        color: '#9a9a9a',
+        fontSize: 11,
+        fontWeight: '600',
+        letterSpacing: 2,
+        paddingBottom: 8,
     },
     heroTitle: {
         fontFamily: 'Edo',
         fontSize: 40,
         color: 'white',
-        textShadowColor: 'rgba(0,0,0,0.8)',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 4,
+        textAlign: 'center',
+        textShadowColor: 'rgba(255, 184, 0, 0.45)',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 10,
+    },
+    heroRule: {
+        width: '60%',
+        height: 1.5,
+        marginTop: 10,
+        marginBottom: 12,
     },
     heroSubtitle: {
-        fontSize: 16,
-        color: 'rgba(255,255,255,0.85)',
-        marginTop: 4,
+        fontSize: 15,
+        lineHeight: 22,
+        color: '#d0d0d0',
+        textAlign: 'center',
     },
 
     // Feature Cards
@@ -364,6 +451,8 @@ const styles = StyleSheet.create({
     },
     featureCard: {
         height: 140,
+        // Black so the contain-sized artwork on Best Sellers and Challenges blends into the card
+        backgroundColor: 'black',
         borderRadius: 12,
         overflow: 'hidden',
         marginBottom: 12,
@@ -472,5 +561,133 @@ const styles = StyleSheet.create({
         bottom: 0,
         backgroundColor: COLORS.dark,
         zIndex: 20,
+    },
+
+    // Free trial overlay
+    trialContent: {
+        paddingHorizontal: 16,
+        paddingBottom: 40,
+    },
+    trialHeader: {
+        alignItems: 'center',
+        paddingTop: 4,
+        paddingBottom: 22,
+        paddingHorizontal: 8,
+    },
+    trialEyebrow: {
+        color: '#9a9a9a',
+        fontSize: 11,
+        fontWeight: '600',
+        letterSpacing: 2,
+        paddingBottom: 8,
+    },
+    trialTitle: {
+        fontFamily: 'Edo',
+        color: COLORS.cyan,
+        fontSize: 34,
+        textAlign: 'center',
+        textShadowColor: 'rgba(0, 217, 255, 0.45)',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 10,
+    },
+    trialRule: {
+        width: '60%',
+        height: 1.5,
+        marginTop: 10,
+        marginBottom: 14,
+    },
+    trialSubtitle: {
+        color: '#d0d0d0',
+        fontSize: 15,
+        lineHeight: 22,
+        textAlign: 'center',
+    },
+    trialHighlightsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingBottom: 26,
+    },
+    trialHighlight: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    trialHighlightIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#151515',
+        borderWidth: 1,
+        borderColor: '#333',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    trialHighlightText: {
+        color: '#9a9a9a',
+        fontSize: 11,
+        lineHeight: 15,
+        textAlign: 'center',
+    },
+    trialSectionLabel: {
+        color: '#6b6b6b',
+        fontSize: 11,
+        fontWeight: '600',
+        letterSpacing: 1.5,
+        paddingBottom: 8,
+        paddingLeft: 2,
+    },
+    trialPanel: {
+        backgroundColor: '#151515',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#2a2a2a',
+        paddingHorizontal: 14,
+        marginBottom: 22,
+    },
+    trialFeatureRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    trialFeatureDivider: {
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: '#2a2a2a',
+    },
+    trialFeatureIcon: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: 'rgba(0, 217, 255, 0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(0, 217, 255, 0.35)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    trialFeatureTitle: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    trialFeatureDescription: {
+        color: '#9a9a9a',
+        fontSize: 12,
+        lineHeight: 17,
+        paddingTop: 2,
+    },
+    trialIncludedList: {
+        paddingHorizontal: 4,
+        marginBottom: 22,
+    },
+    trialMemberNote: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+    },
+    trialMemberNoteText: {
+        color: '#b5b5b5',
+        fontSize: 14,
+        paddingLeft: 8,
     },
 });

@@ -1,18 +1,30 @@
-import { useState } from "react";
-import { Pressable, Text, TouchableOpacity, View } from "react-native";
-import { TrackingNotesStyles } from "../HGStyles";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import PricingModal from "../premium/PricingModal";
-import { SubscriptionCard } from "./SubscriptionCard";
+import { PremiumPlanCard, SubscriptionPlanCard } from "./PlanCards";
 
 type WhatsHotProps = {
     handleBackButton: () => void;
   };
 
+const highlights: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
+    { icon: 'calendar-outline', text: 'New program\nevery month' },
+    { icon: 'trending-up-outline', text: 'Builds on\nthe last one' },
+    { icon: 'stats-chart-outline', text: 'Track every\nsession' },
+];
+
 export function SubscriptionPage({handleBackButton}: WhatsHotProps) {
 
     const [premiumVisible, setPremiumVisible] = useState(false);
-    const [defaultPricing, setDefaultPricing] = useState("premium");
-    
+    const [defaultPricing, setDefaultPricing] = useState<"subscription" | "premium">("premium");
+
+    const openPricing = (type: "subscription" | "premium") => {
+        setDefaultPricing(type);
+        setPremiumVisible(true);
+    };
+
     return (
         <>
 
@@ -22,37 +34,136 @@ export function SubscriptionPage({handleBackButton}: WhatsHotProps) {
         defaultType={defaultPricing}
         />
 
-        <View style={{flex: 1, paddingTop: 10, paddingHorizontal: 10, justifyContent: 'center'}}>
-        <View style={{flex: 0.2, width: '100%', justifyContent: 'center'}}>
-            <TouchableOpacity style={{flex: 1, width: "20%", paddingLeft: 10, paddingTop: 5, paddingBottom: 5, justifyContent: 'center'}} onPress={handleBackButton}>
-                <Text style={[TrackingNotesStyles.backButtonText]}>Back</Text>
+        <ScrollView style={styles.page} contentContainerStyle={styles.pageContent} showsVerticalScrollIndicator={false}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBackButton}>
+                <Ionicons name="arrow-back" size={22} color="white" />
+                <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
-        </View>
-        <View style={{flex: 0.1, width: '100%', paddingBottom: 20}}>
-            <Text style={{fontFamily: 'Edo', color: 'gold', fontSize: 30, textAlign: 'center'}}>
-                Monthly subscriptions
-            </Text>
-        </View>
-        <View style={{flex: 0.2, width: '100%', paddingHorizontal: 10, paddingBottom: 20}}>
-            <Text style={{color: 'white', fontSize: 15, textAlign: 'center'}}>
-                If you want a new and exciting gym program each month, that builds upon the previous program, you're in the right place!
-            </Text>
-        </View>
-        <Pressable onPress={() => {setDefaultPricing('premium'), setPremiumVisible(true)}} style={{flex: 0.3, width: '100%', justifyContent: 'center'}}>
-            <SubscriptionCard cardImage={require('@/assets/images/premiumCard.jpg')} cardTitle="Upgrade to premium" cardDays="Monthly rewards" />
-        </Pressable>
-        <Pressable onPress={() => {setDefaultPricing('subscription'), setPremiumVisible(true)}} style={{flex: 0.3, width: '100%', justifyContent: 'center'}}>
-            <SubscriptionCard cardImage={require('@/assets/images/SubscriptionCard2day.jpg')} cardTitle="Gym plan subscription" cardDays="2 days/week" />
-        </Pressable>
-        <Pressable onPress={() => {setDefaultPricing('subscription'), setPremiumVisible(true)}} style={{flex: 0.3, width: '100%', justifyContent: 'center'}}>
-            <SubscriptionCard cardImage={require('@/assets/images/SubscriptionCard4day.jpg')} cardTitle="Gym plan subscription" cardDays="4 days/week" />
-        </Pressable>
-        <View style={{flex: 0.15}} />
-        </View>
+
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.eyebrow}>FRESH TRAINING, EVERY MONTH</Text>
+                <Text style={styles.title}>Monthly subscriptions</Text>
+                <LinearGradient
+                    colors={['rgba(255, 215, 0, 0)', 'rgba(255, 215, 0, 0.9)', 'rgba(255, 215, 0, 0)']}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={styles.titleRule}
+                />
+                <Text style={styles.subtitle}>
+                    A brand new gym program lands every month, each one building on the last.
+                </Text>
+            </View>
+
+            {/* Highlights */}
+            <View style={styles.highlightsRow}>
+                {highlights.map(({ icon, text }) => (
+                    <View key={icon} style={styles.highlight}>
+                        <View style={styles.highlightIcon}>
+                            <Ionicons name={icon} size={18} color="white" />
+                        </View>
+                        <Text style={styles.highlightText}>{text}</Text>
+                    </View>
+                ))}
+            </View>
+
+            <Text style={styles.sectionLabel}>CHOOSE YOUR PLAN</Text>
+
+            <SubscriptionPlanCard onPress={() => openPricing('subscription')} />
+            <PremiumPlanCard subtitle="Monthly rewards" onPress={() => openPricing('premium')} />
+        </ScrollView>
 
         </>
     );
 }
 
-
-
+const styles = StyleSheet.create({
+    page: {
+        flex: 1,
+    },
+    pageContent: {
+        paddingTop: 10,
+        paddingHorizontal: 16,
+        paddingBottom: 24,
+    },
+    backButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        paddingVertical: 8,
+    },
+    backButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+        paddingLeft: 6,
+    },
+    header: {
+        alignItems: 'center',
+        paddingTop: 12,
+        paddingBottom: 22,
+        paddingHorizontal: 8,
+    },
+    eyebrow: {
+        color: '#9a9a9a',
+        fontSize: 11,
+        fontWeight: '600',
+        letterSpacing: 2,
+        paddingBottom: 8,
+    },
+    title: {
+        fontFamily: 'Edo',
+        color: 'gold',
+        fontSize: 34,
+        textAlign: 'center',
+        textShadowColor: 'rgba(255, 215, 0, 0.45)',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 10,
+    },
+    titleRule: {
+        width: '60%',
+        height: 1.5,
+        marginTop: 10,
+        marginBottom: 14,
+    },
+    subtitle: {
+        color: '#d0d0d0',
+        fontSize: 15,
+        lineHeight: 22,
+        textAlign: 'center',
+    },
+    highlightsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingBottom: 26,
+    },
+    highlight: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    highlightIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#151515',
+        borderWidth: 1,
+        borderColor: '#333',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    highlightText: {
+        color: '#9a9a9a',
+        fontSize: 11,
+        lineHeight: 15,
+        textAlign: 'center',
+    },
+    sectionLabel: {
+        color: '#6b6b6b',
+        fontSize: 11,
+        fontWeight: '600',
+        letterSpacing: 1.5,
+        paddingBottom: 8,
+        paddingLeft: 2,
+    },
+});

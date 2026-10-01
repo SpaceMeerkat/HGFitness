@@ -1,126 +1,197 @@
 import { StyleSheet } from "react-native";
 
 export const PricingStyles = StyleSheet.create({
+  // Also used by SettingsModal
   modalBackground: {
     flex: 1,
     backgroundColor: '#000000aa',
     justifyContent: 'center',
     padding: 20,
   },
-  modalContent: {
+
+  // Modal shell
+  backdrop: {
     flex: 1,
-    flexDirection: 'column', // stack rows vertically
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingTop: 20,
-    paddingBottom: 10,
-    paddingHorizontal: 10,
-    maxHeight: '100%',
-  },
-  colorCell: {
-    flexDirection: 'column',
-    backgroundColor: 'black',
-    width: '100%',   // take full modal width
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
-    borderRadius: 8,
-    paddingVertical: 10
+    padding: 16,
   },
-  titleRow: {
+  backdropDismiss: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  sheet: {
+    maxHeight: '90%',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2e2e2e',
+    padding: 16,
+    overflow: 'hidden',
+  },
+  headerRow: {
     flexDirection: 'row',
-    width: '100%',   // take full modal width
-    justifyContent: 'center',
-    paddingVertical: 10
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
   },
-  titleText: {
+  headerText: {
+    color: '#9a9a9a',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 2,
+  },
+  closeIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#1f1f1f',
+    borderWidth: 1,
+    borderColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // Segmented tabs
+  tabTrack: {
+    flexDirection: 'row',
+    backgroundColor: '#0d0d0d',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
+    padding: 3,
+    marginBottom: 14,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabActive: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'lime',
+  },
+  tabText: {
+    color: '#8a8a8a',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  tabTextActive: {
+    color: 'lime',
+  },
+
+  // Tier content
+  content: {
+    flexShrink: 1,
+  },
+  hero: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#333',
+    paddingVertical: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroTitle: {
     color: 'white',
-    fontSize: 44,
+    fontSize: 40,
+    fontFamily: 'Edo',
     textAlign: 'center',
-    fontFamily: 'Edo'
+    textShadowColor: 'rgba(255, 255, 255, 0.35)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   priceRow: {
     flexDirection: 'row',
-    width: '100%',   // take full modal width
-    justifyContent: 'center',
-    paddingTop: 0,
-    paddingBottom: 4
+    alignItems: 'flex-end',
+    paddingTop: 4,
   },
-  cellPriceText: {
+  priceCurrency: {
     color: 'white',
-    fontSize: 28,
-    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: '600',
+    paddingBottom: 6,
+    paddingRight: 2,
   },
-  cadenceRow: {
+  priceText: {
+    color: 'white',
+    fontSize: 40,
+    fontWeight: 'bold',
+    lineHeight: 44,
+  },
+  priceCadence: {
+    color: '#b5b5b5',
+    fontSize: 14,
+    paddingBottom: 7,
+    paddingLeft: 6,
+  },
+  benefitsScroll: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
+  benefitsContent: {
+    paddingTop: 16,
+    paddingBottom: 8,
+    paddingHorizontal: 4,
+  },
+  sectionLabel: {
+    color: '#6b6b6b',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.5,
+    paddingBottom: 6,
+  },
+  benefitRow: {
     flexDirection: 'row',
-    width: '100%',   // take full modal width
-    justifyContent: 'center',
-    paddingBottom: 10
+    alignItems: 'center',
+    paddingVertical: 7,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#222',
   },
-  cellPriceSubText: {
-    color: 'white',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  cell: {
-    flex: 1,
+  benefitIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
   },
-  infoContainer: {
+  benefitIconYes: {
+    backgroundColor: 'rgba(0, 255, 0, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 255, 0, 0.4)',
+  },
+  benefitIconNo: {
+    backgroundColor: '#151515',
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
+  },
+  benefitText: {
     flex: 1,
-    flexDirection: 'column',
-    width: '100%',   // take full modal width
-    justifyContent: 'center',
-    borderRadius: 8,
-    paddingVertical: 4
+    color: 'white',
+    fontSize: 14,
   },
-  infoChild: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingVertical: 8,
-    paddingLeft: 8,
-    borderRadius: 16
-  },
-  infoText: {
-    color: 'grey',
-    // fontSize: 16,
-    textAlign: 'left',
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",   // vertical center
-    marginVertical: 4,      // spacing between rows
-  },
-
-  infoIcon: {
-    flex: 0.1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  infoTextContainer: {
-    flex: 0.9,
-    justifyContent: "center",
+  benefitTextNo: {
+    color: '#6b6b6b',
   },
   purchaseButton: {
-    paddingVertical: 10,
-    padding: 12,
-    backgroundColor: '#000000ff',
-    borderRadius: 100,
+    marginTop: 12,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  purchaseGradient: {
+    paddingVertical: 14,
     alignItems: 'center',
+    borderRadius: 999,
   },
   purchaseText: {
-    color: 'white',
+    color: 'black',
     fontWeight: 'bold',
-  },
-  closeButton: {
-    paddingVertical: 10,
-    padding: 12,
-    borderRadius: 100,
-    alignItems: 'center',
-  },
-  closeText: {
-    color: 'white',
-    fontWeight: 'bold',
+    letterSpacing: 1.5,
   },
 })

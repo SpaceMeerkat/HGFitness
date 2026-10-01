@@ -1,9 +1,11 @@
 import { PricingStyles } from '@/components/premium/PricingStyles';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { Alert, ImageBackground, Pressable, Text, View } from 'react-native';
+import { Alert, ImageBackground, Pressable, ScrollView, Text, View } from 'react-native';
 import { useAppContext } from "../appContext";
 import { SubscriptionPayment } from "../premium/PremiumPayment";
+import { PLAN_BENEFITS } from "./PlanBenefits";
 
 type PricingPricingProps = {
     typeString: "free" | "subscription" | "premium";
@@ -25,78 +27,24 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
       premium: "79",
     };
 
+    const title_dict: Record<"free" | "subscription" | "premium", string> = {
+      free: "Free tier",
+      subscription: "Subscription",
+      premium: "Premium",
+    };
+
     const itemCategory = item_category_dict[typeString];
     const itemPrice = price_category_dict[typeString];
 
-      // Dictionary of benefits
-      const premiumBenefits: { yes: string[]; no: string[] } = {
-        yes: [
-          "Gym program progress tracking",
-          "One shot gym program tracking",
-          "Meal nutrition tracking",
-          "Individual exercise progress monitoring",
-          "Fresh gym programs every month",
-          "Unlimited gym program re-tracking",
-          "Expanded meal options",
-          "Guided nutrition tracking",
-          "Expanded exercise progress monitoring"
-        ],
-        no: [
-        ],
-      };
-
-      const subscriptionBenefits: { yes: string[]; no: string[] } = {
-        yes: [
-          "Gym program progress tracking",
-          "One shot gym program tracking",
-          "Meal nutrition tracking",
-          "Individual exercise progress monitoring",
-          "Fresh gym programs every month",
-        ],
-        no: [
-          "Unlimited gym program re-tracking",
-          "Expanded meal options",
-          "Guided nutrition tracking",
-          "Expanded exercise progress monitoring"
-        ],
-      };
-
-      const freeBenefits: { yes: string[]; no: string[] } = {
-        yes: [
-          "Gym program progress tracking",
-          "One shot gym program tracking",
-          "Meal nutrition tracking",
-          "Individual exercise progress monitoring",
-        ],
-        no: [
-          "Fresh gym programs every month",
-          "Unlimited gym program re-tracking",
-          "Expanded meal options",
-          "Guided nutrition tracking",
-          "Expanded exercise progress monitoring"
-        ],
-      };
-
-      const benefitsMap: Record<string, { yes: string[]; no: string[] }> = {
-        premium: premiumBenefits,
-        subscription: subscriptionBenefits,
-        free: freeBenefits,
-      };
-
       const renderBenefit = (text: string, type: "yes" | "no", index: number) => {
-        const iconName = type === "yes" ? "checkmark" : "close-outline";
-        const iconColor = type === "yes" ? "lime" : "red";
+        const included = type === "yes";
 
         return (
-          <View key={`${type}-${index}`} style={PricingStyles.cell}>
-            <View style={PricingStyles.infoRow}>
-              <View style={PricingStyles.infoIcon}>
-                <Ionicons name={iconName} size={24} color={iconColor} />
-              </View>
-              <View style={PricingStyles.infoTextContainer}>
-                <Text style={PricingStyles.infoText}>{text}</Text>
-              </View>
+          <View key={`${type}-${index}`} style={PricingStyles.benefitRow}>
+            <View style={[PricingStyles.benefitIcon, included ? PricingStyles.benefitIconYes : PricingStyles.benefitIconNo]}>
+              <Ionicons name={included ? "checkmark" : "close"} size={14} color={included ? "lime" : "#6b6b6b"} />
             </View>
+            <Text style={[PricingStyles.benefitText, !included && PricingStyles.benefitTextNo]}>{text}</Text>
           </View>
         );
       };
@@ -112,40 +60,32 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
     };
 
     const renderModal = () => {
-      const benefits = benefitsMap[typeString] || { yes: [], no: [] };
-      
+      const benefits = PLAN_BENEFITS[typeString] || { yes: [], no: [] };
+      const isFree = itemCategory === "free";
+
     return (
-        <View style={PricingStyles.modalContent}>
-        {/* Color block imageBackground */}
-        <ImageBackground source={imageSourceString(typeString)} resizeMode="stretch" style={[PricingStyles.colorCell, {overflow: 'hidden'}]}>
-          {/* Title */}
-          <View style={PricingStyles.titleRow}>
-              <View style={PricingStyles.cell}>
-              <Text style={PricingStyles.titleText}>{typeString}</Text>
-              </View>
-          </View>
-
-          {/* Price */}
+        <View style={PricingStyles.content}>
+        {/* Hero: tier artwork with title and price */}
+        <ImageBackground source={imageSourceString(typeString)} resizeMode="stretch" style={PricingStyles.hero}>
+          <LinearGradient
+            pointerEvents="none"
+            colors={['rgba(0, 0, 0, 0.15)', 'rgba(0, 0, 0, 0.55)']}
+            style={PricingStyles.heroOverlay}
+          />
+          <Text style={PricingStyles.heroTitle}>{title_dict[typeString]}</Text>
           <View style={PricingStyles.priceRow}>
-              <View style={PricingStyles.cell}>
-              <Text style={PricingStyles.cellPriceText}>R{itemPrice}</Text>
-              </View>
-          </View>
-
-          {/* Price cadence */}
-          <View style={PricingStyles.cadenceRow}>
-              <View style={PricingStyles.cell}>
-              <Text style={PricingStyles.cellPriceSubText}>per month</Text>
-              </View>
+            <Text style={PricingStyles.priceCurrency}>R</Text>
+            <Text style={PricingStyles.priceText}>{itemPrice}</Text>
+            <Text style={PricingStyles.priceCadence}>/ month</Text>
           </View>
         </ImageBackground>
 
-        <View style={PricingStyles.infoContainer}>
-          {/* Yes benefits */}
+        <ScrollView style={PricingStyles.benefitsScroll} contentContainerStyle={PricingStyles.benefitsContent} showsVerticalScrollIndicator={false}>
+          {benefits.yes.length > 0 && <Text style={PricingStyles.sectionLabel}>{"WHAT'S INCLUDED"}</Text>}
           {benefits.yes.map((benefit, index) => renderBenefit(benefit, "yes", index))}
-          {/* No benefits */}
+          {benefits.no.length > 0 && <Text style={[PricingStyles.sectionLabel, { paddingTop: 14 }]}>NOT INCLUDED</Text>}
           {benefits.no.map((benefit, index) => renderBenefit(benefit, "no", index))}
-        </View>
+        </ScrollView>
 
         {/* Purchase Button */}
         <Pressable onPress={itemCategory === "free" ? () => {} : async () => {
@@ -155,8 +95,15 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
           }
           await SubscriptionPayment({ itemCategory, profile, setProfile });
         }}
-        style={[PricingStyles.purchaseButton, itemCategory === "free"? {opacity: 0.3}: {}]}>
-            <Text style={PricingStyles.purchaseText}>PURCHASE</Text>
+        style={({ pressed }) => [PricingStyles.purchaseButton, isFree ? { opacity: 0.3 } : pressed ? { opacity: 0.8 } : {}]}>
+          <LinearGradient
+            colors={isFree ? ['#4a4a4a', '#2a2a2a'] : ['#6dff47', '#1fae00']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={PricingStyles.purchaseGradient}
+          >
+            <Text style={[PricingStyles.purchaseText, isFree && { color: 'white' }]}>PURCHASE</Text>
+          </LinearGradient>
         </Pressable>
         </View>
     );

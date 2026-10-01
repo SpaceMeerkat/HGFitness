@@ -1,4 +1,5 @@
 import { useAppContext } from "@/components/appContext";
+import { CardSheen, shineStyles, SilverBadge } from "@/components/CardShine";
 import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -339,11 +340,6 @@ export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handle
     }
       
 
-    const images: Record<string, any> = {
-    "4": require("@/assets/images/4Days.png"),
-    "2": require("@/assets/images/2Days.png"),
-    };
-
     const handlePress = async () => {
         const programRawData = trackingData[cardTitle]
         if (programRawData !== null && programRawData !== undefined) {
@@ -363,13 +359,16 @@ export function SubscriptionProgramCard({ cardImage, cardTitle, cardInfo, handle
                 height: cardTitle != "NotPremium" ? 70 : 70, paddingBottom: cardTitle != "NotPremium" ? 8 : 5}]
                 }>
                 {content}
+                <CardSheen />
                 {cardTitle != "NotPremium" && (
-                    <View style={{ flex: 0.25 }}>
-                        <Image source={images[cardInfo]} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
+                    <View style={{ flex: 0.25, height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                        <SilverBadge>
+                            <Text style={shineStyles.badgeNumber}>{cardInfo}</Text>
+                        </SilverBadge>
                     </View>
                 )}
                 <View style={{ flex: 1, paddingLeft: cardTitle != "NotPremium"? 16 : 4}}>
-                    <Text style={{ fontFamily: 'Edo', color: 'white', fontSize: cardTitle != "NotPremium"? 26 :20 }}>{shortCardTitle}</Text>
+                    <Text style={[shineStyles.glowTitle, { fontSize: cardTitle != "NotPremium"? 26 :20 }]}>{shortCardTitle}</Text>
                 </View>
                 {cardTitle != "NotPremium" && (
                     <View style={{ flex: 0.3, paddingRight: 10 }}>
