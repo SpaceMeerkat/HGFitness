@@ -275,8 +275,13 @@ export function ProfileOverview() {
         <View style={{ position: 'relative' }}>
           <TouchableOpacity
             onPress={() => setChangeUsernameVisible(true)}
-            style={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }}>
-            <Ionicons name="pencil-outline" size={20} color="white" />
+            style={{
+              position: 'absolute', top: 12, right: 12, zIndex: 10, elevation: 10,
+              width: 32, height: 32, borderRadius: 16,
+              backgroundColor: 'rgba(255,255,255,0.08)',
+              justifyContent: 'center', alignItems: 'center',
+            }}>
+            <Ionicons name="pencil-outline" size={16} color="white" />
           </TouchableOpacity>
 
         <Wrapper
@@ -289,59 +294,86 @@ export function ProfileOverview() {
           style={{
             flex: 0.25,
             borderWidth: 1,
-            borderRadius: 4,
-            borderColor: "grey",
-            backgroundColor: 'black',
-            overflow: 'hidden'
+            borderRadius: 20,
+            borderColor: "rgba(255,255,255,0.14)",
+            backgroundColor: '#111111',
+            overflow: 'hidden',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.45,
+            shadowRadius: 10,
+            elevation: 6,
           }}
         >
         {/* Main header component */}
         <View style={{
           flexDirection: "row",
-          paddingTop: 12,
-          paddingHorizontal: 14,
+          alignItems: 'center',
+          paddingTop: 16,
+          paddingHorizontal: 16,
         }}>
           {/* Profile image - pressable */}
-          <Pressable onPress={handleProfileImageClick} style={{flex: 0.5}}>
-            <View>
-              <Image source={profileAvatar ? { uri: profileAvatar } : require("@/assets/images/appIcon.png")} style={{ width: 100, height: 100, borderRadius: 50, borderWidth: 2, borderColor: 'white' }} />
+          <Pressable onPress={handleProfileImageClick}>
+            <View style={{ borderRadius: 50, padding: 3, borderWidth: 2, borderColor: premium ? '#ffd54d' : 'rgba(255,255,255,0.5)' }}>
+              <Image source={profileAvatar ? { uri: profileAvatar } : require("@/assets/images/appIcon.png")} style={{ width: 88, height: 88, borderRadius: 44 }} />
             </View>
           </Pressable>
 
           {/* Profile mini info - username and sex */}
-          <View style={{ flex: 0.8, justifyContent: "center" }}>
-            <Text style={DefaultTabStyles.defaultBoldText}>{profile.username}</Text>
-            <Text style={[DefaultTabStyles.defaultBodyText, {fontSize: 14}]}>Account level: {accountLevel}</Text>
+          <View style={{ flex: 1, justifyContent: "center", marginLeft: 16 }}>
+            <Text style={[DefaultTabStyles.defaultBoldText, { fontSize: 21 }]}>{profile.username}</Text>
+            <View style={{
+              flexDirection: 'row',
+              alignSelf: 'flex-start',
+              alignItems: 'center',
+              marginTop: 8,
+              paddingVertical: 4,
+              paddingHorizontal: 10,
+              borderRadius: 12,
+              backgroundColor: premium ? 'rgba(255,213,77,0.15)' : accountLevel === 'subscription' ? 'rgba(0,195,165,0.15)' : 'rgba(255,255,255,0.08)',
+            }}>
+              <Ionicons
+                name={premium ? "star" : accountLevel === 'subscription' ? "sparkles" : "person"}
+                size={12}
+                color={premium ? '#ffd54d' : accountLevel === 'subscription' ? '#00c3a5' : '#aaa'}
+              />
+              <Text style={{
+                color: premium ? '#ffd54d' : accountLevel === 'subscription' ? '#00c3a5' : '#aaa',
+                fontSize: 12, fontWeight: '600', marginLeft: 5, textTransform: 'capitalize',
+              }}>
+                {accountLevel}
+              </Text>
+            </View>
           </View>
         </View>
 
         {/* Main stats bar */}
-        <View style={{flex: 1, paddingVertical: 8}}>
+        <View style={{marginHorizontal: 16, marginTop: 16, marginBottom: 4, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.04)', paddingVertical: 14}}>
           <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
             <View style={{flex: 0.35, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
-                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[2]}</Text>
+                <Text style={{color: 'white', fontSize: 28, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[2]}</Text>
               </View>
               <View style={{flex: 0.3}}>
-                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Sessions</Text>
+                <Text style={{color: '#999', fontSize: 12, fontWeight: '600', textAlign: 'center', letterSpacing: 0.5}}>SESSIONS</Text>
               </View>
             </View>
-            <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
+            <View style={{width: 1, alignSelf: 'stretch', backgroundColor: 'rgba(255,255,255,0.12)'}}/>
             <View style={{flex: 0.3, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
-                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[1]}</Text>
+                <Text style={{color: 'white', fontSize: 28, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[1]}</Text>
               </View>
               <View style={{flex: 0.3}}>
-                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Level</Text>
+                <Text style={{color: '#999', fontSize: 12, fontWeight: '600', textAlign: 'center', letterSpacing: 0.5}}>LEVEL</Text>
               </View>
             </View>
-            <View style={{flex: 0.01, flexDirection: 'column', backgroundColor: 'white', maxWidth: 2}}/>
+            <View style={{width: 1, alignSelf: 'stretch', backgroundColor: 'rgba(255,255,255,0.12)'}}/>
             <View style={{flex: 0.35, flexDirection: 'column'}}>
               <View style={{flex: 0.7}}>
-                <Text style={{color: 'white', fontSize: 32, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[0]}</Text>
+                <Text style={{color: 'white', fontSize: 28, textAlign: 'center', fontFamily: 'Edo'}}>{achievements[0]}</Text>
               </View>
               <View style={{flex: 0.3}}>
-                <Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center'}}>Programs</Text>
+                <Text style={{color: '#999', fontSize: 12, fontWeight: '600', textAlign: 'center', letterSpacing: 0.5}}>PROGRAMS</Text>
               </View>
             </View>
           </View>

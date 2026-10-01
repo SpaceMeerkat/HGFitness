@@ -77,6 +77,7 @@ export default function MyPrograms() {
   );
 
   console.log("purchase queue: ", profile?.purchaseQueue);
+  console.log(myPrograms);
 
   useEffect(() => {
     if (!profile) {

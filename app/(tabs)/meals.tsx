@@ -248,7 +248,8 @@ export default function MealScreen() {
             onPress={() => setOverlayVisible(false)}
             style={MealTrackingStyles.TrackingBackButton}
           >
-            <Text style={{color: "white", fontSize: 16, fontWeight: 'bold', paddingBottom: 10}}>Back</Text>
+            <Ionicons name="chevron-back" size={16} color="white" style={{marginRight: 2}} />
+            <Text style={{color: "white", fontSize: 15, fontWeight: '600'}}>Back</Text>
         </TouchableOpacity>
         <View style={activeMeal === 'water'
           ? [MealTrackingStyles.TrackingOptionsContainer, { height: 'auto' as const, maxHeight: '75%' as const }]
@@ -271,7 +272,7 @@ export default function MealScreen() {
                 return (
                   <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
                     <View style={MealTrackingStyles.MealOptionLayoutContainer}>
-                      <View style={{ flex: 1, flexDirection: 'column' }}>
+                      <View style={{ flex: 1, flexDirection: 'column', borderRadius: 14, overflow: 'hidden' }}>
                           {/* Background image layer */}
                           <View style={{ flex: 0.95, flexDirection: 'row' }}>
                             <ImageBackground source={premiumImage} resizeMode="contain" style={{...StyleSheet.absoluteFillObject, opacity: 0.15}}/>
@@ -296,7 +297,7 @@ export default function MealScreen() {
                     <PremiumRibbon />
                     <View key={index} style={MealTrackingStyles.MealOptionOuterContainer}>
                       <View style={MealTrackingStyles.MealOptionLayoutContainer}>
-                        <View style={{ flex: 1, flexDirection: 'column' }}>
+                        <View style={{ flex: 1, flexDirection: 'column', borderRadius: 14, overflow: 'hidden' }}>
                           {/* Background image layer */}
                           <View style={{ flex: 0.95, flexDirection: 'row' }}>
                             <ImageBackground source={premiumImage} resizeMode="contain" style={{...StyleSheet.absoluteFillObject, opacity: 0.15}} />
@@ -329,28 +330,36 @@ export default function MealScreen() {
                       }}
                     >
                       {/* Meal name */}
-                      <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
-                        <Text style={{ color: "white", fontSize: 22, fontWeight: 'bold', textAlign: 'center' }}>{item.name}</Text>
+                      <View style={{ flex: 0.5, borderRadius: 10, overflow: 'hidden', marginBottom: 8 }}>
+                        <LinearGradient
+                          colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0)', 'rgba(255,255,255,0.12)']}
+                          locations={[0, 0.5, 1]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' }}
+                        >
+                          <Text style={{ color: "white", fontSize: 20, fontWeight: '600', textAlign: 'center' }}>{item.name}</Text>
+                        </LinearGradient>
                       </View>
 
                       {/* Protein + Calories */}
-                      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center', paddingBottom: 10 }}>
-                        <View style={{ flex: 0.5, paddingTop: 5, paddingRight: 5 }}>
-                          <Text style={{ color: "white", fontSize: 14, textAlign: 'right' }}>
-                            Protein {item.protein[item.activeVersion]}
-                            <MaterialCommunityIcons name="food-drumstick" size={14} color="brown" />
-                          </Text>
+                      <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingBottom: 10 }}>
+                        <View style={{ flex: 0.5, alignItems: 'flex-end', paddingRight: 5 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={{ color: "white", fontSize: 13 }}>{item.protein[item.activeVersion]}g protein</Text>
+                            <MaterialCommunityIcons name="food-drumstick" size={13} color="brown" style={{marginLeft: 5}} />
+                          </View>
                         </View>
-                        <View style={{ flex: 0.5, paddingTop: 5, paddingLeft: 5 }}>
-                          <Text style={{ color: "white", fontSize: 14, textAlign: 'left' }}>
-                            Calories {item.calories[item.activeVersion]}
-                            <FontAwesome6 name="fire" size={14} color="orange" />
-                          </Text>
+                        <View style={{ flex: 0.5, alignItems: 'flex-start', paddingLeft: 5 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={{ color: "white", fontSize: 13 }}>{item.calories[item.activeVersion]} cal</Text>
+                            <FontAwesome6 name="fire" size={13} color="orange" style={{marginLeft: 5}} />
+                          </View>
                         </View>
                       </View>
 
                       {/* Version size indicator - burger icons in bottom-right of card, tiny gap between each */}
-                      {Array.from({ length: item.activeVersion + 2 }).map((_, i) => (
+                      {Array.from({ length: item.activeVersion + 1 }).map((_, i) => (
                         <MaterialCommunityIcons
                           key={`burger_${i}`}
                           name="food-apple"
@@ -361,7 +370,7 @@ export default function MealScreen() {
                       ))}
 
                       {/* Add button */}
-                      <View style={{ flex: 0.5, flexDirection: 'row', backgroundColor: 'black', justifyContent: 'center' }}>
+                      <View style={{ flex: 0.5, flexDirection: 'row', justifyContent: 'center', paddingHorizontal: 30 }}>
                         <TouchableOpacity
                           onPress={() => {
                             const currentVersion = item.activeVersion;
@@ -388,13 +397,14 @@ export default function MealScreen() {
                           }}
                           style={MealTrackingStyles.AddMealButton}
                         >
-                          <Text style={{ color: "white", fontSize: 16, textAlign: 'center' }}>Add</Text>
+                          <Text style={{ color: "white", fontSize: 15, fontWeight: '600', textAlign: 'center' }}>Add</Text>
                         </TouchableOpacity>
                       </View>
 
                       {/* Change version button */}
                       <TouchableOpacity
                         style={MealTrackingStyles.MealInfoButton}
+                        // activeOpacity={0.2}
                         onPress={() => {
                           const mealIndex = index + 1;
                           const newVersion = (item.activeVersion + 1) % item.version.length;
@@ -421,10 +431,10 @@ export default function MealScreen() {
 
   const renderMeals = () => {
     const iconDict: Record<string, React.ReactNode> = {
-      Breakfast: <MaterialCommunityIcons name="egg-fried" size={24} color="gold" />,
-      Lunch: <MaterialCommunityIcons name="hamburger" size={24} color="chocolate" />,
-      Dinner: <MaterialCommunityIcons name="food-turkey" size={24} color="brown" />,
-      Snack: <FontAwesome6 name="apple-whole" size={24} color="lime" />,
+      Breakfast: <MaterialCommunityIcons name="egg-fried" size={18} color="gold" />,
+      Lunch: <MaterialCommunityIcons name="hamburger" size={18} color="chocolate" />,
+      Dinner: <MaterialCommunityIcons name="food-turkey" size={18} color="brown" />,
+      Snack: <FontAwesome6 name="apple-whole" size={17} color="lime" />,
     };
     return (
       <>
@@ -555,14 +565,21 @@ export default function MealScreen() {
 
         {/* Meals section */}
 
-        {["Breakfast", "Lunch", "Dinner", "Snack"].map(meal => (
+        {["Breakfast", "Lunch", "Dinner", "Snack"].map(meal => {
+          const mealItems = getMealNames(meal, dictionary, mealPrograms);
+          return (
 
           <Pressable onLongPress={() => setRemovableIcons(true)} key={meal} style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 10, paddingVertical: 6}}>
-            <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 4, borderColor: 'grey', paddingHorizontal: 10, paddingVertical: 4}}>
-              <Text style={{textAlign: 'left', color: 'white', fontSize: 22}}>{iconDict[meal]} {meal}</Text>
-              <View style={{height: 1, backgroundColor: 'white'}} />
-              {getMealNames(meal, dictionary, mealPrograms).map(({ mealName, calorieValue, proteinValue, mealProgramIndex, storedVersion }, index) => (
-                <View key={`${meal}_${index}`} style={{ paddingVertical: 8, paddingHorizontal: 5, flexDirection: 'row' }}>
+            <View style={MealTrackingStyles.MealCategoryCard}>
+              <View style={MealTrackingStyles.MealCategoryHeaderRow}>
+                <View style={MealTrackingStyles.MealCategoryIconBadge}>
+                  {iconDict[meal]}
+                </View>
+                <Text style={MealTrackingStyles.MealCategoryTitle}>{meal}</Text>
+              </View>
+              <View style={MealTrackingStyles.MealCategoryTitleDivider} />
+              {mealItems.map(({ mealName, calorieValue, proteinValue, mealProgramIndex, storedVersion }, index) => (
+                <View key={`${meal}_${index}`} style={[MealTrackingStyles.MealItemRow, index === mealItems.length - 1 ? {borderBottomWidth: 0} : null]}>
                   {removableIcons === true ? (
                   <Pressable onPress={() => {
                     const mealarg = meal;
@@ -590,30 +607,40 @@ export default function MealScreen() {
                     }}
                   >
                     <View style={{flex:0.7, flexDirection:'column'}}>
-                      <Text style={{ color: "white", fontSize: 18 }}>{mealName}</Text>
+                      <Text style={MealTrackingStyles.MealItemName}>{mealName}</Text>
                     </View>
                     <View style={{flex:0.3, flexDirection:'column'}}>
-                      <Text style={{ color: "white", fontSize: 18, textAlign: 'right'}}>{calorieValue} <FontAwesome6 name="fire" size={14} color="orange" /></Text>
+                      <Text style={MealTrackingStyles.MealItemCalories}>{calorieValue} <FontAwesome6 name="fire" size={13} color="orange" /></Text>
                     </View>
                   </TouchableOpacity>
                 </View>
               ))}
-              <TouchableOpacity onPress={() => {
-                const mealarg = meal;
-                handleMealPress({mealarg, setActiveMeal, setOverlayVisible})}
+              <TouchableOpacity
+                style={MealTrackingStyles.MealAddFoodButton}
+                onPress={() => {
+                  const mealarg = meal;
+                  handleMealPress({mealarg, setActiveMeal, setOverlayVisible})}
                 }>
-                <Text style={{color: 'grey', fontSize: 20, paddingTop: 8}}> <Ionicons name="add-circle-outline" size={20} color="grey" textAlignVertical='center' /> Add food</Text>
+                <Ionicons name="add-circle-outline" size={16} color="grey" />
+                <Text style={{color: 'grey', fontSize: 14, marginLeft: 6}}>Add food</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
-        ))}
+        )})}
 
         <Pressable onLongPress={() => setRemovableIcons(true)} style={{flex: 0.16, flexDirection: 'column', width: '100%', paddingHorizontal: 10, paddingVertical: 6}}>
-          <View style={{flex: 1, backgroundColor: 'black', borderWidth: 1, borderRadius: 4, borderColor: 'grey', paddingHorizontal: 10, paddingVertical: 4}}>
-            <Text style={{textAlign: 'left', color: 'white', fontSize: 22}}><FontAwesome6 name="bottle-water" size={20} color="cyan" textAlignVertical='bottom' /> Water</Text>
-            <View style={{height: 1, backgroundColor: 'white'}} />
-            {getWaterNames('water', dictionary).map((mealName?: any, index?: any) => (
-                <View key={`${'water'}_${index}`} style={{ paddingVertical: 8, paddingHorizontal: 5, flexDirection: 'row' }}>
+          <View style={MealTrackingStyles.MealCategoryCard}>
+            <View style={MealTrackingStyles.MealCategoryHeaderRow}>
+              <View style={MealTrackingStyles.MealCategoryIconBadge}>
+                <FontAwesome6 name="bottle-water" size={16} color="cyan" />
+              </View>
+              <Text style={MealTrackingStyles.MealCategoryTitle}>Water</Text>
+            </View>
+            <View style={MealTrackingStyles.MealCategoryTitleDivider} />
+            {(() => {
+              const waterItems = getWaterNames('water', dictionary);
+              return waterItems.map((mealName?: any, index?: any) => (
+                <View key={`${'water'}_${index}`} style={[MealTrackingStyles.MealItemRow, index === waterItems.length - 1 ? {borderBottomWidth: 0} : null]}>
                   {removableIcons === true ? (
                   <Pressable onPress={() => {
                     const mealarg = 'water'
@@ -621,21 +648,25 @@ export default function MealScreen() {
                     const calorieValue = 0;
                     const proteinValue = 0;
                     const waterValue = mealName;
-                    removeMealItem({mealarg, index, dictionary, trackingData, mealValue, calorieValue, proteinValue, waterValue, setDictionary, storeTrackingAsync, setTrackingData}) 
+                    removeMealItem({mealarg, index, dictionary, trackingData, mealValue, calorieValue, proteinValue, waterValue, setDictionary, storeTrackingAsync, setTrackingData})
                   }} style={{flex:0.15, flexDirection:'column'}}>
                     <Ionicons name="remove-circle-outline" size={24} color="red" />
                   </Pressable>
                   ) : null}
                   <View style={{flex:0.85, flexDirection:'column'}}>
-                    <Text style={{ color: "white", fontSize: 18 }}>{mealName} litres</Text>
+                    <Text style={MealTrackingStyles.MealItemName}>{mealName} litres</Text>
                   </View>
                 </View>
-              ))}
-            <TouchableOpacity onPress={() => {
-              const mealarg = 'water';
-              handleMealPress({mealarg, setActiveMeal, setOverlayVisible})}
-            }>
-             <Text style={{color: 'grey', fontSize: 20, paddingTop: 8}}> <Ionicons name="add-circle-outline" size={20} color="grey" textAlignVertical='bottom' /> Add water</Text>
+              ));
+            })()}
+            <TouchableOpacity
+              style={MealTrackingStyles.MealAddFoodButton}
+              onPress={() => {
+                const mealarg = 'water';
+                handleMealPress({mealarg, setActiveMeal, setOverlayVisible})}
+              }>
+              <Ionicons name="add-circle-outline" size={16} color="grey" />
+              <Text style={{color: 'grey', fontSize: 14, marginLeft: 6}}>Add water</Text>
             </TouchableOpacity>
           </View>
         </Pressable>

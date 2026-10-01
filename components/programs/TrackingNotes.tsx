@@ -1,4 +1,5 @@
 import { TrackingNotesStyles } from "@/components/HGStyles";
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import React, { useEffect, useState } from 'react';
 import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { normalizeNotes, parseAlternativeTriggerNote, splitNotes } from './NotesUtils';
@@ -79,8 +80,10 @@ interface NotesProps {
                     <Text key={i} style={{fontSize: 13, marginBottom: 4}}>
                       {parsed ? (
                         <>
-                          <Text style={{color: levelColor}}>{parsed.original}</Text>
-                          <Text style={{color: 'white'}}> was swapped for </Text>
+                          <Text style={{color: 'white'}}>{parsed.original}</Text>
+                          <Text style={{color: 'white'}}> </Text>
+                          <FontAwesome5 name="exchange-alt" size={11} color="white" />
+                          <Text style={{color: 'white'}}> </Text>
                           <Text style={{color: levelColor}}>{parsed.alternative}</Text>
                         </>
                       ) : (

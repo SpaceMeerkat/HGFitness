@@ -1,6 +1,6 @@
 import { useAppContext } from "@/components/appContext";
 import { ShopStyles } from "@/components/HGStyles";
-import { CompletedGymCard, FreeSessionsCard, MyProgramCard, SubscriptionProgramCard } from "@/components/programs/MyProgramsCard";
+import { CompletedGymCard, EmptyCompletedProgramsCard, FreeSessionsCard, MyProgramCard, SubscriptionProgramCard } from "@/components/programs/MyProgramsCard";
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { S3_API_URL } from "../network/apiConfig";
@@ -98,6 +98,15 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
         )}
 
           <>
+            {/* Section Header Monthly Programs */}
+            <View style={{flexDirection: "row", paddingVertical: 10, alignItems: "center", justifyContent: "center"}}>
+              <View style={{flex:0.25, backgroundColor: "white", height: 1, paddingLeft: 16}}></View>
+              <View style={{flex:0.5, alignItems: "center", justifyContent: "center", paddingHorizontal: 8}}>
+                <Text style={{color: "white"}}>Monthly Programs</Text>
+              </View>
+              <View style={{flex:0.25, backgroundColor: "white", height: 1, paddingRight: 16}}></View>
+            </View>
+
             {Object.keys(myPrograms)
               .filter(key =>
                 key.toLowerCase().includes("subscription2day") ||
@@ -192,13 +201,18 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
         </View>
 
         {/* Display Completed Programs */}
-        {Object.keys(purchasedPrograms).length > 0 ? (
-          Object.keys(purchasedPrograms).map((programName: string, index: number) => {
-            if (programName.toLowerCase().includes('subscription')) {
-              return null;
-            } if (programName.toLowerCase().includes('singlesession')) {
-              return null;
-            } if (trackingDataSoft[programName]['completed']) {
+        {(() => {
+          const completedProgramNames = Object.keys(purchasedPrograms || {}).filter((programName: string) => {
+            if (programName.toLowerCase().includes('subscription')) return false;
+            if (programName.toLowerCase().includes('singlesession')) return false;
+            return trackingDataSoft?.[programName]?.['completed'] === true;
+          });
+
+          if (completedProgramNames.length === 0) {
+            return <EmptyCompletedProgramsCard />;
+          }
+
+          return completedProgramNames.map((programName: string, index: number) => {
             const programDetails = purchasedPrograms[programName]; // Get the details for each program
             return (
               <CompletedGymCard
@@ -208,11 +222,9 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
                 cardTitle={programName}  // Display the program name
                 cardInfo={`${programDetails.days} days/week`}  // Display number of days per week
               />
-            );}
-          })
-        ) : (
-          <Text style={{color: 'white', textAlign: 'center'}}>No completed programs yet, get tracking!</Text>
-        )}
+            );
+          });
+        })()}
 
       </ScrollView>
   );

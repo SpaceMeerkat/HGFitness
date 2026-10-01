@@ -6,7 +6,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ImageBackground, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export type TrackingData = {
   datestamp: Date;
@@ -55,8 +55,16 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
     const handleAddMealClick = (openWindow: boolean) => {
         setInstructionsVisible(openWindow);
         setCurrentInstructions(null);
-        setCurrentIngredients(null); 
+        setCurrentIngredients(null);
         addMealItem({key, dictionary, itemarg, trackingData, mealValue, calorieValue, proteinValue, waterValue, setDictionary, storeTrackingAsync, setTrackingData, setOverlayVisible})
+      }
+
+    const handleUpsizeClick = () => {
+        const mealIndex = currentMealIndex + 1;
+        const newVersion = (mealProgramState[activeMeal][mealIndex].activeVersion + 1) % mealVersions;
+        updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
+        setCurrentInstructions(mealProgramState[activeMeal][mealIndex].how[newVersion].split('/'))
+        setCurrentIngredients(mealProgramState[activeMeal][mealIndex].ingredients[newVersion])
       }
 
     const mealVersions = versionLength;
@@ -89,25 +97,18 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
 
                     <View style={{flex: 0.25, flexDirection: 'column'}}>
                     {/* Prtein and calries bar */}
-                    <Pressable 
-                        onPress={() => {
-                            const mealIndex = currentMealIndex + 1;
-                            const newVersion = (mealProgramState[activeMeal][mealIndex].activeVersion + 1) % mealVersions; 
-                            updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
-                            setCurrentInstructions(mealProgramState[activeMeal][mealIndex].how[newVersion].split('/')),
-                            setCurrentIngredients(mealProgramState[activeMeal][mealIndex].ingredients[newVersion])
-                        }}
-                        style={({ pressed }) => ({
+                    <View
+                        style={{
                         flex: 1,
                         flexDirection: 'column',
                         paddingTop: 10,
                         paddingBottom: 10,
                         borderWidth: 2,
                         borderRadius: 8,
-                        borderColor: pressed ? 'limegreen' : 'grey',
-                        backgroundColor: pressed ? 'green' : 'black',
+                        borderColor: 'grey',
+                        backgroundColor: 'black',
                         overflow: 'hidden'
-                        })}>
+                        }}>
                         <View style={{flex: 1, flexDirection: 'row'}}>
                             <View style={{flex: 1}}/>
                             <View style={{flex: 2}}>
@@ -123,10 +124,8 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                                 </View>
                             </View>
                             <View style={{flex: 1.5}}>
-                                <View style={{flex: 1, flexDirection: 'column'}}>
-                                    <View style={{flex: 1, paddingHorizontal: 15, justifyContent: 'center'}}>
-                                        <Entypo name="arrow-with-circle-up" size={30} color="lime" style={{textAlign: 'center'}} />
-                                    </View>
+                                <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+                                    <View style={{width: 1, height: '70%', backgroundColor: 'rgba(255,255,255,0.15)'}} />
                                 </View>
                             </View>
                             <View style={{flex: 2}}>
@@ -141,7 +140,7 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                             </View>
                             <View style={{flex: 1}}/>
                         </View>
-                    </Pressable>
+                    </View>
                     </View>
 
                     <View style={{flex: 0.1, flexDirection: 'column', paddingVertical: 10}}>
@@ -162,14 +161,25 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                         <View style={{ height: 18, width: (activeVersion + 1) * 18.5 }} />
                     </View>
 
-                    {/* Add the addMeal button here */}
-                    <View style={{flexDirection: 'row', justifyContent: 'center', paddingBottom: 20}}>
-                        <TouchableOpacity onPress={() => handleAddMealClick(false)} activeOpacity={0.8}>
+                    {/* Upsize and addMeal buttons, side by side */}
+                    <View style={{flexDirection: 'row', justifyContent: 'center', paddingBottom: 20, gap: 12}}>
+                        <TouchableOpacity onPress={handleUpsizeClick} activeOpacity={0.8} style={{flex: 1, maxWidth: 150}}>
                             <LinearGradient
                                 colors={['#1a1a1a', '#000000']}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
-                                style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, borderWidth: 1.5, borderColor: 'lime'}}
+                                style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 100, borderWidth: 1.5, borderColor: 'lime'}}
+                            >
+                                <Entypo name="arrow-with-circle-up" size={18} color="lime" />
+                                <Text style={{color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 6}}>Upsize</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleAddMealClick(false)} activeOpacity={0.8} style={{flex: 1, maxWidth: 150}}>
+                            <LinearGradient
+                                colors={['#1a1a1a', '#000000']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 100, borderWidth: 1.5, borderColor: 'lime'}}
                             >
                                 <Ionicons name="add-circle-outline" size={18} color="lime" />
                                 <Text style={{color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 6}}>Add</Text>
