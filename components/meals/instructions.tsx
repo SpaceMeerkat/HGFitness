@@ -55,8 +55,16 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
     const handleAddMealClick = (openWindow: boolean) => {
         setInstructionsVisible(openWindow);
         setCurrentInstructions(null);
-        setCurrentIngredients(null); 
+        setCurrentIngredients(null);
         addMealItem({key, dictionary, itemarg, trackingData, mealValue, calorieValue, proteinValue, waterValue, setDictionary, storeTrackingAsync, setTrackingData, setOverlayVisible})
+      }
+
+    const handleUpsizeClick = () => {
+        const mealIndex = currentMealIndex + 1;
+        const newVersion = (mealProgramState[activeMeal][mealIndex].activeVersion + 1) % mealVersions;
+        updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
+        setCurrentInstructions(mealProgramState[activeMeal][mealIndex].how[newVersion].split('/'))
+        setCurrentIngredients(mealProgramState[activeMeal][mealIndex].ingredients[newVersion])
       }
 
     const mealVersions = versionLength;
@@ -89,25 +97,18 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
 
                     <View style={{flex: 0.25, flexDirection: 'column'}}>
                     {/* Prtein and calries bar */}
-                    <Pressable 
-                        onPress={() => {
-                            const mealIndex = currentMealIndex + 1;
-                            const newVersion = (mealProgramState[activeMeal][mealIndex].activeVersion + 1) % mealVersions; 
-                            updateActiveVersion({activeMeal, mealIndex, newVersion, setMealProgramsState})
-                            setCurrentInstructions(mealProgramState[activeMeal][mealIndex].how[newVersion].split('/')),
-                            setCurrentIngredients(mealProgramState[activeMeal][mealIndex].ingredients[newVersion])
-                        }}
-                        style={({ pressed }) => ({
+                    <View
+                        style={{
                         flex: 1,
                         flexDirection: 'column',
                         paddingTop: 10,
                         paddingBottom: 10,
                         borderWidth: 2,
                         borderRadius: 8,
-                        borderColor: pressed ? 'limegreen' : 'grey',
-                        backgroundColor: pressed ? 'green' : 'black',
+                        borderColor: 'grey',
+                        backgroundColor: 'black',
                         overflow: 'hidden'
-                        })}>
+                        }}>
                         <View style={{flex: 1, flexDirection: 'row'}}>
                             <View style={{flex: 1}}/>
                             <View style={{flex: 2}}>
@@ -123,10 +124,8 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                                 </View>
                             </View>
                             <View style={{flex: 1.5}}>
-                                <View style={{flex: 1, flexDirection: 'column'}}>
-                                    <View style={{flex: 1, paddingHorizontal: 15, justifyContent: 'center'}}>
-                                        <Entypo name="arrow-with-circle-up" size={30} color="lime" style={{textAlign: 'center'}} />
-                                    </View>
+                                <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+                                    <View style={{width: 1, height: '70%', backgroundColor: 'rgba(255,255,255,0.15)'}} />
                                 </View>
                             </View>
                             <View style={{flex: 2}}>
@@ -141,7 +140,7 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                             </View>
                             <View style={{flex: 1}}/>
                         </View>
-                    </Pressable>
+                    </View>
                     </View>
 
                     <View style={{flex: 0.1, flexDirection: 'column', paddingVertical: 10}}>
@@ -169,6 +168,7 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                                 colors={['#1a1a1a', '#000000']}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
+
                                 style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, borderWidth: 1.5, borderColor: 'lime'}}
                             >
                                 <Ionicons name="add-circle-outline" size={18} color="lime" />

@@ -410,6 +410,18 @@ const styles = StyleSheet.create({
 });
 
 
+export function EmptyCompletedProgramsCard() {
+    return (
+        <View style={styles.container}>
+            <View style={[ShopStyles.myProgramsBlockContainer, { backgroundColor: 'black', borderColor: 'grey', justifyContent: 'center', paddingTop: 0 }]}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ color: 'grey', textAlign: 'center' }}>Completed Programs Will Appear Here</Text>
+                </View>
+            </View>
+        </View>
+    );
+}
+
 interface FreeSessionsProps {
     cardTitle: string;
     modalPress: React.Dispatch<React.SetStateAction<boolean>>;

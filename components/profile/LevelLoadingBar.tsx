@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -23,18 +24,21 @@ const ProgressBarWithDots: React.FC<ProgressBarWithDotsProps> = ({
       <View style={styles.textContainer}>
 
         <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'flex-start'}}>
-          <Text style={{color: 'white', fontSize:12, textAlignVertical: 'top'}}>{`Lv.${level}`}</Text>
+          <Text style={styles.levelLabel}>{`LV.${level}`}</Text>
         </View>
         <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'flex-end'}}>
-          <Text style={{color: 'white', fontSize:12, textAlignVertical: 'top'}}>{`Lv.${level + 1}`}</Text>
+          <Text style={styles.levelLabel}>{`LV.${level + 1}`}</Text>
         </View>
       </View>
       <View style={styles.lineContainer}>
-        
+
         <View style={styles.whiteLine} />
 
-        {/* Red overlay line */}
-        <View
+        {/* Gradient overlay line */}
+        <LinearGradient
+          colors={['#7CFF6B', '#2ee65b']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
           style={[
             styles.redLine,
             { width: `${fillPercentage}%` },
@@ -51,6 +55,9 @@ const ProgressBarWithDots: React.FC<ProgressBarWithDotsProps> = ({
             ]}
           />
         ))}
+
+        {/* Progress knob at the current fill position */}
+        <View style={[styles.knob, { left: `${fillPercentage}%` }]} />
       </View>
     </View>
   );
@@ -68,33 +75,52 @@ const styles = StyleSheet.create({
     height: 25, // gives enough height to render dots
     justifyContent: "center",
   },
+  levelLabel: {
+    color: '#999',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
   lineContainer: {
     position: "relative",
-    height: 5, // gives enough height to render dots
+    height: 6, // gives enough height to render dots
     justifyContent: "center",
   },
   whiteLine: {
     position: "absolute",
     width: "100%",
-    height: 2,
-    backgroundColor: "grey",
+    height: 3,
+    backgroundColor: "rgba(255,255,255,0.12)",
     borderRadius: 100,
   },
   redLine: {
     position: "absolute",
-    height: 4,
-    backgroundColor: "lime",
+    height: 3,
     borderRadius: 100,
+    shadowColor: '#7CFF6B',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
   },
   dot: {
     position: "absolute",
+    width: 8,
+    height: 8,
+    borderRadius: 100,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "#1c1c1c",
+    transform: [{ translateX: -2.5 }], // centers the dot horizontally
+  },
+  knob: {
+    position: "absolute",
     width: 12,
     height: 12,
-    borderRadius: 100,
+    borderRadius: 6,
     borderWidth: 2,
-    borderColor: "grey",
-    backgroundColor: "white",
-    transform: [{ translateX: -2.5 }], // centers the dot horizontally
+    borderColor: "#0a0a0a",
+    backgroundColor: "#7CFF6B",
+    transform: [{ translateX: -6 }],
   },
 });
 
