@@ -76,9 +76,6 @@ export default function MyPrograms() {
     }, [profile?.purchaseQueue]) 
   );
 
-  console.log("purchase queue: ", profile?.purchaseQueue);
-  console.log(myPrograms);
-
   useEffect(() => {
     if (!profile) {
       setLoginSignupActive(true);

@@ -6,13 +6,14 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Animated, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { FindPrecedingNumber } from './FindPrecedingNumber';
 import { InitializeExerciseDictionary } from './InitializeExerciseDictionary';
 import { buildAlternativeTriggerNote, normalizeNotes, splitNotes } from "./NotesUtils";
 import SaveSession from "./SaveSession";
 import TrackingNotes from "./TrackingNotes";
 import { ExerciseDescriptions } from "./TrackingStyles";
+import { useKeyboardShift } from "./useKeyboardShift";
 
 import { useAppContext } from "@/components/appContext";
 
@@ -146,6 +147,9 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   const trackingInfoImageWidth = windowWidth * 0.8 - 32;
   const infoImageDimensions = { width: trackingInfoImageWidth, height: trackingInfoImageWidth * (453 / 922) };
   const alternativeImageDimensions = { width: trackingInfoImageWidth, height: trackingInfoImageWidth * (224 / 922) };
+
+  // Shifts the tracker up so the weight/reps inputs in the final sets aren't hidden by the keyboard
+  const { translateY: keyboardShift, onInputFocus, onInputBlur } = useKeyboardShift();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalExercise, setModalExercise] = useState<string | ''>('');
@@ -495,6 +499,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholderTextColor={"#5b5b5bff"}
                           value={exerciseSet.userInputWeights[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'weight', setIndex, value)}
+                          onFocus={onInputFocus}
+                          onBlur={onInputBlur}
                           editable={(!completedDay || oneShot) && trackingMode}
                         />
                       </LinearGradient>
@@ -516,6 +522,8 @@ export function ProgramTracker({programLevel, programID, programData, programDay
                           placeholderTextColor={"#5b5b5bff"}
                           value={exerciseSet.userInputReps[setIndex] || ''}
                           onChangeText={value => handleInputChange(index, 'reps', setIndex, value)}
+                          onFocus={onInputFocus}
+                          onBlur={onInputBlur}
                           editable={(!completedDay || oneShot) && trackingMode}
                         />
                       </LinearGradient>
@@ -716,6 +724,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
 
   return (
     <>
+      <Animated.View style={{ flexGrow: 1, transform: [{ translateY: keyboardShift }] }}>
       <ScrollView style={ShopStyles.shopScrollContainer}>
         <View style={{flex: 1, flexDirection: 'row'}}>
         { (((completedDay && !oneShot) && !trackingMode) || 
@@ -765,6 +774,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
           </Pressable>
         </View>
       </ScrollView>
+      </Animated.View>
 
       {/* TrackingNotes modal moved outside ScrollView and ImageBackground */}
 

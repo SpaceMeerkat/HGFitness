@@ -28,9 +28,6 @@ export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSess
   if (!profile) return null;
   // const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
-  // console.log(myPrograms);
-  // console.log(trackingData); 
-
   const image = require("@/assets/images/HGBackground.png");
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
   const [trackingDataSoft, setTrackingDataSoft] = useState<any>({}); // Store API response as an object
