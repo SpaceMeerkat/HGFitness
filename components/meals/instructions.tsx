@@ -6,7 +6,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ImageBackground, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export type TrackingData = {
   datestamp: Date;
@@ -161,15 +161,25 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
                         <View style={{ height: 18, width: (activeVersion + 1) * 18.5 }} />
                     </View>
 
-                    {/* Add the addMeal button here */}
-                    <View style={{flexDirection: 'row', justifyContent: 'center', paddingBottom: 20}}>
-                        <TouchableOpacity onPress={() => handleAddMealClick(false)} activeOpacity={0.8}>
+                    {/* Upsize and addMeal buttons, side by side */}
+                    <View style={{flexDirection: 'row', justifyContent: 'center', paddingBottom: 20, gap: 12}}>
+                        <TouchableOpacity onPress={handleUpsizeClick} activeOpacity={0.8} style={{flex: 1, maxWidth: 150}}>
                             <LinearGradient
                                 colors={['#1a1a1a', '#000000']}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
-
-                                style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, borderWidth: 1.5, borderColor: 'lime'}}
+                                style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 100, borderWidth: 1.5, borderColor: 'lime'}}
+                            >
+                                <Entypo name="arrow-with-circle-up" size={18} color="lime" />
+                                <Text style={{color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 6}}>Upsize</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleAddMealClick(false)} activeOpacity={0.8} style={{flex: 1, maxWidth: 150}}>
+                            <LinearGradient
+                                colors={['#1a1a1a', '#000000']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 100, borderWidth: 1.5, borderColor: 'lime'}}
                             >
                                 <Ionicons name="add-circle-outline" size={18} color="lime" />
                                 <Text style={{color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 6}}>Add</Text>
