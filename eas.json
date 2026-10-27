@@ -23,7 +23,7 @@
           "buildType": "apk"
         },
         "env": {
-          "EXPO_PUBLIC_API_URL": "https://REPLACE-WITH-V2-PROD-API-ID.execute-api.af-south-1.amazonaws.com/prod",
+          "EXPO_PUBLIC_API_URL": "https://REPLACE-WITH-V2-STAGING-API-ID.execute-api.af-south-1.amazonaws.com/staging",
           "ORG_GRADLE_PROJECT_reactNativeArchitectures": "arm64-v8a,armeabi-v7a"
         }
     }
