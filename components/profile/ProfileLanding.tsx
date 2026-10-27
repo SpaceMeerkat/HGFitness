@@ -1,10 +1,7 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ProfileStyles } from "@/components/HGStyles";
-import { BASE_API_URL } from "@/components/network/apiConfig";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageBackground } from "expo-image";
-import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { getTotalPrograms, getTotalSessions } from "./CalculateAchievements";
@@ -13,7 +10,7 @@ import { PremiumButton } from "./PremiumButton";
 
 export function ProfileOverview() {
 
-  const { profileImagePaths, profile, trackingData, setProfile, myPrograms } = useAppContext();
+  const { profileImagePaths, profile, trackingData, setAvatar, changeUsername } = useAppContext();
 
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const [profileAvatar, setProfileAvatar] = useState(profileImagePaths["avatarDefault"]);
@@ -73,24 +70,9 @@ export function ProfileOverview() {
 
   const confirmAvatarChange = async () => {
     setConfirmAvatarVisible(false);
-    const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-    try {
-      const response = await fetch(`${BASE_API_URL}/updateProfileAvatar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatarURL: pendingAvatarUrl, token: retrievedToken }),
-      });
-      if (response.ok) {
-        setIsImagePickerVisible(false);
-        setProfileAvatar(pendingAvatarUrl);
-        const updatedProfile = { ...profile, avatar: pendingAvatarUrl };
-        setProfile(updatedProfile);
-        await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
-      } else {
-        console.error('Failed to update profile:', response.status);
-      }
-    } catch (error) {
-      console.error('Error updating profile:', error);
+    if (pendingAvatarUrl && await setAvatar(pendingAvatarUrl)) {
+      setIsImagePickerVisible(false);
+      setProfileAvatar(pendingAvatarUrl);
     }
     setPendingAvatarUrl(null);
   };
@@ -107,28 +89,7 @@ export function ProfileOverview() {
     if (!newUsername.trim() || newUsername.trim() === profile.username) return;
     setUsernameLoading(true);
     try {
-      // SKIP: simulate API call — replace with real fetch when endpoint is ready
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const status = 200;
-      // END SKIP
-
-      // Real call (uncomment when endpoint is ready):
-      // const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-      // const response = await fetch(`${BASE_API_URL}/changeUsername`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ newUsername: newUsername.trim(), token: retrievedToken }),
-      // });
-      // const status = response.status;
-
-      if (status === 200) {
-        const updatedProfile = { ...profile, username: newUsername.trim() };
-        await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
-        setProfile(updatedProfile);
-        setUsernameResult('success');
-      } else {
-        setUsernameResult('error');
-      }
+      setUsernameResult(await changeUsername(newUsername.trim()) ? 'success' : 'error');
     } catch {
       setUsernameResult('error');
     } finally {

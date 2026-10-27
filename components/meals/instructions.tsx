@@ -68,7 +68,7 @@ export function MealInstructions({ setInstructionsVisible, setMealProgramsState,
       }
 
     const mealVersions = versionLength;
-    const image = require("@/assets/images/HGBackground.png");
+    const image = require("@/assets/images/HGBackground.jpg");
     const activeVersion = mealProgramState[activeMeal][currentMealIndex + 1].activeVersion
     const headerProtein = mealProgramState[activeMeal][currentMealIndex + 1].protein[activeVersion];
     const headerCalories = mealProgramState[activeMeal][currentMealIndex + 1].calories[activeVersion];

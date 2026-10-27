@@ -14,7 +14,7 @@ export function CardSheen() {
                 colors={['rgba(255, 255, 255, 0.10)', 'rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.06)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFillObject}
+                style={StyleSheet.absoluteFill}
             />
             <LinearGradient
                 pointerEvents="none"

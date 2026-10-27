@@ -1,6 +1,6 @@
 import { useAppContext } from "@/components/appContext";
 import { DefaultTabStyles, ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
-import { S3_API_URL } from "@/components/network/apiConfig";
+import { S3_API_URL } from "@/components/network/api";
 import { GymCard } from "@/components/shop/ShopCard";
 import { CardInfo } from "@/components/shop/ShopCardInfo";
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -28,7 +28,7 @@ export function AdvancedPrograms({handleBackButton}: ShopProgramProps) {
     const [selectedCardName, setSelectedCardName] = useState(''); 
     const [filteredPrograms, setFilteredPrograms] = useState<ProgramDict | null>(null); 
     const [filterModalVisible, setFilterModalVisible] = useState(false);
-    const image = require("@/assets/images/HGBackground.png");
+    const image = require("@/assets/images/HGBackground.jpg");
 
     useEffect(() => {
         const initialFilteredPrograms = filterAndSortPrograms(advancedPrograms, {

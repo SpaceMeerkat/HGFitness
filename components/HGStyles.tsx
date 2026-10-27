@@ -356,7 +356,7 @@ export const ShopStyles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background for the spinner
     },
     pressableCover: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         // This will make the Pressable cover the entire area, adjust if needed
         zIndex: 1, // Ensure it's on top
     },

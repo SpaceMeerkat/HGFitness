@@ -1,6 +1,5 @@
 // PasswordChangeModal.tsx
-import { BASE_API_URL } from "@/components/network/apiConfig";
-import * as SecureStore from 'expo-secure-store';
+import { useAppContext } from "@/components/appContext";
 import React, { useState } from "react";
 import {
     Alert,
@@ -36,11 +35,11 @@ export default function PasswordChangeModal({
   submitting,
   setSubmitting,
 }: PasswordChangeModalProps) {
+  const { changePassword } = useAppContext();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [emailNotFound, setEmailNotFound] = useState(false);
   const [incorrectPassword, setIncorrectPassword] = useState(false);
   const [nonMatchingPasswords, setNonMatchingPasswords] = useState(false);
 
@@ -65,46 +64,20 @@ export default function PasswordChangeModal({
   const sendEmailChange = async (oldPassword: string, newPassword: string) => {
     try {
       setSubmitting(true);
-      const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-      const response = await fetch(`${BASE_API_URL}/changePassword`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            "token": retrievedToken,
-            "currentPassword": oldPassword,
-            "newPassword": newPassword,
-        }),
-      });
+      const responseMessage = await changePassword(oldPassword, newPassword);
+      setSubmitting(false);
 
-      if (response.ok) {
-        const jsonResponse = await response.json();
-        const responseMessage = jsonResponse.message;
-        const newToken = jsonResponse.token;
+      if (responseMessage === "incorrect_password") {
+        setIncorrectPassword(true);
+      }
 
-        if (responseMessage === "email_unkown") {
-          console.log("response was not good!");
-          setEmailNotFound(true);
-          setSubmitting(false);
-        }
+      if (responseMessage === "invalid_password") {
+        Alert.alert("Please choose a longer password.");
+      }
 
-        if (responseMessage === "incorrect_password") {
-          console.log("response was not good!");
-          setIncorrectPassword(true);
-          setSubmitting(false);
-        }
-
-        if (responseMessage === "success") {
-          console.log("response was good!");
-          await SecureStore.setItemAsync('jwtToken', newToken);
-          setSubmitting(false);
-          checkPasswordChange();
-          onClose(); // close modal
-        }
-      } else {
-        setSubmitting(false);
-        console.error("Password change error:", response.status);
+      if (responseMessage === "success") {
+        checkPasswordChange();
+        onClose(); // close modal
       }
     } catch (error) {
       setSubmitting(false);

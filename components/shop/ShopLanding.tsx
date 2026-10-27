@@ -8,7 +8,7 @@ type ShopLandingProps = {
 
 export function ShopLanding({ handleChildPage }: ShopLandingProps) {
 
-    const image = require("@/assets/images/HGBackground.png");
+    const image = require("@/assets/images/HGBackground.jpg");
 
     return(
         <ImageBackground source={image} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
@@ -51,7 +51,7 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
           <View style={[ShopStyles.shopBlockContainer, {height: 200}]}>
             <ImageBackground source={require("@/assets/images/Subscription.jpg")} resizeMode="cover" style={{flex: 1, flexDirection: 'row', width: '100%', height: '100%', borderRadius: 8, borderWidth: 0}}>
               <View style={{flex:0.5, paddingLeft: 10, justifyContent: 'center', alignItems: 'center'}}>
-                  <Image source={require("@/assets/images/calendar.png")} style={{ flex: 1, width: "100%", resizeMode: "contain", opacity: 0.7}} />
+                  <Image source={require("@/assets/images/calendar.webp")} style={{ flex: 1, width: "100%", resizeMode: "contain", opacity: 0.7}} />
               </View>
               <View style={{flex:0.6, justifyContent: 'flex-start', paddingTop: 20}}>
                 <Text style={[DefaultTabStyles.defaultBodyText, {textAlign: 'center', fontFamily: 'Edo', fontSize: 26}]}>get</Text>
@@ -75,7 +75,7 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
                   <Text style={[DefaultTabStyles.defaultBodyText, {paddingTop: 8, fontSize: 18}]}>click here</Text>
                 </View>
                 <View style={{flex:0.5, flexDirection: "column"}}>
-                  <ImageBackground source={require("@/assets/images/personalisedHelp.png")} resizeMode="cover" 
+                  <ImageBackground source={require("@/assets/images/personalisedHelp.webp")} resizeMode="cover" 
                   style={{flex:1, flexDirection: "column", width: '100%', height: '100%'}}/>
                 </View>
               </View>
@@ -97,4 +97,4 @@ export function ShopLanding({ handleChildPage }: ShopLandingProps) {
       </ScrollView> 
       </ImageBackground>
     )
-}
+}

@@ -1,6 +1,5 @@
 // PasswordResetModal.tsx
-import { BASE_API_URL } from "@/components/network/apiConfig";
-import * as SecureStore from 'expo-secure-store';
+import { useAppContext } from "@/components/appContext";
 import React, { useState } from "react";
 import {
     Alert,
@@ -46,6 +45,7 @@ export default function PasswordResetModal({
   setSubmitting,
 }: PasswordResetModalProps) {
   const [email, setEmail] = useState("");
+  const { resetPassword } = useAppContext();
 
   const handleSubmit = () => {
     if (email.trim()) {
@@ -58,35 +58,13 @@ export default function PasswordResetModal({
   const sendPasswordReset = async (email: string) => {
     try {
       setSubmitting(true)
-      const response = await fetch(`${BASE_API_URL}/resetPassword`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          "email": email
-        }),
-      });
-  
-      if (response.ok) {
-        const jsonResponse = await response.json();
-        const responseMessage = jsonResponse.message;
-        const token = jsonResponse.token;
-        if (responseMessage === "email_send_error") {
-          console.log("response was not good!")
-          unKnownEmailAlert();
-          setSubmitting(false);
-        };
-        if (responseMessage === "success") {
-          console.log("response was good!")
-          await SecureStore.setItemAsync('jwtToken', token);
-          setSubmitting(false);
-          checkEmailPassword();
-        };
-      } else {
-        setSubmitting(false)
-        console.error("Password reset:", response.status);
-        // Handle error, e.g., display an error message
+      const responseMessage = await resetPassword(email);
+      setSubmitting(false);
+      if (responseMessage === "email_send_error") {
+        unKnownEmailAlert();
+      }
+      if (responseMessage === "success") {
+        checkEmailPassword();
       }
     } catch (error) {
       setSubmitting(false);

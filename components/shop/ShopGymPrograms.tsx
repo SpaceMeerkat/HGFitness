@@ -11,7 +11,7 @@ type GymProgramProps = {
 export function GymPrograms({ handleChildPage, handleBackButton }: GymProgramProps) {
 
     const [suggestModalVisible, setSuggestModalVisible] = useState(false);
-    const image = require("@/assets/images/HGBackground.png");
+    const image = require("@/assets/images/HGBackground.jpg");
 
     return(
         <ImageBackground source={image} resizeMode="cover" style={{flex: 1, width: '100%', height: '100%'}}>
@@ -82,4 +82,4 @@ export function GymPrograms({ handleChildPage, handleBackButton }: GymProgramPro
       </ScrollView> 
       </ImageBackground>
     )
-}
+}

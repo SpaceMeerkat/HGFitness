@@ -8,8 +8,6 @@ import TargetsModal from "@/components/meals/TargetsModal";
 import { Water1000, Water250, Water500, WaterCustom } from "@/components/meals/WaterButtons";
 import { MealInstructions } from "@/components/meals/instructions";
 import { addMealItem, getMealNames, getWaterNames, handleMealPress, MealProgramsState, PremiumRibbon, removeMealItem, TrackingData, updateActiveVersion } from "@/components/meals/mealUtils";
-import { runPaymentStatus } from "@/components/network/PollPurchase";
-import { runSubscriptionPolling } from "@/components/network/PollSubscription";
 import { LoginSignupWindow } from "@/components/users/LoginSignup";
 import { LoginWindow } from "@/components/users/LoginWindow";
 import { SignupWindow } from "@/components/users/SignupWindow";
@@ -18,8 +16,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "expo-router/react-navigation";
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -28,37 +25,15 @@ import Toast from 'react-native-toast-message';
 
 export default function MealScreen() {
 
-  const image = require("@/assets/images/HGBackground.png");
+  const image = require("@/assets/images/HGBackground.jpg");
   const premiumImage = require("@/assets/images/OfficialLogo.jpg");
 
-  const { profile, myPrograms, mealPrograms, trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms } = useAppContext();
+  const { profile, mealPrograms, trackingData, setProfile, setTrackingData, checkPendingPayments } = useAppContext();
 
+  // Pick up purchases PayFast has confirmed since the last visit
   useFocusEffect(
     useCallback(() => {
-      if (!profile?.purchaseQueue || Object.keys(profile?.purchaseQueue).length === 0) return;
-
-      const processQueue = async () => {
-        await runPaymentStatus(profile.purchaseQueue, {
-          profile,
-          myPrograms,
-          trackingData,
-          setProfile,
-          setMyPrograms,
-          setTrackingData,
-        });
-
-        await runSubscriptionPolling(profile.purchaseQueue, {
-          profile,
-          myPrograms,
-          trackingData,
-          setProfile,
-          setMyPrograms,
-          setTrackingData,
-          setMealPrograms,
-        });
-      };
-
-      processQueue();
+      checkPendingPayments();
     }, [profile?.purchaseQueue])
   );
 
@@ -96,9 +71,7 @@ export default function MealScreen() {
           streak: streakBool
         },
       };
-    setProfile(updatedProfile); // Update context
-    // Update AsyncStorage
-    await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
+    setProfile(updatedProfile); // Update context (saved to storage by the context)
   };
 
   useEffect(() => {
@@ -209,7 +182,6 @@ export default function MealScreen() {
   };
 
   const storeTrackingAsync = async (item: string) => {
-    await AsyncStorage.setItem('trackingData', JSON.stringify(item));
     setTrackingData(item)
   };
 
@@ -278,7 +250,7 @@ export default function MealScreen() {
                       <View style={{ flex: 1, flexDirection: 'column', borderRadius: 14, overflow: 'hidden' }}>
                           {/* Background image layer */}
                           <View style={{ flex: 0.95, flexDirection: 'row' }}>
-                            <ImageBackground source={premiumImage} resizeMode="contain" style={{...StyleSheet.absoluteFillObject, opacity: 0.15}}/>
+                            <ImageBackground source={premiumImage} resizeMode="contain" style={{...StyleSheet.absoluteFill, opacity: 0.15}}/>
                           </View>
                           {/* Foreground content layer */}
                           <View style={{ flex: 0.05, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', opacity: 0.75 }}>
@@ -303,7 +275,7 @@ export default function MealScreen() {
                         <View style={{ flex: 1, flexDirection: 'column', borderRadius: 14, overflow: 'hidden' }}>
                           {/* Background image layer */}
                           <View style={{ flex: 0.95, flexDirection: 'row' }}>
-                            <ImageBackground source={premiumImage} resizeMode="contain" style={{...StyleSheet.absoluteFillObject, opacity: 0.15}} />
+                            <ImageBackground source={premiumImage} resizeMode="contain" style={{...StyleSheet.absoluteFill, opacity: 0.15}} />
                           </View>
                           {/* Foreground content layer */}
                           <View style={{ flex: 0.05, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', opacity: 0.75 }}>

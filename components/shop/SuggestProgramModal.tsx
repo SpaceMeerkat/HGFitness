@@ -1,5 +1,4 @@
 import { useAppContext } from "@/components/appContext";
-import { BASE_API_URL } from "@/components/network/apiConfig";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useState } from "react";
 import { ActivityIndicator, Modal, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -10,7 +9,7 @@ type SuggestProgramModalProps = {
 };
 
 export function SuggestProgramModal({ visible, onClose }: SuggestProgramModalProps) {
-    const { profile } = useAppContext();
+    const { profile, contactSupport } = useAppContext();
     const [suggestion, setSuggestion] = useState('');
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -22,20 +21,8 @@ export function SuggestProgramModal({ visible, onClose }: SuggestProgramModalPro
         setLoading(true);
 
         try {
-            // SKIP: simulate API call — replace with real fetch when endpoint is ready
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            const status = 200;
-            // END SKIP
-
-            // Real call (uncomment when endpoint is ready):
-            // const response = await fetch(`${BASE_API_URL}/programSuggestion`, {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ suggestion, username: profile?.username }),
-            // });
-            // const status = response.status;
-
-            if (status === 200) {
+            // Suggestions reach the team the same way as support messages
+            if (await contactSupport(`Program suggestion: ${suggestion.trim()}`)) {
                 setSubmitted(true);
             }
         } catch (error) {

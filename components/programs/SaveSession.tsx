@@ -2,29 +2,24 @@ import { TrackingNotesStyles } from "@/components/HGStyles";
 import React from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { SubmitSession } from './SubmitSession';
 
 import { useAppContext } from "@/components/appContext";
 
 interface SaveSessionProps {
-    // SubmitSession : (programID: any, token: any, exerciseDictionary: any, trackingData: any) => void;
     visible: boolean;
     onClose: () => void;
     programID: any;
     programDay: any;
-    token: any;
     exerciseDictionary: any;
-    trackingData: any;
-    setTrackingData: (data: any) => void,
     setSaving: (saving: boolean) => void,
     handleChildPage: (page: 'programs' | 'programOverview' | 'programTracking') => void;
     setSingleSessionsVisible: any;
     sessionProgress: number;
   }
 
-  export default function SaveSession({ visible, onClose, programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving, handleChildPage, setSingleSessionsVisible, sessionProgress}: SaveSessionProps) {
+  export default function SaveSession({ visible, onClose, programID, programDay, exerciseDictionary, setSaving, handleChildPage, setSingleSessionsVisible, sessionProgress}: SaveSessionProps) {
 
-    const { profile } = useAppContext();
+    const { profile, saveProgramSession } = useAppContext();
 
     const showToast = () => {
         // console.log("showing toast");
@@ -50,7 +45,8 @@ interface SaveSessionProps {
 
     const handleSaveSession = () => {
         // Submit the session
-        SubmitSession(programID, programDay, token, exerciseDictionary, trackingData, setTrackingData, setSaving);
+        setSaving(true);
+        saveProgramSession(programID, programDay[0], programDay[1], exerciseDictionary).finally(() => setSaving(false));
       
         // Show the toast
         showToast();

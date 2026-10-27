@@ -1,12 +1,9 @@
 import { useAppContext } from "@/components/appContext";
-import { BASE_API_URL } from "@/components/network/apiConfig";
 import { PricingStyles } from '@/components/premium/PricingStyles';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { runSubscriptionCancellation } from "./network/CancelSubscription";
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import PasswordChangeModal from "./users/ChangePasswordModal";
 import LoadingModal from "./users/LoadingModal";
-import { useLogout } from "./users/LogoutUser";
 
 type SettingsModalProps = {
   visible: boolean;
@@ -26,75 +23,37 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [contactLoading, setContactLoading] = useState(false);
     const [contactResult, setContactResult] = useState<'success' | 'error' | null>(null);
 
-    const { profile,
-            myPrograms,
-            trackingData,
-            setProfile,
-            setMyPrograms,
-            setTrackingData,
-            setMealPrograms,
-            setprofileImagePaths,
-            setMasterGymProgramsDictionary,
-    } = useAppContext();
+    const { profile, logout, cancelSubscription, contactSupport } = useAppContext();
 
-    const transactionQueue = profile?.purchaseQueue
-    const cancelledSubscription = Object.keys(profile?.purchaseQueue || {}).includes("CANCELLED")
+    // The subscription that can be cancelled: one PayFast is still billing
+    const activeSubscription = (['premium', 'gymSubscription'] as const).find(
+      category => profile?.subscriptions?.[category]?.status === 'ACTIVE');
+    const isSubscriber = !!activeSubscription;
 
-    const { logout } = useLogout({
-        profile,
-        trackingData,
-        setProfile,
-        setMyPrograms,
-        setTrackingData,
-        setMealPrograms,
-        setprofileImagePaths,
-        setMasterGymProgramsDictionary,
-    });
-
-    const [isSubscriber, setIsSubscriber] = useState(false)
-
-    useEffect(() => {
-      if (Object.keys(profile?.purchaseQueue || {}).includes("CANCELLED")) {
-        setIsSubscriber(false);
-      } else {
-          if (profile?.premium) {
-          setIsSubscriber(true);
-          } else if (profile?.gymSubscription) {
-          setIsSubscriber(true);
-          }
-      }
-    }, [profile]); 
-
-    const sendEmail = async () => {
-      console.log("sending email request...");
-      const response = await fetch(`${BASE_API_URL}/send_email`, {
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-      return null;
+    const confirmCancelSubscription = () => {
+      if (!activeSubscription) return;
+      const paidUntil = profile?.subscriptions?.[activeSubscription]?.paidUntil;
+      Alert.alert(
+        "Cancel subscription?",
+        `You'll keep your benefits until ${paidUntil}.`,
+        [
+          { text: "Keep it", style: "cancel" },
+          { text: "Cancel subscription", style: "destructive", onPress: async () => {
+            setSubmitting(true);
+            const cancelled = await cancelSubscription(activeSubscription);
+            setSubmitting(false);
+            if (!cancelled) Alert.alert("Error", "Unable to cancel right now, please try again later.");
+          } },
+        ]
+      );
     };
 
     const handleContactSubmit = async () => {
       if (!contactMessage.trim()) return;
       setContactLoading(true);
       try {
-        // SKIP: simulate API call — replace with real fetch when endpoint is ready
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        const status = 200;
-        // END SKIP
-
-        // Real call (uncomment when endpoint is ready):
-        // const response = await fetch(`${BASE_API_URL}/contactSupport`, {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ message: contactMessage.trim(), username: profile?.username }),
-        // });
-        // const status = response.status;
-
-        setContactResult(status === 200 ? 'success' : 'error');
+        const sent = await contactSupport(contactMessage.trim());
+        setContactResult(sent ? 'success' : 'error');
       } catch {
         setContactResult('error');
       } finally {
@@ -208,11 +167,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Text style={[styles.title, !profile? {opacity: 0.3} : {}]}>Change password</Text>
             </Pressable>
 
-            <Pressable onPress={async () => {
-              if (isSubscriber) {
-               await runSubscriptionCancellation({profile, setProfile})
-              }
-              }} style={[styles.row]}>
+            <Pressable onPress={confirmCancelSubscription} style={[styles.row]}>
                 <Text style={[styles.title, !isSubscriber? {opacity: 0.3, color: 'black'} : {color: 'coral'}, !profile? {opacity: 0.3, color: 'black'} : {}]}>Cancel subscription</Text>
             </Pressable>  
 

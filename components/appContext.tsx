@@ -1,311 +1,362 @@
-import { BASE_API_URL } from "@/components/network/apiConfig"; // AppContextProvider.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Network from 'expo-network';
-import * as SecureStore from 'expo-secure-store';
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { Alert, AppState } from 'react-native';
+import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import { Alert, AppState, Linking } from 'react-native';
+import { api, ApiError, clearToken, getToken, setToken } from './network/api';
 
-// Define the structure of the context
-interface AppContextType {
+// Everything the app shows, persisted as one AsyncStorage entry so it's available offline and on restart
+type AppData = {
   profile: any | null;
-  masterGymProgramsDictionary: any | null;
   mealPrograms: any | null;
+  masterGymProgramsDictionary: any | null;
   myPrograms: any | null;
   beginnerPrograms: any | null;
   intermediatePrograms: any | null;
   advancedPrograms: any | null;
   trackingData: any | null;
-  // subscriptionTrackingData: any | null;
-  profileImagePaths: {[key: string]: string};
+  profileImagePaths: { [key: string]: string };
   bestSellers: any | null;
+};
+
+const EMPTY: AppData = {
+  profile: null, mealPrograms: null, masterGymProgramsDictionary: null, myPrograms: null, beginnerPrograms: null,
+  intermediatePrograms: null, advancedPrograms: null, trackingData: null, profileImagePaths: null as any, bestSellers: null,
+};
+const USER_FIELDS: (keyof AppData)[] = ['profile', 'mealPrograms', 'myPrograms', 'trackingData'];
+
+const STATE_KEY = 'hgState';
+// Storage keys used by v1 of the app, removed on first start
+const V1_KEYS = ['profile', 'masterGymProgramsDictionary', 'mealPrograms', 'myPrograms', 'beginnerPrograms',
+  'intermediatePrograms', 'advancedPrograms', 'trackingData', 'profileImagePaths', 'bestSellers', 'lastUpdateDate'];
+
+const PAYMENT_POLL_ATTEMPTS = 6;
+const PAYMENT_POLL_INTERVAL_MS = 5000;
+
+type ItemCategory = 'gymplan' | 'premium' | 'gymSubscription';
+type SubscriptionCategory = 'premium' | 'gymSubscription';
+
+interface AppContextType extends AppData {
   loading: boolean | null;
   isConnected: boolean | null;
-  setProfile: (profile: any | null) => void; // Add setProfile function;
-  setMasterGymProgramsDictionary: (masterGymProgramsDictionary: any | null) => void;
-  setMealPrograms: (mealPrograms: any | null) => void;
-  setMyPrograms: (myPrograms: any | null) => void; // Add setMyPrograms function;
-  setTrackingData: (trackingData: any | null) => void; // Add setTrackingData function;
-  // setSubscriptionTrackingData: (subscriptionTrackingData: any | null) => void;
-  setBestSellers: (bestSellers: any | null) => void;
-  setprofileImagePaths: (profileImagePaths: any | null) => void;
-  setBeginnerPrograms: (beginnerPrograms: any | null) => void;
-  setIntermediatePrograms: (intermediatePrograms: any | null) => void;
-  setAdvancedPrograms: (advancedPrograms: any | null) => void;
-  updateData: () => void;
+  setProfile: (profile: any | null) => void;
+  setMyPrograms: (myPrograms: any | null) => void;
+  setTrackingData: (trackingData: any | null) => void;
+  updateData: (force?: boolean) => Promise<void>;
   recheckConnectivity: () => Promise<void>;
+  login: (email: string, password: string) => Promise<string>;
+  signup: (username: string, email: string, password: string) => Promise<string>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<string>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<string>;
+  changeUsername: (username: string) => Promise<boolean>;
+  contactSupport: (message: string) => Promise<boolean>;
+  setAvatar: (avatarURL: string) => Promise<boolean>;
+  saveProgramSession: (programID: string, week: string, day: string, sessionData: any) => Promise<boolean>;
+  rerunProgram: (programID: string) => Promise<boolean>;
+  startCheckout: (itemCategory: ItemCategory, itemName?: string) => Promise<void>;
+  checkPendingPayments: () => Promise<void>;
+  cancelSubscription: (itemCategory: SubscriptionCategory) => Promise<boolean>;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
-interface AppContextProviderProps {
-  children: ReactNode;
-}
-
-export const LAST_UPDATE_KEY = 'lastUpdateDate'; // Key to store the date of last update
-
-export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children }) => {
-
-  // // // COMMENT OUT IN PRODUCTION MODE
-  // useEffect(() => {
-  //   const clearStorage = async () => {
-  //     try {
-  //       await SecureStore.deleteItemAsync('jwtToken');
-  //       console.log("SecureStore cleared");
-  //       await AsyncStorage.removeItem('profile');
-  //       await AsyncStorage.removeItem('myPrograms');
-  //       await AsyncStorage.removeItem('trackingData');
-  //       await AsyncStorage.removeItem(LAST_UPDATE_KEY);
-  //       await AsyncStorage.removeItem('profileImagePaths');
-  //     } catch (error) {
-  //       console.error("Error clearing SecureStore:", error);
-  //     }
-  //   };
-  
-  //   // Call the async function
-  //   clearStorage();
-  // }, []);
-
-  const [profile, setProfile] = useState<any | null>(null);
-  const [mealPrograms, setMealPrograms] = useState<any | null>(null);
-  const [masterGymProgramsDictionary, setMasterGymProgramsDictionary] = useState<any | null>(null);
-  const [myPrograms, setMyPrograms] = useState<any | null>(null);  // Add myPrograms state
-  const [beginnerPrograms, setBeginnerPrograms] = useState<any | null>(null);
-  const [intermediatePrograms, setIntermediatePrograms] = useState<any | null>(null);
-  const [advancedPrograms, setAdvancedPrograms] = useState<any | null>(null);
-  const [trackingData, setTrackingData] = useState<any | null>(null);
-  // const [subscriptionTrackingData , setSubscriptionTrackingData] = useState<any | null>(null);
-  const [profileImagePaths, setprofileImagePaths] = useState<any | null>(null);
-  const [bestSellers, setBestSellers] = useState<any | null>(null);
-  const [loading, setLoading] = useState<boolean | null>(true);
-  const [isConnected, setIsConnected] = useState<boolean | null>(null);
-
-  // Helper function to check if the last request was made not-today
-  // Note: Also exported as standalone function below for use in LoginWindow
-  const isToday = (dateString: string) => {
-    const lastUpdate = new Date(dateString);
-    const today = new Date();
-    return lastUpdate.getDate() === today.getDate() &&
-           lastUpdate.getMonth() === today.getMonth() &&
-           lastUpdate.getFullYear() === today.getFullYear();
-  };
-
-  // Helper function to check internet connectivity
-  const checkConnectivity = async (): Promise<boolean> => {
-    try {
-      const networkState = await Network.getNetworkStateAsync();
-      return (networkState.isConnected && networkState.isInternetReachable) ?? false;
-    } catch {
-      return false;
-    }
-  };
-
-  // Function to recheck connectivity and retry loading data
-  const recheckConnectivity = async () => {
-    setLoading(true);
-    const connected = await checkConnectivity();
-    setIsConnected(connected);
-    if (connected) {
-      await updateData();
-    } else {
-      setLoading(false);
-    }
-  };
-
-  // Function to update profile, programs, and tracking data
-  const updateData = async () => {
-
-    // Check internet connectivity first
-    const connected = await checkConnectivity();
-    setIsConnected(connected);
-    if (!connected) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // Check if data is present in AsyncStorage
-      const storedProfile = await AsyncStorage.getItem('profile');
-      const storedMasterGymProgramsDictionary = await AsyncStorage.getItem('masterGymProgramsDictionary');
-      const storedMealPrograms = await AsyncStorage.getItem('mealPrograms');
-      const storedMyPrograms = await AsyncStorage.getItem('myPrograms');  // Check if myPrograms is present
-      const storedBeginnerPrograms = await AsyncStorage.getItem('beginnerPrograms');
-      const storedIntermediatePrograms = await AsyncStorage.getItem('intermediatePrograms');
-      const storedAdvancedPrograms = await AsyncStorage.getItem('advancedPrograms');
-      const storedTrackingData = await AsyncStorage.getItem('trackingData');
-      const storedProfileImagePaths = await AsyncStorage.getItem('profileImagePaths');
-      const bestSellers = await AsyncStorage.getItem('bestSellers');
-      const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
-
-      if (storedMasterGymProgramsDictionary && storedMealPrograms && bestSellers && storedProfileImagePaths && storedProfile && storedMyPrograms && storedBeginnerPrograms && storedIntermediatePrograms && storedAdvancedPrograms && storedTrackingData && lastUpdateDate && isToday(lastUpdateDate)) {
-        // If the data is present and is from today, load it from AsyncStorage
-        setProfile(JSON.parse(storedProfile));
-        setMasterGymProgramsDictionary(JSON.parse(storedMasterGymProgramsDictionary));
-        setMealPrograms(JSON.parse(storedMealPrograms));
-        setMyPrograms(JSON.parse(storedMyPrograms)); 
-        setBeginnerPrograms(JSON.parse(storedBeginnerPrograms));
-        setIntermediatePrograms(JSON.parse(storedIntermediatePrograms));
-        setAdvancedPrograms(JSON.parse(storedAdvancedPrograms));
-        setTrackingData(JSON.parse(storedTrackingData));
-        setprofileImagePaths(JSON.parse(storedProfileImagePaths));
-        setBestSellers(JSON.parse(bestSellers));
-        console.log('all data already present in async storage, leaving...');
-        setLoading(false);
-        return;  // No need to make any network requests
-      }
-
-      // If data is not from today, check for JWT token in SecureStore
-      const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-      // If there is mealTracking data, it needs to go with the daily POST request
-      let storedMealData = null;
-      let storedCalorieCalculatorData = null;
-
-      if (storedTrackingData !== null && storedProfile !== null) {
-        const parsedData = JSON.parse(storedTrackingData);
-        storedMealData = parsedData.meals;
-        const parsedProfile = JSON.parse(storedProfile);
-        storedCalorieCalculatorData = parsedProfile.calorieCalculator;
-      }
-
-      if (retrievedToken && storedMealData && storedCalorieCalculatorData) {
-        console.log("running full get request");
-        // If token is present, make a POST request
-        const loginData = { 
-          token: retrievedToken, 
-          mealTrackingData: storedMealData,
-          calorieCalculatorData: storedCalorieCalculatorData,
-        };
-
-        const response = await fetch(`${BASE_API_URL}/getContext`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(loginData),
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        } 
-
-        const jsonResponse = await response.json();
-        
-        // Save the response data to AsyncStorage
-        await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
-        await AsyncStorage.setItem('masterGymProgramsDictionary', JSON.stringify(jsonResponse.masterGymDictionary));
-        await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
-        await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));  // Save myPrograms to AsyncStorage
-        await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
-        await AsyncStorage.setItem('beginnerPrograms', JSON.stringify(jsonResponse.beginner));
-        await AsyncStorage.setItem('intermediatePrograms', JSON.stringify(jsonResponse.intermediate));
-        await AsyncStorage.setItem('advancedPrograms', JSON.stringify(jsonResponse.advanced));
-        await AsyncStorage.setItem('profileImagePaths', JSON.stringify(jsonResponse.profileImagePaths));
-        await AsyncStorage.setItem('bestSellers', JSON.stringify(jsonResponse.bestSellers));
-        await AsyncStorage.setItem(LAST_UPDATE_KEY, new Date().toISOString());
-
-        setProfile(jsonResponse.profile);
-        setMasterGymProgramsDictionary(jsonResponse.masterGymDictionary)
-        setMealPrograms(jsonResponse.mealPrograms);
-        setMyPrograms(jsonResponse.myPrograms);  // Update myPrograms state
-        setBeginnerPrograms(jsonResponse.beginner);
-        setIntermediatePrograms(jsonResponse.intermediate);
-        setAdvancedPrograms(jsonResponse.advanced);
-        setTrackingData(jsonResponse.trackingData);
-        setprofileImagePaths(jsonResponse.profileImagePaths);
-        setBestSellers(jsonResponse.bestSellers);
-
-        setLoading(false);
-
-      } else {
-        // If no token, make a GET request
-        const response = await fetch(`${BASE_API_URL}/getContext`, {
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const jsonResponse = await response.json();
-
-        console.log('running GET only');
-        
-        // Save the response data to AsyncStorage
-        await AsyncStorage.setItem('beginnerPrograms', JSON.stringify(jsonResponse.beginner));
-        await AsyncStorage.setItem('intermediatePrograms', JSON.stringify(jsonResponse.intermediate));
-        await AsyncStorage.setItem('advancedPrograms', JSON.stringify(jsonResponse.advanced));
-        await AsyncStorage.setItem('bestSellers', JSON.stringify(jsonResponse.bestSellers));
-
-        if (LAST_UPDATE_KEY) {
-          await AsyncStorage.setItem(LAST_UPDATE_KEY, new Date().toISOString());
-        }
-
-        setBeginnerPrograms(jsonResponse.beginner);
-        setIntermediatePrograms(jsonResponse.intermediate);
-        setAdvancedPrograms(jsonResponse.advanced);
-        setBestSellers(jsonResponse.bestSellers);
-        setLoading(false);
-      }
-
-    } catch (error) {
-      console.error('Error:', error);
-      Alert.alert('Error', 'Failed to update data.');
-      // If there's an error, set everything to null
-      setProfile(null);
-      setMealPrograms(null);
-      setMasterGymProgramsDictionary(null);
-      setMyPrograms(null);  // Reset myPrograms state on error
-      setBeginnerPrograms(null);
-      setIntermediatePrograms(null);
-      setAdvancedPrograms(null);
-      setTrackingData(null);
-      setprofileImagePaths(null);
-      setBestSellers(null);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Load data on app start
-    updateData();
-  }, []);
-
-  useEffect(() => {
-    // Phones usually resume the app from the background rather than restarting it, so also check on resume
-    // whether the day has rolled over. Otherwise the new-day context request never runs, today's meals get
-    // added to yesterday's tracking and the meal streak breaks.
-    const subscription = AppState.addEventListener('change', async (nextState) => {
-      if (nextState !== 'active') return;
-      const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
-      if (lastUpdateDate && !isToday(lastUpdateDate)) {
-        updateData();
-      }
-    });
-    return () => subscription.remove();
-  }, []);
-
-  return (
-    <AppContext.Provider value={{ profile, masterGymProgramsDictionary, mealPrograms, myPrograms, beginnerPrograms, intermediatePrograms, advancedPrograms, trackingData, profileImagePaths, bestSellers, loading, isConnected,
-    updateData, recheckConnectivity, setMasterGymProgramsDictionary, setProfile, setMealPrograms, setMyPrograms, setTrackingData, setprofileImagePaths, setBeginnerPrograms, setIntermediatePrograms, setBestSellers,
-    setAdvancedPrograms }}>
-      {children}
-    </AppContext.Provider>
-  );
-};
-
-// Hook to use the context
-export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useAppContext must be used within an AppContextProvider');
-  }
-  return context;
-};
-
-// Exported helper function for use in LoginWindow
 export const isToday = (dateString: string) => {
   const lastUpdate = new Date(dateString);
   const today = new Date();
   return lastUpdate.getDate() === today.getDate() &&
          lastUpdate.getMonth() === today.getMonth() &&
          lastUpdate.getFullYear() === today.getFullYear();
+};
+
+const checkConnectivity = async (): Promise<boolean> => {
+  try {
+    const networkState = await Network.getNetworkStateAsync();
+    return (networkState.isConnected && networkState.isInternetReachable) ?? false;
+  } catch {
+    return false;
+  }
+};
+
+export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [data, setData] = useState<AppData>(EMPTY);
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean | null>(true);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  // The latest values, for async actions that run across several renders (kept current by the effect below)
+  const dataRef = useRef(data);
+  const lastUpdateRef = useRef(lastUpdate);
+  const hydrated = useRef(false);
+  const polling = useRef(false);
+
+  const setField = <K extends keyof AppData>(key: K) => (value: AppData[K]) =>
+    setData(current => ({ ...current, [key]: value }));
+  const setProfile = setField('profile');
+  const setMyPrograms = setField('myPrograms');
+  const setTrackingData = setField('trackingData');
+
+  // Keep the refs current and persist whenever anything changes (once the stored copy has been loaded)
+  useEffect(() => {
+    dataRef.current = data;
+    lastUpdateRef.current = lastUpdate;
+    if (!hydrated.current) return;
+    AsyncStorage.setItem(STATE_KEY, JSON.stringify({ ...data, lastUpdate })).catch(error =>
+      console.error('Failed to save app state:', error));
+  }, [data, lastUpdate]);
+
+  // Takes a backend response and puts whatever it contains into state
+  const applyResponse = async (response: any) => {
+    if (response.token) await setToken(response.token);
+    setData(current => ({
+      ...current,
+      profile: response.profile ?? current.profile,
+      mealPrograms: response.mealPrograms ?? current.mealPrograms,
+      myPrograms: response.myPrograms ?? current.myPrograms,
+      trackingData: response.trackingData ?? current.trackingData,
+      masterGymProgramsDictionary: response.gymMasterDictionary ?? current.masterGymProgramsDictionary,
+      beginnerPrograms: response.beginner ?? current.beginnerPrograms,
+      intermediatePrograms: response.intermediate ?? current.intermediatePrograms,
+      advancedPrograms: response.advanced ?? current.advancedPrograms,
+      profileImagePaths: response.profileImagePaths ?? current.profileImagePaths,
+      bestSellers: response.bestSellers ?? current.bestSellers,
+    }));
+    setLastUpdate(new Date().toISOString());
+  };
+
+  const clearUser = async () => {
+    await clearToken();
+    setData(current => ({ ...current, ...Object.fromEntries(USER_FIELDS.map(k => [k, null])) }));
+  };
+
+  // Loads the stored copy into state, the first time only
+  const hydrate = async () => {
+    if (hydrated.current) return { data: dataRef.current, lastUpdate: lastUpdateRef.current };
+    const stored = JSON.parse((await AsyncStorage.getItem(STATE_KEY)) ?? 'null');
+    hydrated.current = true;
+    if (!stored) {
+      AsyncStorage.multiRemove(V1_KEYS).catch(() => {});
+      return { data: EMPTY, lastUpdate: null };
+    }
+    const { lastUpdate: storedUpdate, ...storedData } = stored;
+    const loaded = { ...EMPTY, ...storedData } as AppData;
+    setData(loaded);
+    setLastUpdate(storedUpdate ?? null);
+    return { data: loaded, lastUpdate: storedUpdate as string | null };
+  };
+
+  /** Brings the user's data (or, logged out, the shop) up to date. Runs at start-up and on the first
+   *  resume of a new day; within the same day the stored copy is used unless `force` is set. */
+  const updateData = async (force = false) => {
+    try {
+      const current = await hydrate();
+      const token = await getToken();
+      if (!force && current.lastUpdate && isToday(current.lastUpdate) && (current.data.profile || !token)) {
+        return;
+      }
+
+      const connected = await checkConnectivity();
+      setIsConnected(connected);
+      if (!connected) return;
+
+      if (token) {
+        try {
+          // The meal day and calorie calculator go along so the previous day's tracking is saved
+          await applyResponse(await api('/me/sync', {
+            body: { meals: current.data.trackingData?.meals, calorieCalculator: current.data.profile?.calorieCalculator },
+          }));
+          return;
+        } catch (error) {
+          if (!(error instanceof ApiError && error.status === 401)) throw error;
+          await clearUser(); // Session expired, or the password was changed on another device
+        }
+      }
+      await applyResponse(await api('/catalog', { auth: false }));
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('Error', 'Failed to update data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const recheckConnectivity = async () => {
+    setLoading(true);
+    await updateData(true);
+  };
+
+  // --- Accounts -------------------------------------------------------------------------------
+
+  const login = async (email: string, password: string) => {
+    const response = await api('/auth/login', { body: { email, password }, auth: false });
+    if (response.message === 'success') await applyResponse(response);
+    return response.message as string;
+  };
+
+  const signup = async (username: string, email: string, password: string) => {
+    try {
+      return (await api('/auth/signup', { body: { username, email, password }, auth: false })).message as string;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 400) return 'invalid_details';
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    const { trackingData, profile } = dataRef.current;
+    try {
+      if (trackingData?.meals) {
+        await api('/me/meal-tracking', {
+          body: { trackingData: trackingData.meals, calorieCalculatorData: profile?.calorieCalculator },
+        });
+      }
+    } catch (error) {
+      console.error('Error saving meals at logout:', error);
+    }
+    try {
+      await clearUser();
+      Alert.alert('Logout Successful', 'You have been logged out.', [{ text: 'OK' }]);
+    } catch (error) {
+      console.error('Error clearing storage:', error);
+      Alert.alert('Error', 'There was an error logging you out. Please try again.');
+    }
+  };
+
+  const resetPassword = async (email: string) =>
+    (await api('/auth/reset-password', { body: { email }, auth: false })).message as string;
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    const response = await api('/auth/change-password', { body: { currentPassword, newPassword } });
+    if (response.token) await setToken(response.token);
+    return response.message as string;
+  };
+
+  // Runs a request that either works or doesn't; returns whether it worked
+  const attempt = async (request: () => Promise<unknown>) => {
+    try {
+      await request();
+      return true;
+    } catch (error) {
+      console.error('Request failed:', error);
+      return false;
+    }
+  };
+
+  const changeUsername = (username: string) => attempt(async () => {
+    await api('/me/username', { body: { newUsername: username } });
+    setData(current => ({ ...current, profile: { ...current.profile, username } }));
+  });
+
+  const contactSupport = (message: string) => attempt(() => api('/me/support', { body: { message } }));
+
+  const setAvatar = (avatarURL: string) => attempt(async () => {
+    await api('/me/avatar', { body: { avatarURL } });
+    setData(current => ({ ...current, profile: { ...current.profile, avatar: avatarURL } }));
+  });
+
+  // --- Gym programs -----------------------------------------------------------------------------
+
+  const saveProgramSession = (programID: string, week: string, day: string, sessionData: any) => attempt(async () => {
+    const result = await api('/me/program-tracking', { body: { programID, week, day, trackingData: sessionData } });
+    setData(current => {
+      const program = current.trackingData?.[programID] ?? {};
+      return {
+        ...current,
+        trackingData: {
+          ...current.trackingData,
+          [programID]: {
+            ...program,
+            memoryData: { ...program.memoryData, [`week-${week}-day-${day}`]: { trackingData: sessionData } },
+            completed: result.completed,
+            streakDates: result.streakDates,
+            rerunNumber: result.rerunNumber,
+          },
+        },
+      };
+    });
+  });
+
+  const rerunProgram = (programID: string) => attempt(async () => {
+    const { freshProgramTrackingData } = await api('/me/rerun', { body: { programID } });
+    setData(current => ({ ...current, trackingData: { ...current.trackingData, [programID]: freshProgramTrackingData } }));
+  });
+
+  // --- Payments ---------------------------------------------------------------------------------
+
+  /** Opens PayFast for a purchase. The backend applies the purchase itself when PayFast confirms it;
+   *  the app only watches the pending payment (profile.purchaseQueue) and refreshes once it's settled. */
+  const startCheckout = async (itemCategory: ItemCategory, itemName?: string) => {
+    if (!(await getToken()) || !dataRef.current.profile) {
+      Alert.alert('Login Required', 'User login required.', [{ text: 'OK' }]);
+      return;
+    }
+    try {
+      const { PayFastQuery: query, PayFastUrl } = await api('/payments/checkout', {
+        body: { item_category: itemCategory, item_name: itemName },
+      });
+      setData(current => ({
+        ...current,
+        profile: { ...current.profile, purchaseQueue: { ...current.profile?.purchaseQueue, [query.m_payment_id]: 'PENDING' } },
+      }));
+      await Linking.openURL(`${PayFastUrl}?${new URLSearchParams(query).toString()}`);
+    } catch (error) {
+      console.error('Error making payment:', error);
+    }
+  };
+
+  /** Checks pending payments and refreshes once PayFast has settled one. Retries for a short while, as
+   *  the user usually lands back in the app just before PayFast's confirmation reaches the backend. */
+  const checkPendingPayments = async () => {
+    if (polling.current) return;
+    polling.current = true;
+    try {
+      for (let attemptNumber = 0; attemptNumber < PAYMENT_POLL_ATTEMPTS; attemptNumber++) {
+        const queue = dataRef.current.profile?.purchaseQueue ?? {};
+        const pending = Object.keys(queue).filter(id => queue[id] === 'PENDING');
+        if (pending.length === 0) return;
+        const statuses = await Promise.all(pending.map(id =>
+          api(`/payments/status/${id}`).then(r => r.status as string).catch(error =>
+            error instanceof ApiError && error.status === 404 ? 'UNKNOWN' : 'PENDING')));
+        if (statuses.some(status => status !== 'PENDING')) {
+          await updateData(true);
+          return;
+        }
+        await new Promise(resolve => setTimeout(resolve, PAYMENT_POLL_INTERVAL_MS));
+      }
+    } finally {
+      polling.current = false;
+    }
+  };
+
+  const cancelSubscription = (itemCategory: SubscriptionCategory) => attempt(async () => {
+    await applyResponse(await api('/payments/cancel', { body: { item_category: itemCategory } }));
+  });
+
+  useEffect(() => {
+    updateData();
+    // Phones usually resume the app rather than restart it, so also check on resume whether the day has
+    // rolled over. Otherwise the new-day sync never runs and today's meals get added to yesterday.
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active' && lastUpdateRef.current && !isToday(lastUpdateRef.current)) {
+        updateData(true);
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
+  return (
+    <AppContext.Provider value={{
+      ...data, loading, isConnected, setProfile, setMyPrograms, setTrackingData, updateData, recheckConnectivity,
+      login, signup, logout, resetPassword, changePassword, changeUsername, contactSupport, setAvatar,
+      saveProgramSession, rerunProgram, startCheckout, checkPendingPayments, cancelSubscription,
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useAppContext must be used within an AppContextProvider');
+  }
+  return context;
 };

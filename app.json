@@ -7,7 +7,6 @@
     "icon": "./assets/images/appIcon2.png",
     "scheme": "hoolegainz",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -16,7 +15,6 @@
         "foregroundImage": "./assets/images/appIcon2.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.spacemeerkat.HGMobile"
     },
     "web": {
@@ -35,7 +33,19 @@
         }
       ],
       "expo-secure-store",
-      "expo-web-browser"
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-video",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true

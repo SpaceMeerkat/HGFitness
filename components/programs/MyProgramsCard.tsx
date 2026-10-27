@@ -2,11 +2,8 @@ import { useAppContext } from "@/components/appContext";
 import { CardSheen, shineStyles, SilverBadge } from "@/components/CardShine";
 import { DefaultTabStyles, ShopStyles } from "@/components/HGStyles";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
 import { ActivityIndicator, Image, ImageBackground, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { BASE_API_URL } from "../network/apiConfig";
 
 type CardLevel = 'beginner' | 'advanced' | 'intermediate';
 
@@ -92,48 +89,6 @@ export function MyProgramCard({ imgUri, cardLevel, cardTitle, cardInfo, rerunNum
     );
 }
 
-const UpdateBackendRerun = async (
-    cardTitle: string,
-    trackingData: any,
-    setTrackingData: (data: any) => void
-) => {
-    const retrievedToken = await SecureStore.getItemAsync("jwtToken");
-    if (retrievedToken) {
-        try {
-            const url = `${BASE_API_URL}/rerunGymProgram`;
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    programID: cardTitle,
-                    token: retrievedToken,
-                }),
-            });
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                const freshProgramTrackingData =
-                    jsonResponse.freshProgramTrackingData;
-                const updatedTrackingData = {
-                    ...trackingData,
-                    [cardTitle]: freshProgramTrackingData,
-                };
-                setTrackingData(updatedTrackingData);
-                await AsyncStorage.setItem(
-                    "trackingData",
-                    JSON.stringify(updatedTrackingData)
-                );
-            }
-        } catch (err) {
-            console.error("Updating backend error:", err);
-        }
-    }
-};
-
-
-
-
 interface RerunProgramModalProps {
     cardTitle: string;
     visible: boolean;
@@ -141,7 +96,7 @@ interface RerunProgramModalProps {
 }
 
 export function RerunProgramModal({ cardTitle, visible, onClose }: RerunProgramModalProps) {
-    const { trackingData, setTrackingData } = useAppContext();
+    const { rerunProgram } = useAppContext();
 
     return (
         <Modal
@@ -173,7 +128,7 @@ export function RerunProgramModal({ cardTitle, visible, onClose }: RerunProgramM
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={async () => {
-                                await UpdateBackendRerun(cardTitle, trackingData, setTrackingData);
+                                await rerunProgram(cardTitle);
                                 onClose();
                             }}
                             style={{ flex: 0.45, paddingVertical: 10, borderRadius: 100, backgroundColor: 'white', alignItems: 'center' }}
@@ -402,7 +357,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background for the spinner
     },
     pressableCover: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         // This will make the Pressable cover the entire area, adjust if needed
         zIndex: 1, // Ensure it's on top
     },

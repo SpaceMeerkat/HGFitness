@@ -1,16 +1,14 @@
 import { DefaultTabStyles } from "@/components/HGStyles";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "expo-router/react-navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { ScrollView } from "react-native";
+import { ScrollView, type ScrollViewInstance } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ImageBackground } from "react-native";
 
 import { useAppContext } from "@/components/appContext";
 import { HGHeader } from "@/components/HeaderBar";
-import { runPaymentStatus } from "@/components/network/PollPurchase";
-import { runSubscriptionPolling } from "@/components/network/PollSubscription";
 import { MyProgramsLanding } from "@/components/programs/MyPrograms";
 import { ProgramOverview } from "@/components/programs/ProgramOverview";
 import { ProgramTracker } from "@/components/programs/ProgramTracking";
@@ -42,38 +40,16 @@ export default function MyPrograms() {
   const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
 
 
-  const scrollViewRef = useRef<ScrollView>(null); // Add reference
+  const scrollViewRef = useRef<ScrollViewInstance>(null); // Add reference
 
-  const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms, setProfile, setMyPrograms, setTrackingData, setMealPrograms } =
+  const { profile, myPrograms, trackingData, advancedPrograms, intermediatePrograms, beginnerPrograms, checkPendingPayments } =
     useAppContext();
 
+  // Pick up purchases PayFast has confirmed since the last visit
   useFocusEffect(
     useCallback(() => {
-      if (!profile?.purchaseQueue || Object.keys(profile?.purchaseQueue).length === 0) return;
-
-      const processQueue = async () => {
-        await runPaymentStatus(profile.purchaseQueue, {
-          profile,
-          myPrograms,
-          trackingData,
-          setProfile,
-          setMyPrograms,
-          setTrackingData,
-        });
-
-        await runSubscriptionPolling(profile.purchaseQueue, {
-          profile,
-          myPrograms,
-          trackingData,
-          setProfile,
-          setMyPrograms,
-          setTrackingData,
-          setMealPrograms,
-        });
-      };
-
-      processQueue();
-    }, [profile?.purchaseQueue]) 
+      checkPendingPayments();
+    }, [profile?.purchaseQueue])
   );
 
   useEffect(() => {
@@ -218,7 +194,7 @@ export default function MyPrograms() {
     return null;
   };
 
-  const image = require("@/assets/images/HGBackground.png");
+  const image = require("@/assets/images/HGBackground.jpg");
 
   return (
     <SafeAreaView style={DefaultTabStyles.defaultContainer} edges={['top']}>

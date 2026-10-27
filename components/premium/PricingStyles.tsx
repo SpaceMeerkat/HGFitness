@@ -17,7 +17,7 @@ export const PricingStyles = StyleSheet.create({
     padding: 16,
   },
   backdropDismiss: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   sheet: {
     maxHeight: '90%',
@@ -67,7 +67,7 @@ export const PricingStyles = StyleSheet.create({
     alignItems: 'center',
   },
   tabActive: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: 'lime',
@@ -95,7 +95,7 @@ export const PricingStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   heroTitle: {
     color: 'white',

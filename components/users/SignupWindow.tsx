@@ -1,7 +1,6 @@
-import { BASE_API_URL } from "@/components/network/apiConfig";
+import { useAppContext } from "@/components/appContext";
 import LoadingModal from "@/components/users/LoadingModal";
 import { LoginStyles } from "@/components/users/LoginStyles";
-import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
 import { ImageBackground, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
@@ -10,6 +9,8 @@ type SignupWindowProps = {
   };
 
 export function SignupWindow({ handleChildPage }: SignupWindowProps) {
+
+  const { signup } = useAppContext();
 
   const image = require("@/assets/images/BlackTransparentLogo.png");
 
@@ -83,39 +84,14 @@ export function SignupWindow({ handleChildPage }: SignupWindowProps) {
   const sendSignupRequest = async (SignupData: { username: string; password: string; email: string }) => {
     try {
       setSubmitting(true)
-      const response = await fetch(`${BASE_API_URL}/accountsSignup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(SignupData),
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        const token = data.token;  // Assuming the JWT is returned as 'token' in the response body   
-        const message = data.message; 
-        if (message !== "success") {
-          // Catch the duplicate email response message here
-          if (message === "duplicate_email") {
-            setEmailInUse(true);
-            setSubmitting(false);
-          } else {
-            console.log("unknown signup response");
-            setSubmitting(false);
-          }
-        }
-        if (message === "success") {
-          // Message OK is the default success response message from signup API
-          // Store the JWT (using AsyncStorage or any state management you prefer)
-          await SecureStore.setItemAsync('jwtToken', token);
-          setSubmitting(false)
-          handleChildPage(false, false, true, false); // Moves the user to the login page having successfully signed up
-        }
+      const message = await signup(SignupData.username, SignupData.email, SignupData.password);
+      setSubmitting(false);
+      if (message === "duplicate_email") {
+        setEmailInUse(true);
+      } else if (message === "success") {
+        handleChildPage(false, false, true, false); // Moves the user to the login page having successfully signed up
       } else {
-        setSubmitting(false)
-        console.error("Signup failed with status:", response.status);
-        // Handle error, e.g., display an error message
+        console.log("unknown signup response");
       }
     } catch (error) {
       setSubmitting(false);

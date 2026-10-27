@@ -8,13 +8,14 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://66sq79qyu6.execute-api.af-south-1.amazonaws.com/dev"
+        "EXPO_PUBLIC_API_URL": "https://dg047tc6f1.execute-api.af-south-1.amazonaws.com/dev"
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://mtcbhkowpg.execute-api.af-south-1.amazonaws.com/staging"
+        "EXPO_PUBLIC_API_URL": "https://dg047tc6f1.execute-api.af-south-1.amazonaws.com/dev",
+        "ORG_GRADLE_PROJECT_reactNativeArchitectures": "arm64-v8a,armeabi-v7a"
       }
     },
     "production": {
@@ -22,7 +23,8 @@
           "buildType": "apk"
         },
         "env": {
-          "EXPO_PUBLIC_API_URL": "https://mtcbhkowpg.execute-api.af-south-1.amazonaws.com/staging"
+          "EXPO_PUBLIC_API_URL": "https://REPLACE-WITH-V2-PROD-API-ID.execute-api.af-south-1.amazonaws.com/prod",
+          "ORG_GRADLE_PROJECT_reactNativeArchitectures": "arm64-v8a,armeabi-v7a"
         }
     }
   },

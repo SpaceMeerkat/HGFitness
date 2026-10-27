@@ -1,9 +1,6 @@
-import { isToday, LAST_UPDATE_KEY, useAppContext } from "@/components/appContext";
-import { BASE_API_URL } from "@/components/network/apiConfig";
+import { useAppContext } from "@/components/appContext";
 import LoadingModal from "@/components/users/LoadingModal";
 import { LoginStyles } from "@/components/users/LoginStyles";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
 import { useState } from "react";
 import { ImageBackground, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import PasswordResetModal from "./ForgottenPasswordModal";
@@ -14,7 +11,7 @@ type LoginWindowProps = {
 
 export function LoginWindow({ handleChildPage }: LoginWindowProps) {
 
-  const { setProfile, setTrackingData, setMyPrograms, setBestSellers, setMealPrograms, setprofileImagePaths, setMasterGymProgramsDictionary, updateData } = useAppContext();
+  const { login } = useAppContext();
 
   const image = require("@/assets/images/BlackTransparentLogo.png");
 
@@ -32,9 +29,7 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
   const [invalidAuthentication, setInvalidAuthentication] = useState(false);
 
   const handleSubmit = async () => {
-    // const retrievedToken = await SecureStore.getItemAsync('jwtToken');
     const loginData = {
-      // token: retrievedToken,
       email: email,
       password: password,
     };
@@ -76,68 +71,17 @@ export function LoginWindow({ handleChildPage }: LoginWindowProps) {
   const sendLoginRequest = async (loginData: { email: string; password: string }) => {
     try {
       setSubmitting(true)
-      const response = await fetch(`${BASE_API_URL}/accountsLogin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(loginData),
-      });
-  
-      if (response.ok) {
-        const jsonResponse = await response.json();
-        const responseMessage = jsonResponse.message;
-        if (responseMessage === "not_found") {
-          setUnknownEmail(true);
-          setSubmitting(false);
-        };
-        if (responseMessage === "invalid_password") {
-          setInvalidAuthentication(true);
-          setSubmitting(false);
-        };
-        if (responseMessage === "success") {
-          // Store the JWT (using AsyncStorage or any state management you prefer)
-          await SecureStore.setItemAsync('jwtToken', jsonResponse.token);
-
-          // Check if last update was today
-          const lastUpdateDate = await AsyncStorage.getItem(LAST_UPDATE_KEY);
-
-          if (lastUpdateDate && isToday(lastUpdateDate)) {
-            console.log("running option A.")
-            // Last update was today, use login response data
-            await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
-            await AsyncStorage.setItem('myPrograms', JSON.stringify(jsonResponse.myPrograms));
-            await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
-            await AsyncStorage.setItem('masterGymProgramsDictionary', JSON.stringify(jsonResponse.gymMasterDictionary));
-            await AsyncStorage.setItem('bestSellers', JSON.stringify(jsonResponse.bestSellers));
-            await AsyncStorage.setItem('mealPrograms', JSON.stringify(jsonResponse.mealPrograms));
-            await AsyncStorage.setItem('profileImagePaths', JSON.stringify(jsonResponse.profileImagePaths));
-            await AsyncStorage.setItem(LAST_UPDATE_KEY, new Date().toISOString());
-            setProfile(jsonResponse.profile);
-            setMyPrograms(jsonResponse.myPrograms);
-            setTrackingData(jsonResponse.trackingData);
-            setMasterGymProgramsDictionary(jsonResponse.gymMasterDictionary);
-            setBestSellers(jsonResponse.bestSellers);
-            setMealPrograms(jsonResponse.mealPrograms);
-            setprofileImagePaths(jsonResponse.profileImagePaths);
-            setSubmitting(false);
-            handleChildPage(true, false, false, false);
-          } else {
-            // Seed profile and trackingData so updateData() can make the authenticated POST request.
-            // Without this, updateData() falls to the GET-only path and never restores user-specific
-            // data like myPrograms (premium subscription programs would be lost after logout + re-login).
-            await AsyncStorage.setItem('profile', JSON.stringify(jsonResponse.profile));
-            await AsyncStorage.setItem('trackingData', JSON.stringify(jsonResponse.trackingData));
-            console.log("running full context from Login date check.");
-            await updateData();
-            setSubmitting(false);
-            handleChildPage(true, false, false, false);
-          }
-        };
-      } else {
-        setSubmitting(false)
-        console.error("Login failed with status A:", response.status);
-        // Handle error, e.g., display an error message
+      // A successful login returns everything the app needs, so no second request is made
+      const responseMessage = await login(loginData.email, loginData.password);
+      if (responseMessage === "not_found") {
+        setUnknownEmail(true);
+      }
+      if (responseMessage === "invalid_password") {
+        setInvalidAuthentication(true);
+      }
+      setSubmitting(false);
+      if (responseMessage === "success") {
+        handleChildPage(true, false, false, false);
       }
     } catch (error) {
       setSubmitting(false);

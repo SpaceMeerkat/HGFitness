@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { useAppContext } from "../appContext";
 import { DefaultTabStyles, ShopStyles } from "../HGStyles";
-import { SubscriptionPayment } from "../premium/PremiumPayment";
     
     type SubscriptionOptionsModalProps = {
       visible: boolean;
@@ -34,10 +33,10 @@ import { SubscriptionPayment } from "../premium/PremiumPayment";
         "2": require("@/assets/images/2Days.png"),
     };
     const imageSource = require("@/assets/images/WhiteTransparentLogo.png");
-    const { profile, setProfile } = useAppContext();
+    const { profile, startCheckout } = useAppContext();
     const itemCategory = "gymSubscription";
     const shortCardTitle = "Days a week";
-    const image = require("@/assets/images/HGBackground.png");   
+    const image = require("@/assets/images/HGBackground.jpg");   
 
       return (
         <Modal transparent animationType="fade" visible={visible}>
@@ -69,7 +68,7 @@ import { SubscriptionPayment } from "../premium/PremiumPayment";
                     </Text>
                 </View>
             </View>
-            <Pressable onPress={profile.premium? () => {} : async () =>  await SubscriptionPayment({itemCategory, profile, setProfile})} style={{flex: 0.2, width: '100%', paddingHorizontal: 8}}>
+            <Pressable onPress={profile.premium? () => {} : async () =>  await startCheckout(itemCategory)} style={{flex: 0.2, width: '100%', paddingHorizontal: 8}}>
                 <ImageBackground source={cardImages["2"]} resizeMode="cover" style={[ShopStyles.myProgramsBlockContainer, {overflow: 'hidden', maxHeight: 70}]}>
                     <View style={{ flex: 0.25 }}>
                         <Image source={images["2"]} style={{ flex: 1, width: "100%", resizeMode: "contain" }} />
@@ -187,4 +186,4 @@ import { SubscriptionPayment } from "../premium/PremiumPayment";
       },
       closeBtn: { width: "50%" },
     });
-    
+    

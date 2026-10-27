@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "expo-router/react-navigation";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 
@@ -16,41 +16,17 @@ import MealPrograms from "@/components/shop/ShopMealPrograms";
 import { SubscriptionPage } from "@/components/shop/Subscription";
 import { WhatsHot } from "@/components/shop/WhatsHot";
 import { useAppContext } from "@/components/appContext";
-import { runPaymentStatus } from "@/components/network/PollPurchase";
-import { runSubscriptionPolling } from "@/components/network/PollSubscription";
 
 type PageType = 'programs' | 'mealPrograms' | 'beginner' | 'intermediate' | 'advanced' | 'hot' | 'subscription' | 'apparel' | 'coaching';
 
 export default function ShopScreen() {
 
-  const { profile, myPrograms, trackingData, setProfile, setMyPrograms, setTrackingData, setMealPrograms } = useAppContext();
+  const { profile, checkPendingPayments } = useAppContext();
 
+  // Pick up purchases PayFast has confirmed since the last visit
   useFocusEffect(
     useCallback(() => {
-      if (!profile?.purchaseQueue || Object.keys(profile?.purchaseQueue).length === 0) return;
-
-      const processQueue = async () => {
-        await runPaymentStatus(profile.purchaseQueue, {
-          profile,
-          myPrograms,
-          trackingData,
-          setProfile,
-          setMyPrograms,
-          setTrackingData,
-        });
-
-        await runSubscriptionPolling(profile.purchaseQueue, {
-          profile,
-          myPrograms,
-          trackingData,
-          setProfile,
-          setMyPrograms,
-          setTrackingData,
-          setMealPrograms,
-        });
-      };
-
-      processQueue();
+      checkPendingPayments();
     }, [profile?.purchaseQueue])
   );
 

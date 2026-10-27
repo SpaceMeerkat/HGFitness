@@ -4,7 +4,6 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { Animated, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { FindPrecedingNumber } from './FindPrecedingNumber';
@@ -125,7 +124,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   // Handle the dictionary of exercises and keys from reading in
   const exercises = programData[programDay[0]][programDay[1]]["exercises"];
   const exerciseKeys = Object.keys(exercises);
-  const [token, setToken] = useState<string | null>(null);
   // Set the notes visibility to false to initialise
   const [isNotesVisible, setIsNotesVisible] = useState(false);
   const [exerciseDictionary, setExerciseDictionary] = useState(InitializeExerciseDictionary(exerciseKeys, exercises));
@@ -139,7 +137,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
   // Handle any saving overlays
   const [saving, setSaving] = useState(false);
   // Styling
-  const image = require("@/assets/images/HGBackground.png");
+  const image = require("@/assets/images/HGBackground.jpg");
   // Tracking mode info modal images: computed in real pixels rather than percentage +
   // aspectRatio, which doesn't reliably constrain local Image assets to their parent's
   // laid-out width. TrackingNotesStyles.container is 80% of the window, minus its 16px padding on each side.
@@ -232,19 +230,6 @@ export function ProgramTracker({programLevel, programID, programData, programDay
     });
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const retrievedToken = await SecureStore.getItemAsync('jwtToken');
-      if (retrievedToken) {
-        setToken(retrievedToken); 
-      } else {
-        console.log('No ID found in SecureStore');
-        setToken(null); 
-      }
-    };
-    fetchProfile(); 
-  }, []);
-  
   const handleExerciseClick = (index: number) => {
     setCurrentExerciseIndexForNotes(index);
     setExerciseDictionary(prevState => {
@@ -800,10 +785,7 @@ export function ProgramTracker({programLevel, programID, programData, programDay
         onClose={() => setIsSaveVisible(false)}
         programID={programID}
         programDay={programDay}
-        token={token}
         exerciseDictionary={exerciseDictionary}
-        trackingData = {trackingData}
-        setTrackingData = {setTrackingData}
         setSaving = {setSaving}
         handleChildPage={handleChildPage}
         setSingleSessionsVisible={setSingleSessionsVisible}
@@ -851,4 +833,4 @@ export function ProgramTracker({programLevel, programID, programData, programDay
       </Modal>
       </>
   );
-}
+}

@@ -1,6 +1,6 @@
 import { useAppContext } from "@/components/appContext";
 import { ShopStyles, TrackingNotesStyles } from "@/components/HGStyles";
-import { S3_API_URL } from "@/components/network/apiConfig";
+import { S3_API_URL } from "@/components/network/api";
 import { PremiumButton } from "@/components/profile/PremiumButton";
 import { GymCard } from "@/components/shop/ShopCard";
 import { CardInfo } from "@/components/shop/ShopCardInfo";

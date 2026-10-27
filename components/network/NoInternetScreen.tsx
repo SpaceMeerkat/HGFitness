@@ -40,7 +40,7 @@ export const NoInternetScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',

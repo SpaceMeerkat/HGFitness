@@ -4,7 +4,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Alert, ImageBackground, Pressable, ScrollView, Text, View } from 'react-native';
 import { useAppContext } from "../appContext";
-import { SubscriptionPayment } from "../premium/PremiumPayment";
 import { PLAN_BENEFITS } from "./PlanBenefits";
 
 type PricingPricingProps = {
@@ -13,7 +12,7 @@ type PricingPricingProps = {
 
 const PremiumPricing = ({typeString}: PricingPricingProps) => {
 
-    const { profile, setProfile } = useAppContext();
+    const { profile, startCheckout } = useAppContext();
 
     const item_category_dict: Record<"free" | "subscription" | "premium", string> = {
       free: "free",
@@ -93,7 +92,7 @@ const PremiumPricing = ({typeString}: PricingPricingProps) => {
             Alert.alert('Login Required', 'User login required.', [{ text: 'OK' }]);
             return;
           }
-          await SubscriptionPayment({ itemCategory, profile, setProfile });
+          await startCheckout(itemCategory as "premium" | "gymSubscription");
         }}
         style={({ pressed }) => [PricingStyles.purchaseButton, isFree ? { opacity: 0.3 } : pressed ? { opacity: 0.8 } : {}]}>
           <LinearGradient

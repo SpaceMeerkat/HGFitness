@@ -3,7 +3,7 @@ import { ShopStyles } from "@/components/HGStyles";
 import { CompletedGymCard, EmptyCompletedProgramsCard, FreeSessionsCard, MyProgramCard, SubscriptionProgramCard } from "@/components/programs/MyProgramsCard";
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { S3_API_URL } from "../network/apiConfig";
+import { S3_API_URL } from "../network/api";
 import SingleSessionsModal from "./SingleSessionsModal";
 import SubscriptionOptionsModal from "./SubscriptionOptions";
 import ViewModeModal from "./ViewModeModal";
@@ -22,13 +22,19 @@ type MyProgramsLandingProps = {
   setSingleSessionsVisible: any;
 };
 
-export function MyProgramsLanding({ handleChildPage, setTrackingMode, singleSessionsVisible, setSingleSessionsVisible}: MyProgramsLandingProps) {
-
-  const { myPrograms, trackingData, profile } = useAppContext(); 
+export function MyProgramsLanding(props: MyProgramsLandingProps) {
+  // The guard lives outside the component with the hooks, so logging out (profile -> null) doesn't
+  // change how many hooks run, which React doesn't allow
+  const { profile } = useAppContext();
   if (!profile) return null;
-  // const [singleSessionsVisible, setSingleSessionsVisible] = useState(false);
+  return <MyProgramsLandingContent {...props} />;
+}
 
-  const image = require("@/assets/images/HGBackground.png");
+function MyProgramsLandingContent({ handleChildPage, setTrackingMode, singleSessionsVisible, setSingleSessionsVisible}: MyProgramsLandingProps) {
+
+  const { myPrograms, trackingData, profile } = useAppContext();
+
+  const image = require("@/assets/images/HGBackground.jpg");
   const [purchasedPrograms, setPurchasedPrograms] = useState<any>({}); // Store API response as an object
   const [trackingDataSoft, setTrackingDataSoft] = useState<any>({}); // Store API response as an object
   const [singlePrograms, setSinglePrograms] = useState<any>({});

@@ -1,5 +1,4 @@
 import { useAppContext } from "@/components/appContext";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from "react";
 import { ImageBackground, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { calculateCalories } from "./CalorieCalculatorFunc";
@@ -70,9 +69,7 @@ const CalorieCalculatorModal: React.FC<CalorieCalculatorModalProps> = ({
         water: userWaterCount
       },
     };
-    setProfile(updatedProfile); // Update context
-    // Update AsyncStorage
-    await AsyncStorage.setItem('profile', JSON.stringify(updatedProfile));
+    setProfile(updatedProfile); // Update context (saved to storage by the context)
     setDisplayCalorieCount(false);
     onClose();
   }
